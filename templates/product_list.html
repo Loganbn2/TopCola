@@ -1,9 +1,7 @@
-<div id="product-rectangle" style="width:200px; height:100px; border:1px solid black;"></div>
+<div id="product-rectangle" style="width:200px; height:100px; border:1px solid black;">
+  {{ value }} <!-- Dynamically rendered value -->
+</div>
 
 <script>
-  fetch("/api/product-list")
-    .then(response => response.json())
-    .then(data => {
-      document.getElementById("product-rectangle").innerText = data.value;
-    });
+  // Remove the fetch logic since the value is rendered server-side
 </script>

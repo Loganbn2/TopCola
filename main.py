@@ -19,15 +19,10 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 def calculate():
     return random.randint(1, 10)
 
-@app.route('/api/product-value')
-def get_product_value():
-    value = calculate()  # your logic here
-    return jsonify({'value': value})
-
-@app.route('/api/product-list')
+@app.route('/product-list')  # Change the route to match how the template is accessed
 def get_product_list():
-    value = calculate()  # your logic here
-    return render_template('product_list.html', value=value)
+    value = calculate()  # Dynamically generate the value
+    return render_template('product_list.html', value=value)  # Pass value to the template
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
