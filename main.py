@@ -1,9 +1,10 @@
 from flask import Flask, jsonify
-from flask_cors import CORS
-CORS(app)
 from datetime import datetime  # Import datetime module
 
 app = Flask(__name__)
+
+from flask_cors import CORS
+CORS(app)
 
 @app.route('/api/data', methods=['GET'])
 def get_data():
