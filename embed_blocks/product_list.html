@@ -1,0 +1,9 @@
+<div id="product-rectangle" style="width:200px; height:100px; border:1px solid black;"></div>
+
+<script>
+  fetch("https://topcola.onrender.com/api/product-value")
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById("product-rectangle").innerText = data.value;
+    });
+</script>
