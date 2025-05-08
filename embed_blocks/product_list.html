@@ -14,7 +14,7 @@
     <script>
         async function fetchRandomNumber() {
             try {
-                const response = await fetch('/api/random-number'); // Ensure this matches your backend route
+                const response = await fetch('/api/random-number'); // Use relative path
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }

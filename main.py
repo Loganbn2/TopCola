@@ -14,11 +14,12 @@ app = Flask(__name__)
 from flask_cors import CORS
 CORS(app)
 
-@app.route('https://topcola.onrender.com/api/random-number', methods=['GET'])
+@app.route('/api/random-number', methods=['GET'])  # Fix route to start with a slash
 def get_random_number():
     return jsonify({"random_number": random.randint(1, 10)})
 
 
 if __name__ == '__main__':
     import os
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+    # Use Render's environment variables for deployment
+    app.run()
