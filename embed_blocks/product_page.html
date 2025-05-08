@@ -20,23 +20,15 @@
             padding: 10px; /* Add padding for better spacing */
         }
     </style>
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-        const supabaseUrl = 'https://your-supabase-url.supabase.co';
-        const supabaseKey = 'your-supabase-anon-key';
-        const supabase = createClient(supabaseUrl, supabaseKey);
-
+    <script>
         async function fetchProducts() {
             try {
-                const { data: products, error } = await supabase
-                    .from('Products') // Updated table name
-                    .select('"Product Name"'); // Updated column name
-
-                if (error) {
-                    throw error;
+                const response = await fetch('/api/products'); // Fetch from Flask backend
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
 
+                const products = await response.json();
                 const productList = document.querySelector('.black-rectangle');
                 productList.innerHTML = ''; // Clear existing content
 
@@ -45,7 +37,7 @@
                 } else {
                     products.forEach(product => {
                         const productItem = document.createElement('div');
-                        productItem.textContent = product["Product Name"]; // Access column 3
+                        productItem.textContent = product["Product Name"]; // Ensure case matches column name
                         productList.appendChild(productItem);
                     });
                 }
