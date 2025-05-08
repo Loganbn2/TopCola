@@ -3,8 +3,9 @@ from datetime import datetime  # Import datetime module
 from supabase import create_client, Client  # Import Supabase client
 
 # Initialize Supabase client
-SUPABASE_URL = "your_supabase_url"  # Replace with your Supabase URL
-SUPABASE_KEY = "your_supabase_key"  # Replace with your Supabase API key
+# Replace with your real Supabase credentials
+SUPABASE_URL = "https://otnrvaybkwsvzxgwfhfc.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90bnJ2YXlia3dzdnp4Z3dmaGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3MjYwMDIsImV4cCI6MjA2MjMwMjAwMn0.Ox3qDjoX-x-Tcol96i1XQRuqRWr8oUkc_Z-pZaBJTww"
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = Flask(__name__)
