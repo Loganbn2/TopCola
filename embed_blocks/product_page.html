@@ -30,8 +30,8 @@
         async function fetchProducts() {
             try {
                 const { data: products, error } = await supabase
-                    .from('products')
-                    .select('*');
+                    .from('Products') // Updated table name
+                    .select('"Product Name"'); // Updated column name
 
                 if (error) {
                     throw error;
@@ -45,7 +45,7 @@
                 } else {
                     products.forEach(product => {
                         const productItem = document.createElement('div');
-                        productItem.textContent = product.name;
+                        productItem.textContent = product["Product Name"]; // Access column 3
                         productList.appendChild(productItem);
                     });
                 }
