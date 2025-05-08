@@ -19,11 +19,17 @@ def get_data():
 
 @app.route('/api/products', methods=['GET'])
 def get_products():
-    # Fetch all products from the 'Products' table
-    response = supabase.table('Products').select('*').execute()
-    if response.error:
-        return jsonify({"error": response.error.message}), 500
-    return jsonify(response.data)
+    try:
+        # Fetch all products from the 'Products' table
+        response = supabase.table('Products').select('*').execute()
+        if response.error:
+            app.logger.error(f"Supabase error: {response.error.message}")
+            return jsonify({"error": response.error.message}), 500
+        app.logger.info(f"Fetched products: {response.data}")
+        return jsonify(response.data)
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
