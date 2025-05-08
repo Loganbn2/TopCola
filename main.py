@@ -24,6 +24,11 @@ def get_product_value():
     value = calculate()  # your logic here
     return jsonify({'value': value})
 
+@app.route('/api/product-list')
+def get_product_list():
+    value = calculate()  # your logic here
+    return render_template('product_list.html', value=value)
+
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
 
