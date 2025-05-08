@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from datetime import datetime  # Import datetime module
 from supabase import create_client, Client  # Import Supabase client
+import random  # Import random module
 
 # Initialize Supabase client
 # Replace with your real Supabase credentials
@@ -13,23 +14,11 @@ app = Flask(__name__)
 from flask_cors import CORS
 CORS(app)
 
-@app.route('/api/data', methods=['GET'])
-def get_data():
-    return jsonify({"message": "Hello from the backend!"})
+@app.route('/api/random-number', methods=['GET'])
+def get_random_number():
+    return jsonify({"random_number": random.randint(1, 10)})
 
-@app.route('/api/products', methods=['GET'])
-def get_products():
-    try:
-        # Fetch all products from the 'Products' table
-        response = supabase.table('Products').select('*').execute()
-        if response.error:
-            app.logger.error(f"Supabase error: {response.error.message}")
-            return jsonify({"error": response.error.message}), 500
-        app.logger.info(f"Fetched products: {response.data}")
-        return jsonify(response.data)
-    except Exception as e:
-        app.logger.error(f"Unexpected error: {str(e)}")
-        return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    import os
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
