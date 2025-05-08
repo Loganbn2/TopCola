@@ -15,20 +15,35 @@
             align-items: center;
             font-size: 24px; /* Adjust font size as needed */
             font-family: Arial, sans-serif;
+            text-align: center;
         }
     </style>
-    <script>
-        async function fetchDatetime() {
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+        const supabaseUrl = 'https://your-supabase-url.supabase.co';
+        const supabaseKey = 'your-supabase-anon-key';
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        async function fetchProducts() {
             try {
-                const response = await fetch('https://topcola.onrender.com/api/datetime');
-                const data = await response.json();
-                document.querySelector('.black-rectangle').textContent = data.current_datetime;
+                const { data: products, error } = await supabase
+                    .from('products')
+                    .select('*');
+
+                if (error) {
+                    throw error;
+                }
+
+                const productNames = products.map(product => product.name).join(', ');
+                document.querySelector('.black-rectangle').textContent = productNames || 'No products available';
             } catch (error) {
-                console.error('Error fetching datetime:', error);
+                console.error('Error fetching products:', error);
+                document.querySelector('.black-rectangle').textContent = 'Error loading products';
             }
         }
 
-        document.addEventListener('DOMContentLoaded', fetchDatetime);
+        document.addEventListener('DOMContentLoaded', fetchProducts);
     </script>
 </head>
 <body>
