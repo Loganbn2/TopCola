@@ -3,9 +3,13 @@ from supabase import create_client, Client  # Ensure Supabase client is imported
 import logging  # Import logging module
 import os  # Import os for environment variables if needed
 import random  # Import random module
+from flask_cors import CORS  # Import CORS
 
 # Initialize Flask app
 app = Flask(__name__)
+
+# Enable CORS for the Flask app
+CORS(app)
 
 # Initialize Supabase client
 SUPABASE_URL = "https://otnrvaybkwsvzxgwfhfc.supabase.co"
