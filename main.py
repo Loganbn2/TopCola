@@ -12,9 +12,9 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 app = Flask(__name__)
 
 from flask_cors import CORS
-CORS(app)
+CORS(app)  # Allow all origins (not secure for production)
 
-@app.route('/api/random-number', methods=['GET'])  # Fix route to start with a slash
+@app.route('/api/random-number', methods=['GET'])  # Use relative path
 def get_random_number():
     return jsonify({"random_number": random.randint(1, 10)})
 
