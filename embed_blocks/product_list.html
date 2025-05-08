@@ -14,7 +14,7 @@
     <script>
         async function fetchRandomNumber() {
             try {
-                const response = await fetch('/api/random-number'); // Use relative path
+                const response = await fetch('https://topcola.onrender.com/api/random-number'); // Use full Render app URL
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
