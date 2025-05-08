@@ -14,7 +14,7 @@ app = Flask(__name__)
 from flask_cors import CORS
 CORS(app)
 
-@app.route('/api/random-number', methods=['GET'])
+@app.route('https://topcola.onrender.com/api/random-number', methods=['GET'])
 def get_random_number():
     return jsonify({"random_number": random.randint(1, 10)})
 

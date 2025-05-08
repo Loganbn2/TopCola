@@ -1,19 +1,33 @@
-<!-- ...existing code... -->
-<div id="random-number-box" style="width: 200px; height: 100px; border: 1px solid black; display: flex; align-items: center; justify-content: center;">
-    Loading...
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+</head>
+<body>
+    <!-- ...existing code... -->
+    <div id="random-number-box" style="width: 200px; height: 100px; border: 1px solid black; display: flex; align-items: center; justify-content: center;">
+        Loading...
+    </div>
 
-<script>
-    async function fetchRandomNumber() {
-        try {
-            const response = await fetch('/api/random-number');
-            const data = await response.json();
-            document.getElementById('random-number-box').innerText = `Random Number: ${data.random_number}`;
-        } catch (error) {
-            document.getElementById('random-number-box').innerText = 'Error fetching random number';
+    <script>
+        async function fetchRandomNumber() {
+            try {
+                const response = await fetch('/api/random-number'); // Ensure this matches your backend route
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                document.getElementById('random-number-box').innerText = `Random Number: ${data.random_number}`;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('random-number-box').innerText = 'Error fetching random number';
+            }
         }
-    }
 
-    fetchRandomNumber();
-</script>
-<!-- ...existing code... -->
+        fetchRandomNumber();
+    </script>
+    <!-- ...existing code... -->
+</body>
+</html>
