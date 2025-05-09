@@ -1,7 +1,36 @@
-<div id="product-rectangle" style="width:200px; height:100px; border:1px solid black;">
-  {{ value }} <!-- Dynamically rendered value -->
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <style>
+        .product-container {
+            background-color: black;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: fit-content;
+            margin: 20px auto;
+        }
+        .product-item {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="product-container">
+        {% if error %}
+            <p>{{ error }}</p>
+        {% else %}
+            <h2>Product List</h2>
+            <ul>
+                {% for product in products %}
+                    <li class="product-item">{{ product }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</body>
+</html>
 
-<script>
-  // Remove the fetch logic since the value is rendered server-side
-</script>
