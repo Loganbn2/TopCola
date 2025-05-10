@@ -10,8 +10,8 @@
             color: white;
             padding: 20px;
             border-radius: 5px;
-            width: 100%;
-            margin: 20px auto;
+            width: 80%;
+            margin: 00px auto;
         }
         .product-item {
             margin: 0px 0;
@@ -20,16 +20,12 @@
 </head>
 <body>
     <div class="product-container">
-        {% if error %}
-            <p>{{ error }}</p>
-        {% else %}
-            <h2>Product List</h2>
-            <ul>
-                {% for product in products %}
-                    <li class="product-item">{{ product }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+        <h2>Product List</h2>
+        <ul>
+            {% for product in products %}
+                <li class="product-item">{{ product }}</li>
+            {% endfor %}
+        </ul>
     </div>
 </body>
 </html>
