@@ -12,10 +12,6 @@ import threading
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Starts polling immediately
-poll_thread = threading.Thread(target=poll_supabase, daemon=True)
-poll_thread.start()
-
 # Supabase Configuration
 import os
 from supabase import create_client, Client
@@ -101,6 +97,10 @@ def poll_supabase():
         except Exception as e:
             print("⚠️ Error in polling:", str(e))
             time.sleep(60)
+
+# Starts polling immediately
+poll_thread = threading.Thread(target=poll_supabase, daemon=True)
+poll_thread.start()
 
 
 # product_list.html
