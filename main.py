@@ -92,7 +92,7 @@ def poll_supabase():
                     last_seen_id = post_id
 
 
-            time.sleep(30)  # Poll every 30 seconds
+            time.sleep(300)  # Poll every 30 seconds
 
         except Exception as e:
             print("⚠️ Error in polling:", str(e))
