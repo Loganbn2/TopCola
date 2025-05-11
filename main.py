@@ -108,7 +108,7 @@ poll_thread.start()
 @app.route('/products-list', methods=['GET'])
 def get_product_list():
     try:
-        # Fetch data from the 'Products' table
+        # Fetch data from the 'products' table
         logging.info("Fetching data from the 'Products' table...")
         response = supabase.table('products').select('"product_name"').execute()
         logging.info(f"Supabase response: {response}")
@@ -123,6 +123,25 @@ def get_product_list():
     except Exception as e:
         logging.error(f"Error fetching products: {e}")
         return render_template('product_list.html', products=[], error=f"An error occurred: {str(e)}")
+
+@app.route('/product-info/<int:product_id>', methods=['GET'])
+def get_product_info(product_id):
+    try:
+        # Fetch data for the specified product ID from the 'products' table
+        logging.info(f"Fetching data for product ID {product_id} from the 'Products' table...")
+        response = supabase.table('products').select('*').eq('id', product_id).execute()
+        logging.info(f"Supabase response: {response}")
+        
+        if response.data:
+            product_info = response.data[0]  # Assuming only one row is returned
+            logging.info(f"Product info fetched: {product_info}")
+            return render_template('product_page.html', product=product_info)
+        else:
+            logging.warning(f"No product found with ID {product_id}.")
+            return render_template('product_page.html', product=None, error="Product not found")
+    except Exception as e:
+        logging.error(f"Error fetching product info for ID {product_id}: {e}")
+        return render_template('product_page.html', product=None, error=f"An error occurred: {str(e)}")
 
 if __name__ == "__main__":
     # Start the Supabase polling loop in a background thread
