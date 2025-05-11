@@ -27,6 +27,7 @@ wp_password = "kEET N0me NIpe eBSr y2pC KH7P"
 
 WP_POSTS = f"{wp_base}posts"
 
+'''
 # Supabase Polling Configuration
 last_seen_id = None
 
@@ -101,7 +102,7 @@ def poll_supabase():
 # Starts polling immediately
 poll_thread = threading.Thread(target=poll_supabase, daemon=True)
 poll_thread.start()
-
+'''
 
 # product_list.html
 @app.route('/products', methods=['GET'])
@@ -125,8 +126,8 @@ def get_products():
 
 if __name__ == "__main__":
     # Start the Supabase polling loop in a background thread
-    poll_thread = threading.Thread(target=poll_supabase, daemon=True)
-    poll_thread.start()
+    # poll_thread = threading.Thread(target=poll_supabase, daemon=True)
+    # poll_thread.start()
 
     # Start the Flask web server
     app.run(debug=True, host='127.0.0.1', port=5000)
