@@ -105,16 +105,16 @@ poll_thread.start()
 '''
 
 # product_list.html
-@app.route('/products', methods=['GET'])
-def get_products():
+@app.route('/products-list', methods=['GET'])
+def get_product_list():
     try:
         # Fetch data from the 'Products' table
         logging.info("Fetching data from the 'Products' table...")
-        response = supabase.table('Products').select('"Product Name"').execute()
+        response = supabase.table('products').select('"product_name"').execute()
         logging.info(f"Supabase response: {response}")
         
         if response.data:
-            products = [item['Product Name'] for item in response.data]
+            products = [item['product_name'] for item in response.data]
             logging.info(f"Products fetched: {products}")
             return render_template('product_list.html', products=products)
         else:
