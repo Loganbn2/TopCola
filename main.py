@@ -6,6 +6,7 @@ from flask_cors import CORS  # Import CORS
 import time
 import requests
 import threading
+from product_data import get_product_list, get_product_info  # Import the moved functions
 
 
 # CORS Configuration
@@ -104,43 +105,22 @@ poll_thread = threading.Thread(target=poll_supabase, daemon=True)
 poll_thread.start()
 '''
 
-# product_list.html
 @app.route('/products-list', methods=['GET'])
-def get_product_list():
+def render_product_list():
     try:
-        # Fetch data from the 'products' table
-        logging.info("Fetching data from the 'Products' table...")
-        response = supabase.table('products').select('"product_name"').execute()
-        logging.info(f"Supabase response: {response}")
-        
-        if response.data:
-            products = [item['product_name'] for item in response.data]
-            logging.info(f"Products fetched: {products}")
-            return render_template('product_list.html', products=products)
-        else:
-            logging.warning("No products found in the 'Products' table.")
-            return render_template('product_list.html', products=[], error="No products found")
+        products, error = get_product_list()
+        return render_template('product_list.html', products=products, error=error)
     except Exception as e:
-        logging.error(f"Error fetching products: {e}")
+        logging.error(f"Error rendering product list: {e}")
         return render_template('product_list.html', products=[], error=f"An error occurred: {str(e)}")
 
 @app.route('/product-info/<int:product_id>', methods=['GET'])
-def get_product_info(product_id):
+def render_product_info(product_id):
     try:
-        # Fetch data for the specified product ID from the 'products' table
-        logging.info(f"Fetching data for product ID {product_id} from the 'Products' table...")
-        response = supabase.table('products').select('*').eq('id', product_id).execute()
-        logging.info(f"Supabase response: {response}")
-        
-        if response.data:
-            product_info = response.data[0]  # Assuming only one row is returned
-            logging.info(f"Product info fetched: {product_info}")
-            return render_template('product_page.html', product=product_info)
-        else:
-            logging.warning(f"No product found with ID {product_id}.")
-            return render_template('product_page.html', product=None, error="Product not found")
+        product_info, error = get_product_info(product_id)
+        return render_template('product_page.html', product=product_info, error=error)
     except Exception as e:
-        logging.error(f"Error fetching product info for ID {product_id}: {e}")
+        logging.error(f"Error rendering product info for ID {product_id}: {e}")
         return render_template('product_page.html', product=None, error=f"An error occurred: {str(e)}")
 
 if __name__ == "__main__":
