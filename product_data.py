@@ -22,10 +22,10 @@ def get_product_info(supabase, product_id):
         return None, f"An error occurred: {str(e)}"
 
 
-def get_sativa_product_ids(supabase):
+def get_product_ids_by_tag(supabase, tag):
     try:
-        logging.info("Fetching product IDs with 'sativa' in tags from the 'Products' table...")
-        response = supabase.table('products').select('id').filter('tags', 'cs', '["sativa"]').execute()
+        logging.info(f"Fetching product IDs with '{tag}' in tags from the 'Products' table...")
+        response = supabase.table('products').select('id').filter('tags', 'cs', f'["{tag}"]').execute()
         logging.info(f"Supabase response: {response}")
         
         if response.data:
@@ -33,8 +33,8 @@ def get_sativa_product_ids(supabase):
             logging.info(f"Product IDs fetched: {product_ids}")
             return product_ids, None
         else:
-            logging.warning("No products found with 'sativa' in tags.")
+            logging.warning(f"No products found with '{tag}' in tags.")
             return [], "No products found"
     except Exception as e:
-        logging.error(f"Error fetching product IDs with 'sativa' in tags: {e}")
+        logging.error(f"Error fetching product IDs with '{tag}' in tags: {e}")
         return None, f"An error occurred: {str(e)}"

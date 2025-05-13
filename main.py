@@ -6,7 +6,7 @@ from flask_cors import CORS  # Import CORS
 import time
 import requests
 import threading
-from product_data import get_product_info, get_sativa_product_ids  # Import the moved functions
+from product_data import get_product_info, get_product_ids_by_tag  # Import the moved functions
 
 
 # CORS configuration
@@ -109,11 +109,12 @@ poll_thread.start()
 @app.route('/products-list', methods=['GET'])
 def render_products_list():
     try:
-        product_ids, error = get_sativa_product_ids(supabase)
-        return render_template('product_list.html', product_ids=product_ids, error=error)
+        tag = request.args.get('tag', 'sativa')  # Default to 'sativa' if no tag is provided
+        product_ids, error = get_product_ids_by_tag(supabase, tag)
+        return render_template('product_list.html', product_ids=product_ids, error=error, tag=tag)
     except Exception as e:
         logging.error(f"Error rendering products list: {e}")
-        return render_template('product_list.html', product_ids=[], error=f"An error occurred: {str(e)}")
+        return render_template('product_list.html', product_ids=[], error=f"An error occurred: {str(e)}", tag=None)
 
 
 # product_page.html
@@ -138,4 +139,4 @@ def render_cart():
 
 # run
 if __name__ == "__main__":
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5001)

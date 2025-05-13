@@ -20,6 +20,20 @@
     </style>
 </head>
 <body>
+    <h1>Product List</h1>
+    
+    <!-- Form to input tag -->
+    <form method="get" action="/products-list">
+        <label for="tag">Enter Tag:</label>
+        <input type="text" id="tag" name="tag" value="{{ tag or '' }}">
+        <button type="submit">Search</button>
+    </form>
+
+    <!-- Display error if any -->
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
     <div class="product-list-container">
         <h2>Product IDs</h2>
         {% if product_ids %}
