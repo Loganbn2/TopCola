@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <style>
+        .product-container {
+            background-color: blue;
+            color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            width: 80%;
+            margin: 00px auto;
+        }
+        .product-item {
+            margin: 0px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="product-container">
+        <h2>Product List</h2>
+        <ul>
+            {% for product in products %}
+                <li class="product-item">{{ product }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
