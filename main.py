@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template  # Ensure Flask imports are included
+from flask import Flask, jsonify, render_template, request  # Ensure Flask imports are included
 from supabase import create_client, Client  # Ensure Supabase client is imported
 import logging  # Import logging module
 import os  # Import os for environment variables if needed
@@ -6,14 +6,14 @@ from flask_cors import CORS  # Import CORS
 import time
 import requests
 import threading
-from product_data import get_product_list, get_product_info  # Import the moved functions
+from product_data import get_product_info, get_sativa_product_ids  # Import the moved functions
 
 
-# CORS Configuration
+# CORS configuration
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:5000", "http://localhost:5000"], "methods": ["GET", "POST", "PUT", "DELETE"], "allow_headers": "*"}})
 
-# Supabase Configuration
+# supabase configuration
 import os
 from supabase import create_client, Client
 
@@ -21,7 +21,7 @@ url="https://otnrvaybkwsvzxgwfhfc.supabase.co"
 key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90bnJ2YXlia3dzdnp4Z3dmaGZjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjcyNjAwMiwiZXhwIjoyMDYyMzAyMDAyfQ.yu6OmOqNGqkeBwq00tKvZGU0gNdTY3c9c7u4dSeaGBg"
 supabase: Client = create_client(url, key)
 
-# WordPress API Configuration
+# wordpress configuration
 wp_base = "https://topcoladelivery.com/wp-json/wp/v2/"
 wp_username = "Logan"
 wp_password = "kEET N0me NIpe eBSr y2pC KH7P"
@@ -105,15 +105,18 @@ poll_thread = threading.Thread(target=poll_supabase, daemon=True)
 poll_thread.start()
 '''
 
+# product_list.html
 @app.route('/products-list', methods=['GET'])
-def render_product_list():
+def render_products_list():
     try:
-        products, error = get_product_list(supabase)
-        return render_template('product_list.html', products=products, error=error)
+        product_ids, error = get_sativa_product_ids(supabase)
+        return render_template('product_list.html', product_ids=product_ids, error=error)
     except Exception as e:
-        logging.error(f"Error rendering product list: {e}")
-        return render_template('product_list.html', products=[], error=f"An error occurred: {str(e)}")
+        logging.error(f"Error rendering products list: {e}")
+        return render_template('product_list.html', product_ids=[], error=f"An error occurred: {str(e)}")
 
+
+# product_page.html
 @app.route('/product-info/<int:product_id>', methods=['GET'])
 def render_product_info(product_id):
     try:
@@ -123,10 +126,16 @@ def render_product_info(product_id):
         logging.error(f"Error rendering product info for ID {product_id}: {e}")
         return render_template('product_page.html', product=None, error=f"An error occurred: {str(e)}")
 
-if __name__ == "__main__":
-    # Start the Supabase polling loop in a background thread
-    # poll_thread = threading.Thread(target=poll_supabase, daemon=True)
-    # poll_thread.start()
+# cart.html
+@app.route('/cart', methods=['GET'])
+def render_cart():
+    try:
+        cart_data = []
+        return render_template('cart.html', cart=cart_data)
+    except Exception as e:
+        logging.error(f"Error rendering cart: {e}")
+        return render_template('cart.html', cart=[], error=f"An error occurred: {str(e)}")
 
-    # Start the Flask web server
+# run
+if __name__ == "__main__":
     app.run(debug=True, host='127.0.0.1', port=5000)

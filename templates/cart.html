@@ -3,29 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product List</title>
+    <title>Shopping Cart</title>
     <style>
-        .product-container {
-            background-color: blue;
-            color: #ffffff;
+        .cart-container {
+            background-color: #f8f9fa;
+            color: #333;
             padding: 20px;
             border-radius: 5px;
             width: 80%;
-            margin: 00px auto;
+            margin: 20px auto;
+            font-family: Arial, sans-serif;
         }
-        .product-item {
-            margin: 0px 0;
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        .cart-total {
+            text-align: right;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .place-order-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            width: fit-content;
+            cursor: pointer;
+        }
+        .place-order-button:hover {
+            background-color: #0056b3;
+        }
+        .popup-form {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        .popup-form input {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .popup-form button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .popup-form button:hover {
+            background-color: #0056b3;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
         }
     </style>
+    <script>
+        function togglePopup() {
+            const popup = document.getElementById('popup-form');
+            const overlay = document.getElementById('overlay');
+            const isVisible = popup.style.display === 'block';
+            popup.style.display = isVisible ? 'none' : 'block';
+            overlay.style.display = isVisible ? 'none' : 'block';
+        }
+    </script>
 </head>
 <body>
-    <div class="product-container">
-        <h2>Product List</h2>
-        <ul>
-            {% for product in products %}
-                <li class="product-item">{{ product }}</li>
-            {% endfor %}
-        </ul>
+    <div class="cart-container">
+        <h2>Shopping Cart</h2>
+        <div class="cart-item">
+            <span>Product 1</span>
+            <span>$10.00</span>
+        </div>
+        <div class="cart-item">
+            <span>Product 2</span>
+            <span>$15.00</span>
+        </div>
+        <div class="cart-item">
+            <span>Product 3</span>
+            <span>$20.00</span>
+        </div>
+        <div class="cart-total">
+            Total: $45.00
+        </div>
+        <div class="place-order-button" onclick="togglePopup()">Place Order</div>
+    </div>
+
+    <div id="overlay" class="overlay" onclick="togglePopup()"></div>
+    <div id="popup-form" class="popup-form">
+        <h3>Place Your Order</h3>
+        <form>
+            <input type="text" placeholder="Name" required>
+            <input type="email" placeholder="Email" required>
+            <input type="tel" placeholder="Phone" required>
+            <input type="text" placeholder="Address" required>
+            <input type="text" placeholder="City" required>
+            <input type="text" placeholder="State" required>
+            <input type="text" placeholder="ZIP" required>
+            <button type="submit">Submit</button>
+        </form>
     </div>
 </body>
 </html>
