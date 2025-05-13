@@ -1,8 +1,7 @@
 from flask import render_template
 import logging
-from main import supabase  # Import the supabase client
 
-def get_product_list():
+def get_product_list(supabase):
     try:
         logging.info("Fetching data from the 'Products' table...")
         response = supabase.table('products').select('"product_name"').execute()
@@ -19,7 +18,7 @@ def get_product_list():
         logging.error(f"Error fetching products: {e}")
         return [], f"An error occurred: {str(e)}"
 
-def get_product_info(product_id):
+def get_product_info(supabase, product_id):
     try:
         logging.info(f"Fetching data for product ID {product_id} from the 'Products' table...")
         response = supabase.table('products').select('*').eq('id', product_id).execute()

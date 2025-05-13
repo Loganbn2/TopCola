@@ -108,7 +108,7 @@ poll_thread.start()
 @app.route('/products-list', methods=['GET'])
 def render_product_list():
     try:
-        products, error = get_product_list()
+        products, error = get_product_list(supabase)
         return render_template('product_list.html', products=products, error=error)
     except Exception as e:
         logging.error(f"Error rendering product list: {e}")
@@ -117,7 +117,7 @@ def render_product_list():
 @app.route('/product-info/<int:product_id>', methods=['GET'])
 def render_product_info(product_id):
     try:
-        product_info, error = get_product_info(product_id)
+        product_info, error = get_product_info(supabase, product_id)
         return render_template('product_page.html', product=product_info, error=error)
     except Exception as e:
         logging.error(f"Error rendering product info for ID {product_id}: {e}")
