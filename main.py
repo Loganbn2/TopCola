@@ -6,7 +6,7 @@ from flask_cors import CORS
 import time
 import requests
 import threading
-from product_data import get_product_info, get_product_ids_by_tag 
+from product_data import get_product_info, get_product_ids_by_tag, get_flower_info
 
 
 # CORS configuration
@@ -42,6 +42,16 @@ def render_product_info(product_id):
     except Exception as e:
         logging.error(f"Error rendering product info for ID {product_id}: {e}")
         return render_template('product_page.html', product=None, error=f"An error occurred: {str(e)}")
+    
+# flower_page.html
+@app.route('/flower-info/<int:product_id>', methods=['GET'])
+def render_product_info(product_id):
+    try:
+        product_info, error = get_flower_info(supabase, product_id)
+        return render_template('flower_page.html', product=product_info, error=error)
+    except Exception as e:
+        logging.error(f"Error rendering product info for ID {product_id}: {e}")
+        return render_template('flower_page.html', product=None, error=f"An error occurred: {str(e)}")
 
 # cart.html
 @app.route('/cart', methods=['GET'])

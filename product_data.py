@@ -6,8 +6,25 @@ import json  # Import json for serialization
 
 def get_product_info(supabase, product_id):
     try:
-        logging.info(f"Fetching data for product ID {product_id} from the 'Products' table...")
+        logging.info(f"Fetching data for product ID {product_id} from the 'products' table...")
         response = supabase.table('products').select('*').eq('id', product_id).execute()
+        logging.info(f"Supabase response: {response}")
+        
+        if response.data:
+            product_info = response.data[0]  # assuming only one row is returned
+            logging.info(f"Product info fetched: {product_info}")
+            return product_info, None
+        else:
+            logging.warning(f"No product found with ID {product_id}.")
+            return None, "Product not found"
+    except Exception as e:
+        logging.error(f"Error fetching product info for ID {product_id}: {e}")
+        return None, f"An error occurred: {str(e)}"
+    
+def get_flower_info(supabase, product_id):
+    try:
+        logging.info(f"Fetching data for product ID {product_id} from the 'weighted_products' table...")
+        response = supabase.table('weighted_products').select('*').eq('id', product_id).execute()
         logging.info(f"Supabase response: {response}")
         
         if response.data:
