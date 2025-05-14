@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flower Details</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Albert Sans', sans-serif;
+        }
+        .product-container {
+            display: flex;
+            gap: 20px;
+            color: #333;
+            padding: 20px;
+            padding-top: 50px;
+            border-radius: 5px;
+            width: 80%;
+            margin: 20px auto;
+            align-items: center; /* Center contents vertically */
+        }
+        .left-column, .right-column {
+            flex: 1;
+        }
+        .image-gallery {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .primary-image {
+            height: 375px; /* Increased by 25% */
+            width: 487.5px; /* Increased by 25% */
+            border-radius: 15px;
+            margin-bottom: 10px;
+            object-fit: cover;
+        }
+        .thumbnail-carousel {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+        .thumbnail-carousel img {
+            height: 80px; /* Increased by 25% */
+            width: 100px; /* Increased by 25% */
+            border-radius: 10px;
+            cursor: pointer;
+            object-fit: cover;
+        }
+        .thumbnail-carousel img:hover {
+            border: 1px solid #333;
+        }
+        .product-name {
+            font-size: 40px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .product-description {
+            margin: 10px;
+            margin-top: 40px;
+            margin-bottom: 25px;
+            margin-left: 40px;
+            white-space: pre-line;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+        .product-price {
+            font-size: 24px;
+            color: black;
+            font-weight: 500;
+        }
+        .original-price {
+            font-size: 20px;
+            color: rgb(136, 136, 136);
+            text-decoration: line-through;
+            margin-right: 10px;
+        }
+        .error-message {
+            color: red;
+        }
+        .quantity-dropdown {
+            margin-top: 15px;
+            font-size: 16px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .quantity-dropdown:hover {
+            border-color: #333;
+        }
+        .add-to-cart-button {
+            margin-left: 30px;
+            padding: 10px 25px;
+            font-size: 16px;
+            color: black;
+            background-color: white;
+            border: solid 1px black;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .add-to-cart-button:hover {
+            background-color: black;
+            color: white;
+        }
+    </style>
+    <script>
+        function updatePrimaryImage(src) {
+            document.getElementById('primary-image').src = src;
+        }
+    </script>
+</head>
+<body>
+    <div class="product-container">
+        {% if product %}
+            <div class="left-column">
+                <div class="image-gallery">
+                    <!-- Primary Image -->
+                    <img id="primary-image" class="primary-image" src="https://otnrvaybkwsvzxgwfhfc.supabase.co/storage/v1/object/public/weighted-product-images/{{ product.images[0] }}" alt="Primary Product Image">
+                    
+                    <!-- Thumbnail Carousel -->
+                    <div class="thumbnail-carousel">
+                        {% for image_url in product.images %}
+                            <img src="https://otnrvaybkwsvzxgwfhfc.supabase.co/storage/v1/object/public/weighted-product-images/{{ image_url }}" alt="Thumbnail" onclick="updatePrimaryImage(this.src)">
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="right-column">
+                <div class="product-name">{{ product.product_name }}</div>
+                <div class="product-price">
+                    {% if product.original_price and product.original_price != product['price/g'] %}
+                        <span class="original-price">${{ "%.2f"|format(product.original_price) }}/g</span>
+                    {% endif %}
+                    <span>${{ "%.2f"|format(product['price/g']) }}/g</span>
+                </div>
+                <div class="product-description">{{ product.description }}</div>
+                <div>
+                    <select class="quantity-dropdown">
+                        <option value="1">1</option>
+                        <option value="4">4</option>
+                        <option value="7">7</option>
+                        <option value="14">14</option>
+                        <option value="28">28</option>
+                    </select>
+                    <span>g</span>
+                    <button class="add-to-cart-button">Add to Cart</button>
+                </div>
+            </div>
+        {% elif error %}
+            <p class="error-message">{{ error }}</p>
+        {% else %}
+            <p class="error-message">No product information available.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
