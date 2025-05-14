@@ -45,7 +45,7 @@ def render_product_info(product_id):
     
 # flower_page.html
 @app.route('/flower-info/<int:product_id>', methods=['GET'])
-def render_product_info(product_id):
+def render_flower_info(product_id):
     try:
         product_info, error = get_flower_info(supabase, product_id)
         return render_template('flower_page.html', product=product_info, error=error)
