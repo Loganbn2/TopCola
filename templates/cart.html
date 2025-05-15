@@ -6,25 +6,29 @@
     <title>Shopping Cart</title>
     <style>
         .cart-container {
-            background-color: #f8f9fa;
             color: #333;
             padding: 20px;
             border-radius: 5px;
-            width: 80%;
+            width: 50%;
             margin: 20px auto;
             font-family: Arial, sans-serif;
         }
         .cart-item {
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between; /* Distribute space evenly between elements */
+            align-items: center; /* Align items vertically */
             padding: 10px 0;
             border-bottom: 1px solid #ddd;
+        }
+        .cart-item > * {
+            flex: 1; /* Ensure all elements take up equal space */
+            text-align: center; /* Center align text within each container */
         }
         .cart-item:last-child {
             border-bottom: none;
         }
         .cart-total {
-            text-align: right;
+            text-align: left; /* Align the total for the whole cart to the left */
             font-weight: bold;
             margin-top: 20px;
         }
@@ -84,6 +88,83 @@
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 999;
         }
+        .delete-button {
+            background-color: transparent; /* Make background transparent */
+            color: black; /* Set icon color to black */
+            border: none; /* Remove border */
+            font-size: 18px; /* Adjust font size for the icon */
+            cursor: pointer; /* Change cursor to pointer */
+            width: 100%; /* Ensure the button fills the container */
+        }
+        .delete-button:hover {
+            color: red; /* Change icon color to red on hover */
+        }
+        .quantity-button {
+            color: black;
+            background-color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        .quantity-button:hover {
+            background-color: #dadada;
+        }
+        .quantity-display {
+            font-size: 16px;
+            margin: 0 10px;
+            width: 50px; /* Fixed width for quantity container */
+            text-align: center; /* Center align the text */
+            display: inline-block; /* Ensure the width is applied */
+        }
+        .flower-line-item {
+            color: black; /* Change flower line item text color to black */
+        }
+        .product-line-item {
+            color: black; /* Product line item text color */
+        }
+        .cart-item span {
+            width: 200px; /* Fixed width for product name container */
+            display: inline-block; /* Ensure the width is applied */
+            overflow: hidden; /* Hide overflow text */
+            text-overflow: ellipsis; /* Add ellipsis for overflow text */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        .product-name-container {
+            width: 300px; /* Fixed width for product name container */
+            display: inline-block; /* Ensure the width is applied */
+            overflow: hidden; /* Hide overflow text */
+            text-overflow: ellipsis; /* Add ellipsis for overflow text */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+
+        .quantity-container {
+            width: 50px; /* Fixed width for quantity container */
+            text-align: center; /* Center align the text */
+            display: inline-block; /* Ensure the width is applied */
+            overflow: hidden; /* Prevent overflow */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        .cart-item .product-name-container {
+            text-align: left; /* Align product name to the left */
+        }
+
+        .cart-item .quantity-container {
+            width: 50px; /* Fixed width for quantity container */
+            text-align: center; /* Center align the text */
+            display: inline-block; /* Ensure the width is applied */
+            overflow: hidden; /* Prevent overflow */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        .cart-item .total-container {
+            text-align: center; /* Align line item totals to the center */
+        }
+        .cart-item .delete-button-container {
+            width: 50px; /* Fixed width for delete button container */
+            text-align: center; /* Center align the delete button */
+            display: inline-block; /* Ensure the width is applied */
+        }
     </style>
     <script>
         function togglePopup() {
@@ -93,25 +174,108 @@
             popup.style.display = isVisible ? 'none' : 'block';
             overlay.style.display = isVisible ? 'none' : 'block';
         }
+
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartContainer = document.getElementById('cart-items');
+            let total = 0;
+
+            // Combine quantities of the same product
+            const condensedCart = cart.reduce((acc, item) => {
+                const existingItem = acc.find(i => i.productName === item.productName && i.type === item.type);
+                const itemQuantity = parseInt(item.quantity, 10) || 0; // Ensure quantity is parsed correctly
+                const itemTotal = parseFloat(item.total.replace('$', '')) || 0; // Ensure item.total is parsed correctly
+                if (existingItem) {
+                    existingItem.quantity += itemQuantity;
+                    existingItem.total = `$${(parseFloat(existingItem.total.replace('$', '')) + itemTotal).toFixed(2)}`;
+                } else {
+                    item.quantity = itemQuantity; // Ensure quantity is properly formatted
+                    item.total = `$${itemTotal.toFixed(2)}`; // Ensure total is properly formatted
+                    acc.push({ ...item });
+                }
+                return acc;
+            }, []);
+
+            condensedCart.forEach((item, index) => {
+                const lineItem = document.createElement('div');
+                lineItem.className = `cart-item ${item.type === 'flower_line_item' ? 'flower-line-item' : 'product-line-item'}`;
+                lineItem.id = `cart-item-${index}`; // Add unique ID for the line item
+                lineItem.innerHTML = `
+                    <span class="product-name-container">${item.productName}</span>
+                    <div>
+                        <button onclick="updateQuantity(${index}, -1)" class="quantity-button">-</button>
+                        <span id="quantity-${index}" class="quantity-container">${item.quantity}${item.type === 'flower_line_item' ? 'g' : ''}</span>
+                        <button onclick="updateQuantity(${index}, 1)" class="quantity-button">+</button>
+                    </div>
+                    <span id="total-${index}" class="total-container">${item.total}</span>
+                    <div class="delete-button-container">
+                        <button onclick="deleteItem(${index})" class="delete-button">&times;</button>
+                    </div>
+                `;
+                cartContainer.appendChild(lineItem);
+                total += parseFloat(item.total.replace('$', '')) || 0; // Ensure total is parsed correctly
+            });
+
+            document.getElementById('cart-total').textContent = `Total: $${total.toFixed(2)}`;
+        }
+
+        function updateQuantity(index, change) {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const item = cart[index];
+            const unitPrice = parseFloat(item.total.replace('$', '')) / parseInt(item.quantity, 10); // Ensure quantity is parsed as a number
+
+            if (item.type === 'flower_line_item') {
+                const allowedQuantities = [1, 4, 7, 14, 28];
+                let currentIndex = allowedQuantities.indexOf(parseInt(item.quantity, 10));
+
+                // Determine the next valid quantity based on the change
+                if (change > 0 && currentIndex < allowedQuantities.length - 1) {
+                    currentIndex++;
+                } else if (change < 0 && currentIndex > 0) {
+                    currentIndex--;
+                }
+
+                item.quantity = allowedQuantities[currentIndex];
+            } else {
+                item.quantity = Math.max(1, parseInt(item.quantity, 10) + change); // Ensure quantity is at least 1
+            }
+
+            item.total = `$${(unitPrice * item.quantity).toFixed(2)}`;
+
+            // Update the specific line item in the DOM
+            const quantityDisplay = document.getElementById(`quantity-${index}`);
+            quantityDisplay.textContent = `${item.quantity}${item.type === 'flower_line_item' ? 'g' : ''}`;
+            document.getElementById(`total-${index}`).textContent = item.total;
+
+            // Update the cart in local storage
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Recalculate and update the total
+            let total = cart.reduce((sum, cartItem) => sum + parseFloat(cartItem.total.replace('$', '')), 0);
+            document.getElementById('cart-total').textContent = `Total: $${total.toFixed(2)}`;
+        }
+
+        function deleteItem(index) {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.splice(index, 1); // Remove the item at the specified index
+            localStorage.setItem('cart', JSON.stringify(cart)); // Update local storage
+
+            // Reload the cart to reflect changes
+            document.getElementById('cart-items').innerHTML = ''; // Clear current items
+            loadCart(); // Reload cart with updated items
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCart);
     </script>
 </head>
 <body>
     <div class="cart-container">
         <h2>Shopping Cart</h2>
-        <div class="cart-item">
-            <span>Product 1</span>
-            <span>$10.00</span>
+        <div id="cart-items">
+            <!-- Line items will be dynamically inserted here -->
         </div>
-        <div class="cart-item">
-            <span>Product 2</span>
-            <span>$15.00</span>
-        </div>
-        <div class="cart-item">
-            <span>Product 3</span>
-            <span>$20.00</span>
-        </div>
-        <div class="cart-total">
-            Total: $45.00
+        <div id="cart-total" class="cart-total">
+            Total: $0.00
         </div>
         <div class="place-order-button" onclick="togglePopup()">Place Order</div>
     </div>

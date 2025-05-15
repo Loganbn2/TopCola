@@ -24,6 +24,10 @@
         .left-column, .right-column {
             flex: 1;
         }
+        .left-column {
+            flex: 1;
+            align-self: flex-start; /* Align contents to the top */
+        }
         .image-gallery {
             display: flex;
             flex-direction: column;
@@ -62,8 +66,8 @@
             margin-bottom: 25px;
             margin-left: 40px;
             white-space: pre-line;
-            font-size: 18px;
-            line-height: 1.5;
+            font-size: 16px;
+            line-height: 1.3;
         }
         .product-price {
             font-size: 24px;
@@ -107,10 +111,60 @@
             background-color: black;
             color: white;
         }
+        .subtotal-line {
+            margin-top: 30px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #333;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .discount-line {
+            font-size: 18px;
+            font-weight: 500;
+            color: #157831;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .total-line {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            padding: 10px;
+            border-radius: 5px;
+        }
     </style>
     <script>
         function updatePrimaryImage(src) {
             document.getElementById('primary-image').src = src;
+        }
+        function updateSubtotal() {
+            const quantity = document.getElementById('quantity-dropdown').value;
+            const originalPrice = {{ "%.2f"|format(product.original_price) }};
+            const standardDiscount = {{ "%.2f"|format(product.standard_discount) }};
+            const subtotal = (quantity * originalPrice).toFixed(2);
+            const discount = (quantity * standardDiscount).toFixed(2);
+            const total = (subtotal - discount).toFixed(2); // Calculate total
+            document.getElementById('subtotal').textContent = `$${subtotal}`;
+            document.getElementById('discount').textContent = `-$${discount}`;
+            document.getElementById('total').textContent = `$${total}`; // Update total
+        }
+        function addToCart() {
+            const productName = "{{ product.product_name }}";
+            const quantity = document.getElementById('quantity-dropdown').value;
+            const total = document.getElementById('total').textContent;
+
+            // Retrieve existing cart items from local storage
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            
+            // Add new line item to the cart
+            cart.push({ productName, quantity, total });
+            
+            // Save updated cart back to local storage
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            alert('Item added to cart: ' + productName + ' (Quantity: ' + quantity + ', Total: ' + total + ')');
         }
     </script>
 </head>
@@ -134,19 +188,34 @@
                 <div class="product-name">{{ product.product_name }}</div>
                 <div class="product-price">
                     {% if product.original_price and product.original_price != product.price %}
-                        <span class="original-price">${{ "%.2f"|format(product.original_price) }}/g</span>
+                        <span class="original-price">${{ "%.2f"|format(product.original_price) }}</span>
                     {% endif %}
-                    <span>${{ "%.2f"|format(product.price) }}/g</span>
+                    <span>${{ "%.2f"|format(product.price) }}</span>
                 </div>
                 <div class="product-description">{{ product.description }}</div>
                 <div>
-                    <select class="quantity-dropdown">
+                    <select class="quantity-dropdown" id="quantity-dropdown" onchange="updateSubtotal()">
                         {% for i in range(1, 11) %}
                             <option value="{{ i }}">{{ i }}</option>
                         {% endfor %}
                     </select>
-                    <button class="add-to-cart-button">Add to Cart</button>
+                    <button class="add-to-cart-button" onclick="addToCart()">Add to Cart</button>
                 </div>
+                <div class="subtotal-line">
+                    Subtotal: <span id="subtotal">${{ "%.2f"|format(product.original_price) }}</span>
+                </div>
+                <div class="discount-line">
+                    Discounts: <span id="discount">-${{ "%.2f"|format(product.standard_discount) }}</span>
+                </div>
+                <hr style="margin: 20px 0; border: 1px solid #ccc;">
+                <div class="total-line">
+                    Total: <span id="total">${{ "%.2f"|format(product.original_price - product.standard_discount) }}</span>
+                </div>
+                {% if product.BOGO or product.B2GO or product.B3GO %}
+                    <p style="margin-top: 10px; font-size: 16px; color: #555;">
+                        *BOGO, B2GO & B3GO discounts are displayed in Cart.
+                    </p>
+                {% endif %}
             </div>
         {% elif error %}
             <p class="error-message">{{ error }}</p>
