@@ -183,6 +183,7 @@
             const quantity = document.querySelector('.quantity-dropdown').value;
             const pricePerGram = {{ "%.2f"|format(product['price/g']) }};
             const total = (quantity * pricePerGram).toFixed(2); // Calculate total directly as price/g * quantity
+            const productTier = "{{ product.price_tier }}";
 
             // Retrieve existing cart items from local storage
             const cart = JSON.parse(localStorage.getItem('cart')) || [];

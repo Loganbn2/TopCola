@@ -266,7 +266,7 @@
 
         function deleteItem(index) {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            cart.splice(index, 1); // Remove the item at the specified index
+            cart.splice(index, 1); // Remove the entire line item at the specified index
             localStorage.setItem('cart', JSON.stringify(cart)); // Update local storage
 
             // Reload the cart to reflect changes
