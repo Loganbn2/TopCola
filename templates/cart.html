@@ -179,6 +179,8 @@
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const cartContainer = document.getElementById('cart-items');
             let total = 0;
+            let subtotal = 0;
+            let discounts = 0;
 
             // Combine quantities of the same product
             const condensedCart = cart.reduce((acc, item) => {
@@ -213,10 +215,17 @@
                     </div>
                 `;
                 cartContainer.appendChild(lineItem);
-                total += parseFloat(item.total.replace('$', '')) || 0; // Ensure total is parsed correctly
+                subtotal += parseFloat(item.total.replace('$', '')) || 0; // Calculate subtotal
             });
 
-            document.getElementById('cart-total').textContent = `Total: $${total.toFixed(2)}`;
+            // Example discount logic (adjust as needed)
+            if (subtotal > 100) {
+                discounts = subtotal * 0.1; // 10% discount for orders over $100
+            }
+
+            document.getElementById('cart-subtotal').textContent = `Subtotal: $${subtotal.toFixed(2)}`;
+            document.getElementById('cart-discounts').textContent = `Volume Discounts: -$${discounts.toFixed(2)}`;
+            document.getElementById('cart-total').textContent = `Total: $${(subtotal - discounts).toFixed(2)}`;
         }
 
         function updateQuantity(index, change) {
@@ -273,6 +282,13 @@
         <h2>Shopping Cart</h2>
         <div id="cart-items">
             <!-- Line items will be dynamically inserted here -->
+        </div>
+        <hr> <!-- Divider line -->
+        <div id="cart-subtotal" class="cart-total">
+            Subtotal: $0.00
+        </div>
+        <div id="cart-discounts" class="cart-total">
+            Volume Discounts: $0.00
         </div>
         <div id="cart-total" class="cart-total">
             Total: $0.00
