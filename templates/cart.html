@@ -203,7 +203,10 @@
                 lineItem.className = `cart-item ${item.type === 'flower_line_item' ? 'flower-line-item' : 'product-line-item'}`;
                 lineItem.id = `cart-item-${index}`; // Add unique ID for the line item
                 lineItem.innerHTML = `
-                    <span class="product-name-container">${item.productName}</span>
+                    <span class="product-name-container">
+                        ${item.productName} 
+                        ${item.type === 'flower_line_item' ? `(Tier ${item.productTier})` : ''}
+                    </span>
                     <div>
                         <button onclick="updateQuantity(${index}, -1)" class="quantity-button">-</button>
                         <span id="quantity-${index}" class="quantity-container">${item.quantity}${item.type === 'flower_line_item' ? 'g' : ''}</span>
@@ -266,7 +269,7 @@
 
         function deleteItem(index) {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            cart.splice(index, 1); // Remove the entire line item at the specified index
+            cart.splice(index, 1); // Remove the item at the specified index
             localStorage.setItem('cart', JSON.stringify(cart)); // Update local storage
 
             // Reload the cart to reflect changes
@@ -274,7 +277,88 @@
             loadCart(); // Reload cart with updated items
         }
 
-        document.addEventListener('DOMContentLoaded', loadCart);
+        function getHighestDiscount(tier, quantity) {
+            const volumeDiscounts = {
+                "4g discount": 4,
+                "7g discount": 7,
+                "14g discount": 14,
+                "28g discount": 28
+            };
+
+            // Simulated discount values for each tier (replace with actual data if available)
+            const discountValues = {
+                {% for discount in volume_discounts %}
+                "{{ discount.tier }}": {
+                    "4g discount": {{ discount['4g_discount'] }},
+                    "7g discount": {{ discount['7g_discount'] }},
+                    "14g discount": {{ discount['14g_discount'] }},
+                    "28g discount": {{ discount['28g_discount'] }}
+                },
+                {% endfor %}
+                
+            };
+
+            let highestDiscount = 0;
+            Object.keys(volumeDiscounts).forEach(discountKey => {
+                if (quantity >= volumeDiscounts[discountKey] && discountValues[tier] && discountValues[tier][discountKey]) {
+                    highestDiscount = Math.max(highestDiscount, discountValues[tier][discountKey]);
+                }
+            });
+
+            return highestDiscount;
+        }
+
+        function calculateTierTotals() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const tierTotals = {};
+            const tierDiscounts = {};
+
+            // Calculate total quantities for each tier independently
+            cart.forEach(item => {
+                if (item.type === 'flower_line_item') {
+                    const tier = item.productTier;
+                    const quantity = parseInt(item.quantity, 10) || 0;
+
+                    if (!tier) {
+                        console.error(`Missing tier for item: ${item.productName}`);
+                        return;
+                    }
+
+                    if (!tierTotals[tier]) {
+                        tierTotals[tier] = 0;
+                    }
+                    tierTotals[tier] += quantity; // Add quantity to the tier total
+                }
+            });
+
+            // Calculate discounts for each tier
+            Object.keys(tierTotals).forEach(tier => {
+                const quantity = tierTotals[tier];
+                tierDiscounts[tier] = getHighestDiscount(tier, quantity);
+            });
+
+            // Display tier totals and discounts
+            const tierTotalsContainer = document.getElementById('tier-totals');
+            tierTotalsContainer.innerHTML = ''; // Clear existing content
+            Object.keys(tierTotals).forEach(tier => {
+                const tierTotalElement = document.createElement('div');
+                tierTotalElement.textContent = `Tier ${tier}: ${tierTotals[tier]}g (Discount: $${tierDiscounts[tier].toFixed(2)})`;
+                tierTotalsContainer.appendChild(tierTotalElement);
+            });
+
+            // Calculate and update the final "Volume Discounts" value
+            const totalDiscounts = Object.values(tierDiscounts).reduce((sum, discount) => sum + discount, 0);
+            document.getElementById('cart-discounts').textContent = `Volume Discounts: -$${totalDiscounts.toFixed(2)}`;
+
+            // Update the total value
+            const subtotal = parseFloat(document.getElementById('cart-subtotal').textContent.replace('Subtotal: $', '')) || 0;
+            document.getElementById('cart-total').textContent = `Total: $${(subtotal - totalDiscounts).toFixed(2)}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCart();
+            calculateTierTotals(); // Call the function after loading the cart
+        });
     </script>
 </head>
 <body>
@@ -282,6 +366,9 @@
         <h2>Shopping Cart</h2>
         <div id="cart-items">
             <!-- Line items will be dynamically inserted here -->
+        </div>
+        <div id="tier-totals" class="cart-total">
+            <!-- Tier totals will be dynamically inserted here -->
         </div>
         <hr> <!-- Divider line -->
         <div id="cart-subtotal" class="cart-total">

@@ -159,13 +159,13 @@
             // Dynamically calculate discount based on quantity
             let discount = 0.00;
             if (quantity === 4) {
-                discount = {{ product.volume_discounts['4g discount'] }};
+                discount = {{ product.volume_discounts['4g_discount'] }};
             } else if (quantity === 7) {
-                discount = {{ product.volume_discounts['7g discount'] }};
+                discount = {{ product.volume_discounts['7g_discount'] }};
             } else if (quantity === 14) {
-                discount = {{ product.volume_discounts['14g discount'] }};
+                discount = {{ product.volume_discounts['14g_discount'] }};
             } else if (quantity === 28) {
-                discount = {{ product.volume_discounts['28g discount'] }};
+                discount = {{ product.volume_discounts['28g_discount'] }};
             }
 
             const total = (subtotal - discount).toFixed(2);
@@ -183,18 +183,18 @@
             const quantity = document.querySelector('.quantity-dropdown').value;
             const pricePerGram = {{ "%.2f"|format(product['price/g']) }};
             const total = (quantity * pricePerGram).toFixed(2); // Calculate total directly as price/g * quantity
-            const productTier = "{{ product.price_tier }}";
+            const productTier = "{{ product.price_tier }}"; // Ensure price_tier is correctly assigned
 
             // Retrieve existing cart items from local storage
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
             // Add new flower line item to the cart
-            cart.push({ productName, quantity, total, type: 'flower_line_item' });
+            cart.push({ productName, quantity, total, type: 'flower_line_item', productTier }); // Include productTier
 
             // Save updated cart back to local storage
             localStorage.setItem('cart', JSON.stringify(cart));
 
-            alert('Item added to cart: ' + productName + ' (Quantity: ' + quantity + ', Total: $' + total + ')');
+            alert('Item added to cart: ' + productName + ' (Quantity: ' + quantity + ', Tier: ' + productTier + ', Total: $' + total + ')');
         }
 
         function loadCart() {

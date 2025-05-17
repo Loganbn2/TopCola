@@ -72,3 +72,29 @@ def get_product_ids_by_tag(supabase, tag):
     except Exception as e:
         logging.error(f"Error fetching product IDs with '{tag}' in tags: {e}")
         return None, f"An error occurred: {str(e)}"
+
+def get_volume_discounts(supabase):
+    try:
+        logging.info("Fetching all data from the 'volume_discounts' table...")
+        response = supabase.table('volume_discounts').select('tier, 4g_discount, 7g_discount, 14g_discount, 28g_discount').execute()
+        logging.info(f"Supabase response: {response}")
+        
+        if response.data:
+            volume_discounts = [
+                {
+                    "tier": item.get("tier"),
+                    "4g_discount": item.get("4g_discount"),
+                    "7g_discount": item.get("7g_discount"),
+                    "14g_discount": item.get("14g_discount"),
+                    "28g_discount": item.get("28g_discount")
+                }
+                for item in response.data
+            ]
+            logging.info(f"Volume discounts data fetched: {volume_discounts}")
+            return volume_discounts, None
+        else:
+            logging.warning("No data found in the 'volume_discounts' table.")
+            return [], "No data found"
+    except Exception as e:
+        logging.error(f"Error fetching data from the 'volume_discounts' table: {e}")
+        return None, f"An error occurred: {str(e)}"
