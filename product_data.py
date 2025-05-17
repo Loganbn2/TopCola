@@ -30,6 +30,23 @@ def get_flower_info(supabase, product_id):
         if response.data:
             product_info = response.data[0]  # assuming only one row is returned
             logging.info(f"Product info fetched: {product_info}")
+
+            # Fetch corresponding volume_discounts row
+            price_tier = product_info.get('price_tier')
+            if price_tier is not None:
+                logging.info(f"Fetching data from 'volume_discounts' table for price_tier {price_tier}...")
+                discount_response = supabase.table('volume_discounts').select('*').eq('tier', price_tier).execute()
+                logging.info(f"Volume discounts response: {discount_response}")
+
+                if discount_response.data:
+                    product_info['volume_discounts'] = discount_response.data[0]  # assuming only one row is returned
+                    logging.info(f"Volume discounts data added: {product_info['volume_discounts']}")
+                else:
+                    logging.warning(f"No volume discounts found for price_tier {price_tier}.")
+                    product_info['volume_discounts'] = None
+            else:
+                logging.warning("No price_tier found in product info.")
+
             return product_info, None
         else:
             logging.warning(f"No product found with ID {product_id}.")

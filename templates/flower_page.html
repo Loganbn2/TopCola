@@ -151,19 +151,21 @@
         }
 
         function updateSubtotal() {
-            const quantity = document.querySelector('.quantity-dropdown').value;
+            {% if product and 'price/g' in product and 'price_tier' in product and product.volume_discounts %}
+            const quantity = parseInt(document.querySelector('.quantity-dropdown').value);
             const pricePerGram = {{ "%.2f"|format(product['price/g']) }};
             const subtotal = (quantity * pricePerGram).toFixed(2);
 
+            // Dynamically calculate discount based on quantity
             let discount = 0.00;
-            if (quantity == 4) {
-                discount = {{ "%.2f"|format(product['4g discount']) }};
-            } else if (quantity == 7) {
-                discount = {{ "%.2f"|format(product['7g discount']) }};
-            } else if (quantity == 14) {
-                discount = {{ "%.2f"|format(product['14g discount']) }};
-            } else if (quantity == 28) {
-                discount = {{ "%.2f"|format(product['28g discount']) }};
+            if (quantity === 4) {
+                discount = {{ product.volume_discounts['4g discount'] }};
+            } else if (quantity === 7) {
+                discount = {{ product.volume_discounts['7g discount'] }};
+            } else if (quantity === 14) {
+                discount = {{ product.volume_discounts['14g discount'] }};
+            } else if (quantity === 28) {
+                discount = {{ product.volume_discounts['28g discount'] }};
             }
 
             const total = (subtotal - discount).toFixed(2);
@@ -171,6 +173,9 @@
             document.getElementById('subtotal').textContent = `$${subtotal}`;
             document.getElementById('discount').textContent = `-$${discount.toFixed(2)}`;
             document.getElementById('total').textContent = `$${total}`;
+            {% else %}
+            console.error("Product data or volume discounts are missing or incomplete.");
+            {% endif %}
         }
 
         function addToCart() {
@@ -224,10 +229,14 @@
 
         // Set initial values on page load
         document.addEventListener('DOMContentLoaded', () => {
+            {% if product and 'price/g' in product %}
             const pricePerGram = {{ "%.2f"|format(product['price/g']) }};
             document.getElementById('subtotal').textContent = `$${pricePerGram.toFixed(2)}`;
             document.getElementById('discount').textContent = `-$0.00`;
             document.getElementById('total').textContent = `$${pricePerGram.toFixed(2)}`;
+            {% else %}
+            console.error("Product data is missing or incomplete.");
+            {% endif %}
         });
     </script>
 </head>
