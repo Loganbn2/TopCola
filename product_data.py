@@ -98,3 +98,28 @@ def get_volume_discounts(supabase):
     except Exception as e:
         logging.error(f"Error fetching data from the 'volume_discounts' table: {e}")
         return None, f"An error occurred: {str(e)}"
+
+def get_groups(supabase):
+    try:
+        logging.info("Fetching all data from the 'groups' table...")
+        response = supabase.table('groups').select('group, BOGO, B2GO, B3GO').execute()
+        logging.info(f"Supabase response: {response}")
+        
+        if response.data:
+            groups = [
+                {
+                    "group": item.get("group"),
+                    "BOGO": item.get("BOGO"),
+                    "B2GO": item.get("B2GO"),
+                    "B3GO": item.get("B3GO")
+                }
+                for item in response.data
+            ]
+            logging.info(f"Groups data fetched: {groups}")
+            return groups, None
+        else:
+            logging.warning("No data found in the 'groups' table.")
+            return [], "No data found"
+    except Exception as e:
+        logging.error(f"Error fetching data from the 'groups' table: {e}")
+        return None, f"An error occurred: {str(e)}"
