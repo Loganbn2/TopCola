@@ -154,17 +154,19 @@
             const productName = "{{ product.product_name }}";
             const quantity = document.getElementById('quantity-dropdown').value;
             const total = document.getElementById('total').textContent;
+            const BOGO = "{{ product.BOGO }}";
+            const bundle_category = "{{ product.bundle_category }}";
 
             // Retrieve existing cart items from local storage
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             
             // Add new line item to the cart
-            cart.push({ productName, quantity, total });
+            cart.push({ productName, quantity, total, bundle_category, BOGO });
             
             // Save updated cart back to local storage
             localStorage.setItem('cart', JSON.stringify(cart));
             
-            alert('Item added to cart: ' + productName + ' (Quantity: ' + quantity + ', Total: ' + total + ')');
+            alert('Item added to cart: ' + productName + bundle_category + ' (Quantity: ' + quantity + ', Total: ' + total + ')');
         }
     </script>
 </head>
