@@ -204,7 +204,7 @@
                 lineItem.id = `cart-item-${index}`; // Add unique ID for the line item
                 lineItem.innerHTML = `
                     <span class="product-name-container">
-                        ${item.productName + " Bundle:" + item.bundle_category} 
+                        ${item.productName } 
                         ${item.type === 'flower_line_item' ? `(Tier ${item.productTier})` : ''}
                         ${item.type === 'product_line_item' && item.bundle_category ? `(Category: ${item.bundle_category})` : ''}
                     </span>
