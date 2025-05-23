@@ -175,6 +175,74 @@
             overlay.style.display = isVisible ? 'none' : 'block';
         }
 
+        function calculateBOGODiscounts() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const groups = {{ groups|tojson|safe }};
+            let totalBOGODiscount = 0;
+
+            // Group items by their product group
+            const groupedItems = cart.reduce((acc, item) => {
+                if (!acc[item.productGroup]) {
+                    acc[item.productGroup] = [];
+                }
+                // Create individual entries based on quantity
+                for (let i = 0; i < item.quantity; i++) {
+                    acc[item.productGroup].push({
+                        ...item,
+                        quantity: 1,
+                        total: `$${(parseFloat(item.total.replace('$', '')) / item.quantity).toFixed(2)}`
+                    });
+                }
+                return acc;
+            }, {});
+
+            // Calculate discounts for each group
+            Object.entries(groupedItems).forEach(([group, items]) => {
+                const groupConfig = groups.find(g => g.group === group);
+                if (!groupConfig) return;
+
+                // Sort items by price (lowest to highest)
+                const sortedItems = items.sort((a, b) => {
+                    const priceA = parseFloat(a.total.replace('$', ''));
+                    const priceB = parseFloat(b.total.replace('$', ''));
+                    return priceA - priceB;
+                });
+
+                let groupDiscount = 0;
+                let discountType = '';
+
+                if (groupConfig.BOGO) {
+                    discountType = 'BOGO';
+                    const freeItems = Math.floor(sortedItems.length / 2);
+                    for (let i = 0; i < freeItems; i++) {
+                        groupDiscount += parseFloat(sortedItems[i].total.replace('$', ''));
+                    }
+                } else if (groupConfig.B2GO) {
+                    discountType = 'B2GO';
+                    const freeItems = Math.floor(sortedItems.length / 3);
+                    for (let i = 0; i < freeItems; i++) {
+                        groupDiscount += parseFloat(sortedItems[i].total.replace('$', ''));
+                    }
+                } else if (groupConfig.B3GO) {
+                    discountType = 'B3GO';
+                    const freeItems = Math.floor(sortedItems.length / 4);
+                    for (let i = 0; i < freeItems; i++) {
+                        groupDiscount += parseFloat(sortedItems[i].total.replace('$', ''));
+                    }
+                }
+
+                if (groupDiscount > 0) {
+                    console.log(`${group} group: ${discountType} discount of $${groupDiscount.toFixed(2)} (${sortedItems.length} items)`);
+                    totalBOGODiscount += groupDiscount;
+                }
+            });
+
+            if (totalBOGODiscount > 0) {
+                console.log(`Total discount: $${totalBOGODiscount.toFixed(2)}`);
+            }
+            return totalBOGODiscount;
+        }
+
         function loadCart() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const cartContainer = document.getElementById('cart-items');
@@ -182,17 +250,19 @@
             let subtotal = 0;
             let discounts = 0;
 
+            console.log('Loading cart with items:', cart);
+
             // Combine quantities of the same product
             const condensedCart = cart.reduce((acc, item) => {
                 const existingItem = acc.find(i => i.productName === item.productName && i.type === item.type);
-                const itemQuantity = parseInt(item.quantity, 10) || 0; // Ensure quantity is parsed correctly
-                const itemTotal = parseFloat(item.total.replace('$', '')) || 0; // Ensure item.total is parsed correctly
+                const itemQuantity = parseInt(item.quantity, 10) || 0;
+                const itemTotal = parseFloat(item.total.replace('$', '')) || 0;
                 if (existingItem) {
                     existingItem.quantity += itemQuantity;
                     existingItem.total = `$${(parseFloat(existingItem.total.replace('$', '')) + itemTotal).toFixed(2)}`;
                 } else {
-                    item.quantity = itemQuantity; // Ensure quantity is properly formatted
-                    item.total = `$${itemTotal.toFixed(2)}`; // Ensure total is properly formatted
+                    item.quantity = itemQuantity;
+                    item.total = `$${itemTotal.toFixed(2)}`;
                     acc.push({ ...item });
                 }
                 return acc;
@@ -201,10 +271,10 @@
             condensedCart.forEach((item, index) => {
                 const lineItem = document.createElement('div');
                 lineItem.className = `cart-item ${item.type === 'flower_line_item' ? 'flower-line-item' : 'product-line-item'}`;
-                lineItem.id = `cart-item-${index}`; // Add unique ID for the line item
+                lineItem.id = `cart-item-${index}`;
                 lineItem.innerHTML = `
                     <span class="product-name-container">
-                        ${item.productName } 
+                        ${item.productName} 
                         ${item.type === 'flower_line_item' ? `(Tier ${item.productTier})` : ''}
                         ${item.type === 'product_line_item' && item.bundle_category ? `(Category: ${item.bundle_category})` : ''}
                     </span>
@@ -219,29 +289,32 @@
                     </div>
                 `;
                 cartContainer.appendChild(lineItem);
-                subtotal += parseFloat(item.total.replace('$', '')) || 0; // Calculate subtotal
+                subtotal += parseFloat(item.total.replace('$', '')) || 0;
             });
 
-            // Example discount logic (adjust as needed)
+            // Calculate volume discounts
             if (subtotal > 100) {
-                discounts = subtotal * 0.1; // 10% discount for orders over $100
+                discounts = subtotal * 0.1;
             }
+
+            // Calculate BOGO/B2GO discounts
+            const bogoDiscounts = calculateBOGODiscounts();
 
             document.getElementById('cart-subtotal').textContent = `Subtotal: $${subtotal.toFixed(2)}`;
             document.getElementById('cart-discounts').textContent = `Volume Discounts: -$${discounts.toFixed(2)}`;
-            document.getElementById('cart-total').textContent = `Total: $${(subtotal - discounts).toFixed(2)}`;
+            document.getElementById('cart-bogo-discounts').textContent = `BOGO Discounts: -$${bogoDiscounts.toFixed(2)}`;
+            document.getElementById('cart-total').textContent = `Total: $${(subtotal - discounts - bogoDiscounts).toFixed(2)}`;
         }
 
         function updateQuantity(index, change) {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const item = cart[index];
-            const unitPrice = parseFloat(item.total.replace('$', '')) / parseInt(item.quantity, 10); // Ensure quantity is parsed as a number
+            const unitPrice = parseFloat(item.total.replace('$', '')) / parseInt(item.quantity, 10);
 
             if (item.type === 'flower_line_item') {
                 const allowedQuantities = [1, 4, 7, 14, 28];
                 let currentIndex = allowedQuantities.indexOf(parseInt(item.quantity, 10));
 
-                // Determine the next valid quantity based on the change
                 if (change > 0 && currentIndex < allowedQuantities.length - 1) {
                     currentIndex++;
                 } else if (change < 0 && currentIndex > 0) {
@@ -250,7 +323,7 @@
 
                 item.quantity = allowedQuantities[currentIndex];
             } else {
-                item.quantity = Math.max(1, parseInt(item.quantity, 10) + change); // Ensure quantity is at least 1
+                item.quantity = Math.max(1, parseInt(item.quantity, 10) + change);
             }
 
             item.total = `$${(unitPrice * item.quantity).toFixed(2)}`;
@@ -263,9 +336,19 @@
             // Update the cart in local storage
             localStorage.setItem('cart', JSON.stringify(cart));
 
-            // Recalculate and update the total
-            let total = cart.reduce((sum, cartItem) => sum + parseFloat(cartItem.total.replace('$', '')), 0);
-            document.getElementById('cart-total').textContent = `Total: $${total.toFixed(2)}`;
+            // Recalculate all discounts and totals
+            let subtotal = cart.reduce((sum, cartItem) => sum + parseFloat(cartItem.total.replace('$', '')), 0);
+            let volumeDiscounts = 0;
+            if (subtotal > 100) {
+                volumeDiscounts = subtotal * 0.1;
+            }
+            const bogoDiscounts = calculateBOGODiscounts();
+
+            // Update all totals in the DOM
+            document.getElementById('cart-subtotal').textContent = `Subtotal: $${subtotal.toFixed(2)}`;
+            document.getElementById('cart-discounts').textContent = `Volume Discounts: -$${volumeDiscounts.toFixed(2)}`;
+            document.getElementById('cart-bogo-discounts').textContent = `BOGO Discounts: -$${bogoDiscounts.toFixed(2)}`;
+            document.getElementById('cart-total').textContent = `Total: $${(subtotal - volumeDiscounts - bogoDiscounts).toFixed(2)}`;
         }
 
         function deleteItem(index) {
@@ -357,6 +440,9 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Debug logging for volume_discounts
+            console.log('Volume Discounts from Jinja:', {{ groups|tojson|safe }});
+            
             loadCart();
             calculateTierTotals(); // Call the function after loading the cart
         });
