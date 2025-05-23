@@ -196,7 +196,9 @@
                 return acc;
             }, {});
 
-            // Calculate discounts for each group
+            // Calculate discounts for each group. Keep in mind that the way you've organized this means
+            // you can't add new groups without editing the code. You can add items to the groups, but you're
+            // stuck with BOGO, B2GO, and B3GO.
             Object.entries(groupedItems).forEach(([group, items]) => {
                 const groupConfig = groups.find(g => g.group === group);
                 if (!groupConfig) return;
@@ -232,14 +234,10 @@
                 }
 
                 if (groupDiscount > 0) {
-                    console.log(`${group} group: ${discountType} discount of $${groupDiscount.toFixed(2)} (${sortedItems.length} items)`);
                     totalBOGODiscount += groupDiscount;
                 }
             });
 
-            if (totalBOGODiscount > 0) {
-                console.log(`Total discount: $${totalBOGODiscount.toFixed(2)}`);
-            }
             return totalBOGODiscount;
         }
 
@@ -249,8 +247,6 @@
             let total = 0;
             let subtotal = 0;
             let discounts = 0;
-
-            console.log('Loading cart with items:', cart);
 
             // Combine quantities of the same product
             const condensedCart = cart.reduce((acc, item) => {
@@ -440,9 +436,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Debug logging for volume_discounts
-            console.log('Volume Discounts from Jinja:', {{ groups|tojson|safe }});
-            
             loadCart();
             calculateTierTotals(); // Call the function after loading the cart
         });
