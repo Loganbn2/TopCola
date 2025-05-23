@@ -7,6 +7,7 @@ import time
 import requests
 import threading
 from product_data import get_product_info, get_product_ids_by_tag, get_flower_info, get_volume_discounts, get_groups
+from random import shuffle
 
 
 # CORS configuration
@@ -21,16 +22,37 @@ url="https://otnrvaybkwsvzxgwfhfc.supabase.co"
 key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90bnJ2YXlia3dzdnp4Z3dmaGZjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjcyNjAwMiwiZXhwIjoyMDYyMzAyMDAyfQ.yu6OmOqNGqkeBwq00tKvZGU0gNdTY3c9c7u4dSeaGBg"
 supabase: Client = create_client(url, key)
 
+# Register custom Jinja2 filter for shuffling
+@app.template_filter('shuffle')
+def shuffle_filter(seq):
+    shuffled = list(seq)
+    shuffle(shuffled)
+    return shuffled
+
 # product_list.html
-@app.route('/products-list', methods=['GET'])
-def render_products_list():
+@app.route('/products-list/<string:tag>', methods=['GET'])
+def render_products_list(tag):
     try:
-        tag = request.args.get('tag', 'sativa')  # Default to 'sativa' if no tag is provided
-        product_ids, error = get_product_ids_by_tag(supabase, tag)
-        return render_template('product_list.html', product_ids=product_ids, error=error, tag=tag)
+        product_ids, flower_ids, error = get_product_ids_by_tag(supabase, tag)
+
+        # Fetch product and flower details
+        product_details = [get_product_info(supabase, pid)[0] for pid in product_ids] if product_ids else []
+        flower_details = [get_flower_info(supabase, fid)[0] for fid in flower_ids] if flower_ids else []
+
+        return render_template('product_list.html', 
+                               product_ids=(product_ids, flower_ids), 
+                               product_details=product_details, 
+                               flower_details=flower_details, 
+                               error=error, 
+                               tag=tag)
     except Exception as e:
         logging.error(f"Error rendering products list: {e}")
-        return render_template('product_list.html', product_ids=[], error=f"An error occurred: {str(e)}", tag=None)
+        return render_template('product_list.html', 
+                               product_ids=[], 
+                               product_details=[], 
+                               flower_details=[], 
+                               error=f"An error occurred: {str(e)}", 
+                               tag=None)
 
 
 # product_page.html

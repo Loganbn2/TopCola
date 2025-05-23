@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product List</title>
     <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;700&display=swap');
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Albert Sans', sans-serif;
+        }
         .product-list-container {
             background-color: blue;
             color: white;
@@ -17,33 +26,88 @@
         .product-id {
             margin: 5px 0;
         }
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            justify-content: center;
+        }
+        .card {
+            border-radius: 8px;
+            padding: 16px;
+            width: 300px;
+            height: 400px;
+            text-align: left;
+        }
+        h1 {
+            font-size: 42px;
+            margin-bottom: 20px;
+        }
+        .card h3 {
+            margin: 0 0 10px;
+            font-weight: bold;
+        }
+        .card img {
+            width: 100%;
+            height: 200px;
+            border-radius: 15px;
+        }
+        .card button {
+            background-color: #fff;
+            color: black;
+            border: solid, 1px, black;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+        .card button:hover {
+            background-color: black;
+            color: white;
+            border: solid 1px black;
+        }
+        .card p {
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
-    <h1>Product List</h1>
-    
-    <!-- Form to input tag -->
-    <form method="get" action="/products-list">
-        <label for="tag">Enter Tag:</label>
-        <input type="text" id="tag" name="tag" value="{{ tag or '' }}">
-        <button type="submit">Search</button>
-    </form>
+    <h1>{{ tag.capitalize() }}</h1>
 
     <!-- Display error if any -->
     {% if error %}
         <p style="color: red;">{{ error }}</p>
     {% endif %}
 
-    <div class="product-list-container">
-        <h2>Product IDs</h2>
-        {% if product_ids %}
-            {% for product_id in product_ids %}
-                <div class="product-id">{{ product_id }}</div>
-            {% endfor %}
-        {% else %}
-            <p>{{ error or "No products found." }}</p>
-        {% endif %}
+    <div class="cards-container">
+        {% for flower in flower_details|shuffle %}
+            <div class="card">
+                <img class="img" src="https://otnrvaybkwsvzxgwfhfc.supabase.co/storage/v1/object/public/weighted-product-images/{{ flower.images[0] }}" alt="Primary Product Image">
+                <h3>{{ flower.product_name }}</h3>
+                <p>${{ '%.2f' |format(flower['price/g']) }}/g</p>
+                <button>Select Options</button>
+            </div>
+        {% endfor %}
+
+        {% for product in product_details|shuffle %}
+            <div class="card">
+                <img class="img" src="https://otnrvaybkwsvzxgwfhfc.supabase.co/storage/v1/object/public/product-images/{{ product.images[0] }}" alt="Primary Product Image">
+                <h3>{{ product.product_name }}</h3>
+                <p>${{ '%.2f'|format(product.price) }}</p>
+                <button>Add to Cart</button>
+            </div>
+        {% endfor %}
     </div>
+
+    <script>
+        console.log('Product IDs:', {{ product_ids | tojson }});
+        console.log('Product Details:', {{ product_details | tojson }});
+        console.log('Flower Details:', {{ flower_details | tojson }});
+    </script>
 </body>
 </html>
 

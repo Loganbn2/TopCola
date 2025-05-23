@@ -60,18 +60,30 @@ def get_product_ids_by_tag(supabase, tag):
     try:
         logging.info(f"Fetching product IDs with '{tag}' in tags from the 'Products' table...")
         response = supabase.table('products').select('id').filter('tags', 'cs', f'["{tag}"]').execute()
-        logging.info(f"Supabase response: {response}")
-        
+        logging.info(f"Supabase response for products: {response}")
+
+        product_ids = []
         if response.data:
             product_ids = [item['id'] for item in response.data]
             logging.info(f"Product IDs fetched: {product_ids}")
-            return product_ids, None
         else:
-            logging.warning(f"No products found with '{tag}' in tags.")
-            return [], "No products found"
+            logging.warning(f"No products found with '{tag}' in tags in the 'products' table.")
+
+        logging.info(f"Fetching product IDs with '{tag}' in tags from the 'weighted_products' table...")
+        flower_response = supabase.table('weighted_products').select('id').filter('tags', 'cs', f'["{tag}"]').execute()
+        logging.info(f"Supabase response for weighted_products: {flower_response}")
+
+        flower_ids = []
+        if flower_response.data:
+            flower_ids = [item['id'] for item in flower_response.data]
+            logging.info(f"Flower IDs fetched: {flower_ids}")
+        else:
+            logging.warning(f"No products found with '{tag}' in tags in the 'weighted_products' table.")
+
+        return product_ids, flower_ids, None
     except Exception as e:
         logging.error(f"Error fetching product IDs with '{tag}' in tags: {e}")
-        return None, f"An error occurred: {str(e)}"
+        return None, None, f"An error occurred: {str(e)}"
 
 def get_volume_discounts(supabase):
     try:
