@@ -344,7 +344,7 @@
 
             document.getElementById('cart-subtotal').textContent = `Subtotal: $${subtotal.toFixed(2)}`;
             document.getElementById('cart-discounts').textContent = `Volume Discounts: -$${discounts.toFixed(2)}`;
-            document.getElementById('cart-bogo-discounts').textContent = `BOGO Discounts: -$${bogoDiscounts.toFixed(2)}`;
+            document.getElementById('cart-bogo-discounts').textContent = `Buy X Get 1 Discounts: -$${bogoDiscounts.toFixed(2)}`;
             document.getElementById('cart-total').textContent = `Total: $${(subtotal - discounts - bogoDiscounts).toFixed(2)}`;
         }
 
@@ -467,6 +467,14 @@
             const totalDiscounts = Object.values(tierDiscounts).reduce((sum, discount) => sum + discount, 0);
             document.getElementById('cart-discounts').textContent = `Volume Discounts: -$${totalDiscounts.toFixed(2)}`;
 
+            // Hide or show the volume discounts line based on the total discounts
+            const volumeDiscountsElement = document.getElementById('cart-discounts');
+            if (totalDiscounts === 0) {
+                volumeDiscountsElement.style.display = 'none';
+            } else {
+                volumeDiscountsElement.style.display = 'block';
+            }
+
             // Update the total value
             const subtotal = parseFloat(document.getElementById('cart-subtotal').textContent.replace('Subtotal: $', '')) || 0;
             document.getElementById('cart-total').textContent = `Total: $${(subtotal - totalDiscounts).toFixed(2)}`;
@@ -493,7 +501,7 @@
                 Volume Discounts: $0.00
             </div>
             <div id="cart-bogo-discounts" class="discounts-total">
-                BOGO Discounts: $0.00
+                Buy X Get 1 Discounts: $0.00
             </div>
             <hr style="margin-top: 30px;"> <!-- Divider line between discounts and total -->
             <div id="cart-total" class="cart-total">
