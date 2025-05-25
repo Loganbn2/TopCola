@@ -36,7 +36,7 @@
             border-radius: 8px;
             padding: 16px;
             width: 300px;
-            height: 400px;
+            height: 350px;
             text-align: left;
         }
         h1 {
@@ -89,7 +89,7 @@
                 <img class="img" src="https://otnrvaybkwsvzxgwfhfc.supabase.co/storage/v1/object/public/weighted-product-images/{{ flower.images[0] }}" alt="Primary Product Image">
                 <h3>{{ flower.product_name }}</h3>
                 <p>${{ '%.2f' |format(flower['price/g']) }}/g</p>
-                <button>Select Options</button>
+                <button onclick="location.href='https://topcoladelivery.com/flower-details/{{ flower.id }}'">Select Options</button>
             </div>
         {% endfor %}
 
@@ -98,7 +98,7 @@
                 <img class="img" src="https://otnrvaybkwsvzxgwfhfc.supabase.co/storage/v1/object/public/product-images/{{ product.images[0] }}" alt="Primary Product Image">
                 <h3>{{ product.product_name }}</h3>
                 <p>${{ '%.2f'|format(product.price) }}</p>
-                <button>Add to Cart</button>
+                <button onclick="location.href='https://topcoladelivery.com/product-details/{{ product.id }}'">Select Options</button>
             </div>
         {% endfor %}
     </div>

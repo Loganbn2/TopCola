@@ -230,7 +230,7 @@
 
         function calculateBOGODiscounts() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const groups = {{ groups|tojson|safe }};
+            const groups = JSON.parse('{{ groups|tojson|safe }}');
             let totalBOGODiscount = 0;
 
             // Group items by their product group
@@ -386,7 +386,7 @@
             // Update all totals in the DOM
             document.getElementById('cart-subtotal').textContent = `Subtotal: $${subtotal.toFixed(2)}`;
             document.getElementById('cart-discounts').textContent = `Volume Discounts: -$${volumeDiscounts.toFixed(2)}`;
-            document.getElementById('cart-bogo-discounts').textContent = `BOGO Discounts: -$${bogoDiscounts.toFixed(2)}`;
+            document.getElementById('cart-bogo-discounts').textContent = `Buy X Get 1 Discounts: -$${bogoDiscounts.toFixed(2)}`;
             document.getElementById('cart-total').textContent = `Total: $${(subtotal - volumeDiscounts - bogoDiscounts).toFixed(2)}`;
 
             // Recalculate and render tier totals and discounts
@@ -467,17 +467,10 @@
             const totalDiscounts = Object.values(tierDiscounts).reduce((sum, discount) => sum + discount, 0);
             document.getElementById('cart-discounts').textContent = `Volume Discounts: -$${totalDiscounts.toFixed(2)}`;
 
-            // Hide or show the volume discounts line based on the total discounts
-            const volumeDiscountsElement = document.getElementById('cart-discounts');
-            if (totalDiscounts === 0) {
-                volumeDiscountsElement.style.display = 'none';
-            } else {
-                volumeDiscountsElement.style.display = 'block';
-            }
-
             // Update the total value
             const subtotal = parseFloat(document.getElementById('cart-subtotal').textContent.replace('Subtotal: $', '')) || 0;
             document.getElementById('cart-total').textContent = `Total: $${(subtotal - totalDiscounts).toFixed(2)}`;
+
         }
 
         document.addEventListener('DOMContentLoaded', () => {
