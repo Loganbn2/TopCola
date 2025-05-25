@@ -218,6 +218,25 @@
             border-radius: 5px;
             font-size: 16px;
         }
+
+        .promo-code {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .promo-code input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 40%; /* Shrink the input field to 40% width */
+        }
+
+        .promo-code label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
     </style>
     <script>
         function togglePopup() {
@@ -473,9 +492,43 @@
             document.getElementById('cart-total').textContent = `Total: $${(subtotal - totalDiscounts - bogoDiscounts).toFixed(2)}`;
         }
 
+        function applyPromoCode() {
+            const promoCodeInput = document.getElementById('promo-code').value.trim();
+            const promoCodes = JSON.parse('{{ promo_codes|tojson|safe }}');
+            const cartTotalElement = document.getElementById('cart-total');
+            const subtotal = parseFloat(document.getElementById('cart-subtotal').textContent.replace('Subtotal: $', '')) || 0;
+
+            const promoCode = promoCodes.find(code => code.code === promoCodeInput);
+
+            if (promoCode) {
+                const dollarsOff = promoCode.dollars_off || 0;
+                const percentOff = promoCode.percent_off || 0;
+
+                const existingDiscounts = parseFloat(document.getElementById('cart-discounts').textContent.replace('Volume Discounts: -$', '')) || 0;
+                const bogoDiscounts = parseFloat(document.getElementById('cart-bogo-discounts').textContent.replace('Buy X Get 1 Discounts: -$', '')) || 0;
+
+                const adjustedSubtotal = subtotal - existingDiscounts - bogoDiscounts;
+                const percentDiscount = (adjustedSubtotal * percentOff) / 100;
+                const totalDiscount = dollarsOff + percentDiscount;
+
+                const promoDiscountElement = document.getElementById('cart-promo-discounts');
+                promoDiscountElement.textContent = `Promo Code (${promoCode.code}): -$${totalDiscount.toFixed(2)}`;
+                promoDiscountElement.style.display = totalDiscount > 0 ? 'block' : 'none';
+
+                cartTotalElement.textContent = `Total: $${(adjustedSubtotal - totalDiscount).toFixed(2)}`;
+            } else {
+                alert('Invalid promo code. Please try again.');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             loadCart();
             calculateTierTotals(); // Call the function after loading the cart
+
+            const promoCodeInput = document.getElementById('promo-code');
+            if (promoCodeInput) {
+                promoCodeInput.addEventListener('change', applyPromoCode);
+            }
         });
     </script>
 </head>
@@ -495,6 +548,13 @@
             </div>
             <div id="cart-bogo-discounts" class="discounts-total">
                 Buy X Get 1 Discounts: $0.00
+            </div>
+            <div id="cart-promo-code" class="promo-code">
+                <label for="promo-code">Promo Code:</label>
+                <input type="text" id="promo-code" placeholder="Enter promo code">
+            </div>
+            <div id="cart-promo-discounts" class="discounts-total" style="display:none;">
+                Promo Code Discount: -$0.00
             </div>
             <hr style="margin-top: 30px;"> <!-- Divider line between discounts and total -->
             <div id="cart-total" class="cart-total">
@@ -519,7 +579,7 @@
                     <option value="zelle">Zelle</option>
                 </select>
                 <label style="font-weight: bold; padding-top: 20px;" for="delivery-time">Desired Delivery Time:</label>
-                <label for="delivery-time">(We strive to be within 30 minutes of selected time)</label>
+                <label for="delivery-time">(We try our best to be within 30 minutes of selected time)</label>
                 <input type="datetime-local" id="delivery-time" name="delivery-time" required>
                 <button type="submit">Place Order</button>
             </form>

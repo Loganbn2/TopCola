@@ -6,7 +6,7 @@ from flask_cors import CORS
 import time
 import requests
 import threading
-from product_data import get_product_info, get_product_ids_by_tag, get_flower_info, get_volume_discounts, get_groups
+from product_data import get_product_info, get_product_ids_by_tag, get_flower_info, get_volume_discounts, get_groups, get_promo_codes
 from random import shuffle
 
 
@@ -82,10 +82,11 @@ def render_cart():
         cart_data = []
         volume_discounts, error = get_volume_discounts(supabase)
         groups, error = get_groups(supabase)
-        return render_template('cart.html', cart=cart_data, volume_discounts=volume_discounts, groups=groups, error=error)
+        promo_codes, error = get_promo_codes(supabase)
+        return render_template('cart.html', cart=cart_data, volume_discounts=volume_discounts, groups=groups, promo_codes=promo_codes, error=error)
     except Exception as e:
         logging.error(f"Error rendering cart: {e}")
-        return render_template('cart.html', cart=[], groups=[], volume_discounts=[], error=f"An error occurred: {str(e)}")
+        return render_template('cart.html', cart=[], groups=[], volume_discounts=[], promo_codes=[], error=f"An error occurred: {str(e)}")
 
 # run
 if __name__ == "__main__":

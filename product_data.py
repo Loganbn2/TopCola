@@ -135,3 +135,27 @@ def get_groups(supabase):
     except Exception as e:
         logging.error(f"Error fetching data from the 'groups' table: {e}")
         return None, f"An error occurred: {str(e)}"
+
+def get_promo_codes(supabase):
+    try:
+        logging.info("Fetching all data from the 'promo_codes' table...")
+        response = supabase.table('promo_codes').select('code, dollars_off, percent_off').execute()
+        logging.info(f"Supabase response: {response}")
+
+        if response.data:
+            promo_codes = [
+                {
+                    "code": item.get("code"),
+                    "dollars_off": item.get("dollars_off"),
+                    "percent_off": item.get("percent_off")
+                }
+                for item in response.data
+            ]
+            logging.info(f"Promo codes data fetched: {promo_codes}")
+            return promo_codes, None
+        else:
+            logging.warning("No data found in the 'promo_codes' table.")
+            return [], "No data found"
+    except Exception as e:
+        logging.error(f"Error fetching data from the 'promo_codes' table: {e}")
+        return None, f"An error occurred: {str(e)}"
