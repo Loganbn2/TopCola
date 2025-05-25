@@ -88,6 +88,60 @@ def render_cart():
         logging.error(f"Error rendering cart: {e}")
         return render_template('cart.html', cart=[], groups=[], volume_discounts=[], promo_codes=[], error=f"An error occurred: {str(e)}")
 
+@app.route('/api/place-order', methods=['POST'])
+def place_order():
+    try:
+        # Parse request data
+        data = request.json
+        product_line_items = data.get('productLineItems', [])
+        flower_line_items = data.get('flowerLineItems', [])
+        volume_discount = data.get('volumeDiscount', 0)
+        buy_x_get_1_discount = data.get('buyXGet1Discount', 0)
+        promo_code_discount = data.get('promoCodeDiscount', 0)
+        total = data.get('total', 0)
+        customer_name = data.get('customerName', '')
+        customer_email = data.get('customerEmail', '')
+        customer_phone = data.get('customerPhone', '')
+        customer_address = data.get('customerAddress', '')
+        customer_city = data.get('customerCity', '')
+        customer_state = data.get('customerState', '')
+        customer_zip = data.get('customerZip', '')
+        payment_method = data.get('paymentMethod', '')
+        delivery_time = data.get('deliveryTime', '')
+
+        # Prepare order data
+        order_data = {
+            "product_line_items": product_line_items,
+            "flower_line_items": flower_line_items,
+            "volume_discount": volume_discount,
+            "buy_x_get_1_discount": buy_x_get_1_discount,
+            "promo_code_discount": promo_code_discount,
+            "total": total,
+            "customer_name": customer_name,
+            "customer_email": customer_email,
+            "customer_phone": customer_phone,
+            "customer_address": customer_address,
+            "customer_city": customer_city,
+            "customer_state": customer_state,
+            "customer_zip": customer_zip,
+            "payment_method": payment_method,
+            "delivery_time": delivery_time,
+            "created_at": time.strftime('%Y-%m-%d %H:%M:%S')
+        }
+
+        # Insert order into Supabase 'orders' table
+        response = supabase.table('orders').insert(order_data).execute()
+
+        if response.get('status_code') == 201:
+            return jsonify({"message": "Order placed successfully", "order_id": response.get('data')[0].get('id')}), 201
+        else:
+            logging.error(f"Error placing order: {response.get('error')}")
+            return jsonify({"error": "Failed to place order"}), 500
+
+    except Exception as e:
+        logging.error(f"Error in place_order endpoint: {e}")
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
 # run
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5001)
