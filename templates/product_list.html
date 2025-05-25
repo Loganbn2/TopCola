@@ -97,7 +97,7 @@
             <div class="card">
                 <img class="img" src="https://otnrvaybkwsvzxgwfhfc.supabase.co/storage/v1/object/public/product-images/{{ product.images[0] }}" alt="Primary Product Image">
                 <h3>{{ product.product_name }}</h3>
-                <p>${{ '%.2f'|format(product.price) }}</p>
+                <p><span style="text-decoration: line-through; color: rgb(93, 93, 93);">${{ '%.2f'|format(product.original_price) }}</span>  ${{ '%.2f'|format(product.price) }} </p>
                 <button onclick="location.href='https://topcoladelivery.com/product-details/{{ product.id }}'">Select Options</button>
             </div>
         {% endfor %}

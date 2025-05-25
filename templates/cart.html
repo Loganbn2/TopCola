@@ -469,8 +469,8 @@
 
             // Update the total value
             const subtotal = parseFloat(document.getElementById('cart-subtotal').textContent.replace('Subtotal: $', '')) || 0;
-            document.getElementById('cart-total').textContent = `Total: $${(subtotal - totalDiscounts).toFixed(2)}`;
-
+            const bogoDiscounts = parseFloat(document.getElementById('cart-bogo-discounts').textContent.replace('Buy X Get 1 Discounts: -$', '')) || 0;
+            document.getElementById('cart-total').textContent = `Total: $${(subtotal - totalDiscounts - bogoDiscounts).toFixed(2)}`;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
