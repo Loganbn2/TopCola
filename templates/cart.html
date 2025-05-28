@@ -522,6 +522,36 @@
             }
         }
 
+        function submitOrder() {
+            const fullName = document.getElementById('name-input').value.trim();
+            if (!fullName) {
+                alert('Please enter your name.');
+                return;
+            }
+
+            fetch('/api/place-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ fullName })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                } else if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert('Failed to place order. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while placing the order.');
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             loadCart();
             calculateTierTotals(); // Call the function after loading the cart
@@ -564,8 +594,8 @@
         </div>
         <div class="form-column">
             <h2>Place Your Order</h2>
-            <form>
-                <input type="text" placeholder="Name" required>
+            <form id="order-form">
+                <input type="text" id="name-input" placeholder="Name" required>
                 <input type="email" placeholder="Email" required>
                 <input type="tel" placeholder="Phone" required>
                 <input type="text" placeholder="Address" required>
@@ -582,7 +612,7 @@
                 <label style="font-weight: bold; padding-top: 20px;" for="delivery-time">Desired Delivery Time:</label>
                 <label for="delivery-time">(We try our best to be within 30 minutes of selected time)</label>
                 <input type="datetime-local" id="delivery-time" name="delivery-time" required>
-                <button type="submit">Place Order</button>
+                <button type="button" onclick="submitOrder()">Place Order</button>
             </form>
         </div>
     </div>
