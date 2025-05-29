@@ -15,8 +15,13 @@
             display: flex;
             justify-content: space-between; /* Create space between cart and form */
         }
-        .cart-column, .form-column {
-            width: 48%; /* Adjust width to fit side by side */
+        .cart-column {
+            width: 60%; /* Adjust width to fit side by side */
+            padding-left: 30px;
+        }
+        
+        .form-column {
+            width: 36%; /* Adjust width to fit side by side */
             padding-left: 30px;
         }
         .cart-item {
@@ -116,18 +121,18 @@
             color: black; /* Product line item text color */
         }
         .cart-item span {
-            width: 200px; /* Fixed width for product name container */
-            display: inline-block; /* Ensure the width is applied */
-            overflow: hidden; /* Hide overflow text */
-            text-overflow: ellipsis; /* Add ellipsis for overflow text */
-            white-space: nowrap; /* Prevent text wrapping */
+            width: auto; /* Remove fixed width */
+            display: block; /* Allow to fill available width */
+            overflow: visible; /* Show all text */
+            text-overflow: unset; /* Remove ellipsis */
+            white-space: normal; /* Allow wrapping */
+            word-break: break-word; /* Break long words if needed */
+            text-align: left;
         }
         .product-name-container {
             width: 300px; /* Fixed width for product name container */
             display: inline-block; /* Ensure the width is applied */
-            overflow: hidden; /* Hide overflow text */
-            text-overflow: ellipsis; /* Add ellipsis for overflow text */
-            white-space: nowrap; /* Prevent text wrapping */
+            text-overflow: wrap;
         }
 
         .quantity-container {
@@ -209,15 +214,15 @@
 
         form .city-state-container {
             display: flex;
+            width: 100%; /* Allow to shrink/grow with parent */
+            padding-right: 0; /* Remove fixed padding for better responsiveness */
             gap: 10px;
+            min-width: 0; /* Allow flex children to shrink */
         }
 
         form .city-state-container input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
+            flex: 1 1 0%; /* Allow both inputs to shrink and grow equally */
+            min-width: 0; /* Prevent overflow */
         }
 
         .promo-code {
@@ -341,20 +346,19 @@
                 const lineItem = document.createElement('div');
                 lineItem.className = `cart-item ${item.type === 'flower_line_item' ? 'flower-line-item' : 'product-line-item'}`;
                 lineItem.id = `cart-item-${index}`;
-                lineItem.innerHTML = `
-                    <span class="product-name-container">
-                        ${item.productName}
-                    </span>
-                    <div>
-                        <button onclick="updateQuantity(${index}, -1)" class="quantity-button">-</button>
-                        <span id="quantity-${index}" class="quantity-container">${item.quantity}${item.type === 'flower_line_item' ? 'g' : ''}</span>
-                        <button onclick="updateQuantity(${index}, 1)" class="quantity-button">+</button>
-                    </div>
-                    <span id="total-${index}" class="total-container">${item.total}</span>
-                    <div class="delete-button-container">
-                        <button onclick="deleteItem(${index})" class="delete-button">&times;</button>
-                    </div>
-                `;
+                // Inline product name and option, no line breaks
+                const optionText = item.option ? ` <span style='font-style:italic;'>${item.option}</span>` : '';
+                lineItem.innerHTML =
+                    `<span class="product-name-container" style="display:inline; white-space:normal;">${item.productName}${optionText}</span>` +
+                    `<div>` +
+                        `<button onclick="updateQuantity(${index}, -1)" class="quantity-button">-</button>` +
+                        `<span id="quantity-${index}" class="quantity-container">${item.quantity}${item.type === 'flower_line_item' ? 'g' : ''}</span>` +
+                        `<button onclick="updateQuantity(${index}, 1)" class="quantity-button">+</button>` +
+                    `</div>` +
+                    `<span id="total-${index}" class="total-container">${item.total}</span>` +
+                    `<div class="delete-button-container">` +
+                        `<button onclick="deleteItem(${index})" class="delete-button">&times;</button>` +
+                    `</div>`;
                 cartContainer.appendChild(lineItem);
                 subtotal += parseFloat(item.total.replace('$', '')) || 0;
             });
@@ -626,7 +630,8 @@
                         productID: item.productID,
                         productName: item.productName,
                         total: item.total,
-                        quantity: item.quantity
+                        quantity: item.quantity,
+                        option: item.option // Add option to productItems
                     });
                 }
             });

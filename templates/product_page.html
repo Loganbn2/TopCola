@@ -156,19 +156,24 @@
             const quantity = document.getElementById('quantity-dropdown').value;
             const total = document.getElementById('total').textContent;
             const productGroup = "{{ product.group }}";
+            let selectedOption = null;
+            const optionsDropdown = document.getElementById('options-dropdown');
+            if (optionsDropdown) {
+                selectedOption = optionsDropdown.value;
+            }
 
             // Retrieve existing cart items from local storage
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-            // Add new line item to the cart
-            cart.push({ productName, productID, quantity, total, productGroup });
+            // Add new line item to the cart, including selectedOption if present
+            cart.push({ productName, productID, quantity, total, productGroup, option: selectedOption });
 
             // Save updated cart back to local storage
             localStorage.setItem('cart', JSON.stringify(cart));
 
             console.log('Updated Cart:', cart); // Log the updated cart for debugging
 
-            alert('Item added to cart: ' + productName + ' (ID: ' + productID + ', Group: ' + productGroup + ', Quantity: ' + quantity + ', Total: ' + total + ')');
+            alert('Item added to cart: ' + productName + ' (ID: ' + productID + ', Group: ' + productGroup + ', Quantity: ' + quantity + ', Total: ' + total + (selectedOption ? ', Option: ' + selectedOption : '') + ')');
         }
     </script>
 </head>
@@ -197,6 +202,19 @@
                     <span>${{ "%.2f"|format(product.price) }}</span>
                 </div>
                 <div class="product-description">{{ product.description }}</div>
+
+                {# Options Dropdown #}
+                {% if product.options and product.options|length > 0 %}
+                    <div style="margin-bottom: 10px;">
+                        <label for="options-dropdown" style="font-size: 16px; font-weight: 500; margin-right: 10px;">Options:</label>
+                        <select id="options-dropdown" class="quantity-dropdown" style="margin-top: 0;">
+                            {% for option in product.options %}
+                                <option value="{{ option }}">{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+
                 <div>
                     <select class="quantity-dropdown" id="quantity-dropdown" onchange="updateSubtotal()">
                         {% for i in range(1, 11) %}
