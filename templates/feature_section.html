@@ -1,0 +1,106 @@
+<!-- filepath: /Users/loganbn2/TopCola/TopCola/templates/feature_section.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Featured Products</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;700&display=swap');
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Albert Sans', sans-serif;
+            height: 370px;
+        }
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(220px, 1fr));
+            gap: 20px;
+            justify-content: center;
+        }
+        .card {
+            border-radius: 15px;
+            padding: 16px;
+            width: 100%;
+            max-width: 250px;
+            min-width: 0;
+            height: 350px;
+            text-align: left;
+            border: solid 1px black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        .card h3 {
+            margin: 0 0 10px;
+            font-weight: bold;
+        }
+        .card img {
+            width: 100%;
+            height: 200px;
+            border-radius: 15px;
+        }
+        .card button {
+            background-color: #fff;
+            color: black;
+            border: solid, 1px, black;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 10px;
+            width: 80%;
+        }
+        .card button:hover {
+            background-color: black;
+            color: white;
+            border: solid 1px black;
+        }
+        .card p {
+            margin: 5px 0;
+        }
+        @media (max-width: 1300px) {
+            .cards-container {
+                grid-template-columns: repeat(2, minmax(220px, 1fr));
+            }
+        }
+        @media (max-width: 700px) {
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+            .card {
+                max-width: 95vw;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% if product_error or flower_error %}
+        <p style="color: red;">{{ product_error }} {{ flower_error }}</p>
+    {% endif %}
+    <div class="cards-container">
+        {% for item in featured_items %}
+            <div class="card">
+                {% if item.type == 'flower' %}
+                    <img class="img" src="https://otnrvaybkwsvzxgwfhfc.supabase.co/storage/v1/object/public/weighted-product-images/{{ item.images[0] }}" alt="Primary Product Image">
+                    <h3>{{ item.product_name }}</h3>
+                    <p>${{ '%.2f' |format(item['price/g']) }}/g</p>
+                    <button onclick="location.href='https://topcoladelivery.com/flower-details/{{ item.id }}'">Select Options</button>
+                {% else %}
+                    <img class="img" src="https://otnrvaybkwsvzxgwfhfc.supabase.co/storage/v1/object/public/product-images/{{ item.images[0] }}" alt="Primary Product Image">
+                    <h3>{{ item.product_name }}</h3>
+                    <p><span style="text-decoration: line-through; color: rgb(93, 93, 93);">${{ '%.2f'|format(item.original_price) }}</span>  ${{ '%.2f'|format(item.price) }} </p>
+                    <button onclick="location.href='https://topcoladelivery.com/product-details/{{ item.id }}'">Select Options</button>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

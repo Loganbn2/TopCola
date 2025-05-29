@@ -88,6 +88,7 @@ def render_cart():
         logging.error(f"Error rendering cart: {e}")
         return render_template('cart.html', cart=[], groups=[], volume_discounts=[], promo_codes=[], error=f"An error occurred: {str(e)}")
 
+# place order
 @app.route('/api/place-order', methods=['POST'])
 def place_order():
     try:
@@ -140,6 +141,48 @@ def place_order():
     except Exception as e:
         logging.error(f"Error in place_order endpoint: {e}")
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+# feature_section.html
+@app.route('/feature-section/<string:slug>', methods=['GET'])
+def render_feature_section(slug):
+    try:
+        # Parse the slug into a list of (type, id) tuples
+        featured_items = []
+        i = 0
+        while i < len(slug):
+            item_type = slug[i]
+            i += 1
+            id_str = ''
+            while i < len(slug) and slug[i].isdigit():
+                id_str += slug[i]
+                i += 1
+            if not id_str:
+                continue
+            item_id = int(id_str)
+            if item_type == 'f':
+                flower_info, flower_error = get_flower_info(supabase, item_id)
+                if flower_info:
+                    flower_info['type'] = 'flower'
+                    featured_items.append(flower_info)
+            elif item_type == 'p':
+                product_info, product_error = get_product_info(supabase, item_id)
+                if product_info:
+                    product_info['type'] = 'product'
+                    featured_items.append(product_info)
+        return render_template(
+            'feature_section.html',
+            featured_items=featured_items,
+            product_error=None,
+            flower_error=None
+        )
+    except Exception as e:
+        logging.error(f"Error rendering feature section: {e}")
+        return render_template(
+            'feature_section.html',
+            featured_items=[],
+            product_error=f"An error occurred: {str(e)}",
+            flower_error=f"An error occurred: {str(e)}"
+        )
 
 # run
 if __name__ == "__main__":
