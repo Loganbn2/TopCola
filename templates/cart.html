@@ -326,9 +326,14 @@
             let subtotal = 0;
             let discounts = 0;
 
-            // Combine quantities of the same product
+            // Combine quantities of the same product, but keep separate if 'option' differs
             const condensedCart = cart.reduce((acc, item) => {
-                const existingItem = acc.find(i => i.productName === item.productName && i.type === item.type);
+                // Find an existing item with the same productName, type, AND option (or both undefined)
+                const existingItem = acc.find(i => 
+                    i.productName === item.productName && 
+                    i.type === item.type && 
+                    ((i.option === undefined && item.option === undefined) || i.option === item.option)
+                );
                 const itemQuantity = parseInt(item.quantity, 10) || 0;
                 const itemTotal = parseFloat(item.total.replace('$', '')) || 0;
                 if (existingItem) {
