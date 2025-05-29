@@ -551,6 +551,9 @@
             const promoDiscounts = parseFloat(document.getElementById('cart-promo-discounts').textContent.replace(/Promo Code.*: -\$/, '')) || 0;
             const deliveryTime = document.getElementById('delivery-time').value;
 
+            // Get flowerItems and productItems arrays
+            const { flowerItems, productItems } = getCartItemsByType();
+
             if (!fullName || !email || !phone || !address || !city || !state || !zip || !deliveryTime) {
                 alert('Please fill out all required fields.');
                 return;
@@ -573,7 +576,9 @@
                     volumeDiscounts, 
                     bxgoDiscounts, 
                     promoDiscounts, 
-                    deliveryTime 
+                    deliveryTime,
+                    flowerItems, // Pass flowerItems array
+                    productItems // Pass productItems array
                 })
             })
             .then(response => response.json())
@@ -611,19 +616,17 @@
             cart.forEach(item => {
                 if (item.type === 'flower_line_item') {
                     flowerItems.push({
+                        productID: item.productID,
                         productName: item.productName,
-                        productID: item.productID, // Include productID
-                        quantity: item.quantity,
                         total: item.total,
-                        type: item.type
+                        quantity: item.quantity
                     });
                 } else {
                     productItems.push({
+                        productID: item.productID,
                         productName: item.productName,
-                        productID: item.productID, // Include productID
-                        quantity: item.quantity,
                         total: item.total,
-                        type: item.type
+                        quantity: item.quantity
                     });
                 }
             });

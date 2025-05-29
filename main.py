@@ -105,6 +105,8 @@ def place_order():
         bxgo_discounts = data.get('bxgoDiscounts', 0.0)
         promo_discounts = data.get('promoDiscounts', 0.0)
         delivery_time = data.get('deliveryTime', '')
+        flower_items = data.get('flowerItems', [])  # Get flowerItems array
+        product_items = data.get('productItems', [])  # Get productItems array
 
         # Prepare order data
         order_data = {
@@ -120,6 +122,8 @@ def place_order():
             "BXGO_discounts": bxgo_discounts,
             "promo_discounts": promo_discounts,
             "delivery_time": delivery_time,
+            "flower": flower_items,  # Store flowerItems in 'flower' column
+            "items": product_items,  # Store productItems in 'items' column
             "created_at": time.strftime('%Y-%m-%d %H:%M:%S')
         }
 
