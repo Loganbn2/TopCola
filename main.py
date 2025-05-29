@@ -93,16 +93,38 @@ def place_order():
     try:
         # Parse request data
         data = request.json
-        full_name = data.get('fullName', '')  # Only full_name is handled
+        full_name = data.get('fullName', '')
+        email = data.get('email', '')
+        phone = data.get('phone', '')
+        address = data.get('address', '')
+        city = data.get('city', '')
+        state = data.get('state', '')
+        zip_code = data.get('zip', '')
+        total = data.get('total', 0.0)
+        volume_discounts = data.get('volumeDiscounts', 0.0)
+        bxgo_discounts = data.get('bxgoDiscounts', 0.0)
+        promo_discounts = data.get('promoDiscounts', 0.0)
+        delivery_time = data.get('deliveryTime', '')
 
         # Prepare order data
         order_data = {
-            "full_name": full_name,  # Include only full_name
+            "full_name": full_name,
+            "email": email,
+            "phone": phone,
+            "address": address,
+            "city": city,
+            "state": state,
+            "zip": zip_code,
+            "total": total,
+            "volume_discounts": volume_discounts,
+            "BXGO_discounts": bxgo_discounts,
+            "promo_discounts": promo_discounts,
+            "delivery_time": delivery_time,
             "created_at": time.strftime('%Y-%m-%d %H:%M:%S')
         }
 
         # Insert order into Supabase 'orders' table
-        response = supabase.table('test_orders').insert(order_data).execute()
+        response = supabase.table('orders').insert(order_data).execute()
 
         # Check if the response contains the inserted data
         if response.data and len(response.data) > 0:

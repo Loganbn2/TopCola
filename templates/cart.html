@@ -524,8 +524,20 @@
 
         function submitOrder() {
             const fullName = document.getElementById('name-input').value.trim();
-            if (!fullName) {
-                alert('Please enter your name.');
+            const email = document.getElementById('email-input').value.trim();
+            const phone = document.getElementById('phone-input').value.trim();
+            const address = document.getElementById('address-input').value.trim();
+            const city = document.getElementById('city-input').value.trim();
+            const state = document.getElementById('state-input').value.trim();
+            const zip = document.getElementById('zip-input').value.trim();
+            const total = parseFloat(document.getElementById('cart-total').textContent.replace('Total: $', ''));
+            const volumeDiscounts = parseFloat(document.getElementById('cart-discounts').textContent.replace('Volume Discounts: -$', '')) || 0;
+            const bxgoDiscounts = parseFloat(document.getElementById('cart-bogo-discounts').textContent.replace('Buy X Get 1 Discounts: -$', '')) || 0;
+            const promoDiscounts = parseFloat(document.getElementById('cart-promo-discounts').textContent.replace(/Promo Code.*: -\$/, '')) || 0;
+            const deliveryTime = document.getElementById('delivery-time').value;
+
+            if (!fullName || !email || !phone || !address || !city || !state || !zip || !deliveryTime) {
+                alert('Please fill out all required fields.');
                 return;
             }
 
@@ -534,7 +546,20 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ fullName })
+                body: JSON.stringify({ 
+                    fullName, 
+                    email, 
+                    phone, 
+                    address, 
+                    city, 
+                    state, 
+                    zip, 
+                    total, 
+                    volumeDiscounts, 
+                    bxgoDiscounts, 
+                    promoDiscounts, 
+                    deliveryTime 
+                })
             })
             .then(response => response.json())
             .then(data => {
@@ -596,14 +621,14 @@
             <h2>Place Your Order</h2>
             <form id="order-form">
                 <input type="text" id="name-input" placeholder="Name" required>
-                <input type="email" placeholder="Email" required>
-                <input type="tel" placeholder="Phone" required>
-                <input type="text" placeholder="Address" required>
+                <input type="email" id="email-input" placeholder="Email" required>
+                <input type="tel" id="phone-input" placeholder="Phone" required>
+                <input type="text" id="address-input" placeholder="Address" required>
                 <div class="city-state-container">
-                    <input type="text" placeholder="City" required>
-                    <input type="text" placeholder="State" required>
+                    <input type="text" id="city-input" placeholder="City" required>
+                    <input type="text" id="state-input" placeholder="State" required>
                 </div>
-                <input type="text" placeholder="ZIP" required>
+                <input type="text" id="zip-input" placeholder="ZIP" required>
                 <label style="font-weight: bold; padding-top: 20px;" for="payment-method">Payment Method:</label>
                 <select id="payment-method" name="payment-method" required>
                     <option value="cash">Cash</option>
