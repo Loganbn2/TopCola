@@ -152,20 +152,23 @@
         }
         function addToCart() {
             const productName = "{{ product.product_name }}";
+            const productID = "{{ product.id }}"; // Ensure productID is defined
             const quantity = document.getElementById('quantity-dropdown').value;
             const total = document.getElementById('total').textContent;
             const productGroup = "{{ product.group }}";
 
             // Retrieve existing cart items from local storage
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            
+
             // Add new line item to the cart
-            cart.push({ productName, quantity, total, productGroup });
-            
+            cart.push({ productName, productID, quantity, total, productGroup });
+
             // Save updated cart back to local storage
             localStorage.setItem('cart', JSON.stringify(cart));
-            
-            alert('Item added to cart: ' + productName + productGroup + ' (Quantity: ' + quantity + ', Total: ' + total + ')');
+
+            console.log('Updated Cart:', cart); // Log the updated cart for debugging
+
+            alert('Item added to cart: ' + productName + ' (ID: ' + productID + ', Group: ' + productGroup + ', Quantity: ' + quantity + ', Total: ' + total + ')');
         }
     </script>
 </head>

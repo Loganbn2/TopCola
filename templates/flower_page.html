@@ -151,35 +151,31 @@
         }
 
         function updateSubtotal() {
-            {% if product and 'price/g' in product and 'price_tier' in product and product.volume_discounts %}
             const quantity = parseInt(document.querySelector('.quantity-dropdown').value);
-            const pricePerGram = {{ "%.2f"|format(product['price/g']) }};
-            const subtotal = (quantity * pricePerGram).toFixed(2);
+            const pricePerGram = parseFloat("{{ product['price/g'] }}");
+            let subtotal = quantity * pricePerGram;
 
-            // Dynamically calculate discount based on quantity
-            let discount = 0.00;
+            let discount = 0;
             if (quantity === 4) {
-                discount = {{ product.volume_discounts['4g_discount'] }};
+                discount = parseFloat("{{ product.volume_discounts['4g_discount'] }}");
             } else if (quantity === 7) {
-                discount = {{ product.volume_discounts['7g_discount'] }};
+                discount = parseFloat("{{ product.volume_discounts['7g_discount'] }}");
             } else if (quantity === 14) {
-                discount = {{ product.volume_discounts['14g_discount'] }};
+                discount = parseFloat("{{ product.volume_discounts['14g_discount'] }}");
             } else if (quantity === 28) {
-                discount = {{ product.volume_discounts['28g_discount'] }};
+                discount = parseFloat("{{ product.volume_discounts['28g_discount'] }}");
             }
 
-            const total = (subtotal - discount).toFixed(2);
+            const total = subtotal - discount;
 
-            document.getElementById('subtotal').textContent = `$${subtotal}`;
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
             document.getElementById('discount').textContent = `-$${discount.toFixed(2)}`;
-            document.getElementById('total').textContent = `$${total}`;
-            {% else %}
-            console.error("Product data or volume discounts are missing or incomplete.");
-            {% endif %}
+            document.getElementById('total').textContent = `$${total.toFixed(2)}`;
         }
 
         function addToCart() {
             const productName = "{{ product.product_name }}";
+            const productID = "{{ product.id }}"; // Ensure productID is defined
             const quantity = document.querySelector('.quantity-dropdown').value;
             const pricePerGram = {{ "%.2f"|format(product['price/g']) }};
             const total = (quantity * pricePerGram).toFixed(2); // Calculate total directly as price/g * quantity
@@ -189,12 +185,12 @@
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
             // Add new flower line item to the cart
-            cart.push({ productName, quantity, total, type: 'flower_line_item', productTier }); // Include productTier
+            cart.push({ productName, productID, quantity, total, type: 'flower_line_item', productTier }); // Include productID and productTier
 
             // Save updated cart back to local storage
             localStorage.setItem('cart', JSON.stringify(cart));
 
-            alert('Item added to cart: ' + productName + ' (Quantity: ' + quantity + ', Tier: ' + productTier + ', Total: $' + total + ')');
+            alert('Item added to cart: ' + productName + ' (ID: ' + productID + ', Quantity: ' + quantity + ', Tier: ' + productTier + ', Total: $' + total + ')');
         }
 
         function loadCart() {

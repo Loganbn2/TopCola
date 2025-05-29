@@ -493,6 +493,21 @@
             document.getElementById('cart-total').textContent = `Total: $${(subtotal - totalDiscounts - bogoDiscounts).toFixed(2)}`;
         }
 
+        function getAllCartItems() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+            cart.forEach(item => {
+                console.log(`Product Name: ${item.productName}, Product ID: ${item.productID}, Quantity: ${item.quantity}, Type: ${item.type}`);
+            });
+
+            console.log('All Cart Items:', cart); // Log all cart items
+
+            return cart; // Returns all cart items
+        }
+
+        // Example usage
+        const allCartItems = getAllCartItems();
+
         function applyPromoCode() {
             const promoCodeInput = document.getElementById('promo-code').value.trim();
             const promoCodes = JSON.parse('{{ promo_codes|tojson|safe }}');
@@ -586,6 +601,41 @@
                 promoCodeInput.addEventListener('change', applyPromoCode);
             }
         });
+
+        function getCartItemsByType() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+            const flowerItems = [];
+            const productItems = [];
+
+            cart.forEach(item => {
+                if (item.type === 'flower_line_item') {
+                    flowerItems.push({
+                        productName: item.productName,
+                        productID: item.productID, // Include productID
+                        quantity: item.quantity,
+                        total: item.total,
+                        type: item.type
+                    });
+                } else {
+                    productItems.push({
+                        productName: item.productName,
+                        productID: item.productID, // Include productID
+                        quantity: item.quantity,
+                        total: item.total,
+                        type: item.type
+                    });
+                }
+            });
+
+            console.log('Flower Items:', flowerItems);
+            console.log('Product Items:', productItems);
+
+            return { flowerItems, productItems }; // Returns both arrays
+        }
+
+        // Example usage
+        const { flowerItems, productItems } = getCartItemsByType();
     </script>
 </head>
 <body>
