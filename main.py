@@ -7,6 +7,7 @@ import time
 import requests
 import threading
 from product_data import get_product_info, get_product_ids_by_tag, get_flower_info, get_volume_discounts, get_groups, get_promo_codes
+from profits_data import get_week_report
 from random import shuffle
 
 
@@ -183,6 +184,23 @@ def render_feature_section(slug):
             product_error=f"An error occurred: {str(e)}",
             flower_error=f"An error occurred: {str(e)}"
         )
+
+# profits_reports.html
+@app.route('/profits-report', methods=['GET'])
+def render_profits_report():
+    try:
+        import sys
+        import io
+        debug_output = io.StringIO()
+        sys_stdout = sys.stdout
+        sys.stdout = debug_output
+        average_total = get_week_report(supabase)
+        sys.stdout = sys_stdout
+        debug_logs = debug_output.getvalue()
+        return render_template('profits_reports.html', average_total=average_total, debug_logs=debug_logs)
+    except Exception as e:
+        logging.error(f"Error rendering profits report: {e}")
+        return render_template('profits_reports.html', average_total=None, error=f"An error occurred: {str(e)}", debug_logs=str(e))
 
 # run
 if __name__ == "__main__":
