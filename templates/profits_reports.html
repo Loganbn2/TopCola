@@ -1,0 +1,72 @@
+<h1>All Orders (Last 14 Days)</h1>
+{% if error %}
+  <div style="color: red;">{{ error }}</div>
+{% endif %}
+
+{% if orders and orders|length > 0 %}
+  {% set exclude_keys = ['items', 'flower', 'address', 'city', 'state', 'zip', 'payment method', 'phone', 'email', 'fulfillment status', 'delivery time'] %}
+  {% set filtered_orders = [] %}
+  {% set ns = namespace(total_sum=0, total_count=0, discounts_sum=0, discounts_count=0) %}
+  {% for order in orders %}
+    {% if order['created_at'] and order['created_at'] > cutoff_date.strftime('%Y-%m-%d %H:%M:%S') %}
+      {% set _ = filtered_orders.append(order) %}
+      {% if order['total'] is not none %}
+        {% set ns.total_sum = ns.total_sum + (order['total']|float) %}
+        {% set ns.total_count = ns.total_count + 1 %}
+      {% endif %}
+      {% if order['total_discounts'] is not none %}
+        {% set ns.discounts_sum = ns.discounts_sum + (order['total_discounts']|float) %}
+        {% set ns.discounts_count = ns.discounts_count + 1 %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+  <table border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 20px;">
+    <thead>
+      <tr>
+        <th>Average Total</th>
+        <th>Average Total Discounts</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          {% if ns.total_count > 0 %}
+            ${{ (ns.total_sum / ns.total_count) | round(2) }}
+          {% else %}
+            N/A
+          {% endif %}
+        </td>
+        <td>
+          {% if ns.discounts_count > 0 %}
+            ${{ (ns.discounts_sum / ns.discounts_count) | round(2) }}
+          {% else %}
+            N/A
+          {% endif %}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+      <tr>
+        {% for key in orders[0].keys() if key not in exclude_keys %}
+          <th>{{ key|capitalize }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in filtered_orders %}
+        <tr>
+          {% for key, value in order.items() if key not in exclude_keys %}
+            <td>{{ value }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+      {% if filtered_orders|length == 0 %}
+        <tr><td colspan="{{ orders[0].keys()|length }}">No orders in the last 14 days.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No orders found.</p>
+{% endif %}

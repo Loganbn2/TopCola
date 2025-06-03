@@ -7,8 +7,9 @@ import time
 import requests
 import threading
 from product_data import get_product_info, get_product_ids_by_tag, get_flower_info, get_volume_discounts, get_groups, get_promo_codes
-from profits_data import get_week_report
+from profits_data import get_order_data
 from random import shuffle
+from datetime import datetime, timedelta
 
 
 # CORS configuration
@@ -185,6 +186,17 @@ def render_feature_section(slug):
             flower_error=f"An error occurred: {str(e)}"
         )
 
+# profits_reports.html
+@app.route('/profits-reports', methods=['GET'])
+def profits_reports():
+    try:
+        orders, error = get_order_data(supabase)
+        now = datetime.now()
+        cutoff_date = now - timedelta(days=14)
+        return render_template('profits_reports.html', orders=orders, error=error, cutoff_date=cutoff_date)
+    except Exception as e:
+        logging.error(f"Error rendering profits reports: {e}")
+        return render_template('profits_reports.html', orders=[], error=f"An error occurred: {str(e)}", cutoff_date=None)
 
 
 # run
