@@ -192,7 +192,7 @@ def profits_reports():
     try:
         orders, error = get_order_data(supabase)
         now = datetime.now()
-        cutoff_date = now - timedelta(days=14)
+        cutoff_date = now - timedelta(days=7)
         return render_template('profits_reports.html', orders=orders, error=error, cutoff_date=cutoff_date)
     except Exception as e:
         logging.error(f"Error rendering profits reports: {e}")
