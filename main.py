@@ -188,15 +188,16 @@ def render_feature_section(slug):
 
 # profits_reports.html
 @app.route('/profits-reports', methods=['GET'])
-def profits_reports():
+@app.route('/profits-reports/<int:delta>', methods=['GET'])
+def profits_reports(delta=7):
     try:
         orders, error = get_order_data(supabase)
         now = datetime.now()
-        cutoff_date = now - timedelta(days=7)
-        return render_template('profits_reports.html', orders=orders, error=error, cutoff_date=cutoff_date)
+        cutoff_date = now - timedelta(days=delta)
+        return render_template('profits_reports.html', orders=orders, error=error, cutoff_date=cutoff_date, delta=delta)
     except Exception as e:
         logging.error(f"Error rendering profits reports: {e}")
-        return render_template('profits_reports.html', orders=[], error=f"An error occurred: {str(e)}", cutoff_date=None)
+        return render_template('profits_reports.html', orders=[], error=f"An error occurred: {str(e)}", cutoff_date=None, delta=delta)
 
 
 # run
