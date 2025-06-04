@@ -29,6 +29,7 @@ WP_POSTS = f"{wp_base}posts"
 
 # w
 last_seen_id = None
+last_seen_id_weighted = None
 
 def product_to_wordpress(title, content, product_name=None, post_id=None, iframe_html=None):
     # Generate slug if product_name and post_id are provided
@@ -69,7 +70,7 @@ def mark_post_as_published(post_id):
     except Exception as e:
         print(f"❌ Failed to mark row {post_id} as published:", str(e))
 
-def poll_supabase():
+def poll_products():
     global last_seen_id
     while True:
         try:
@@ -102,17 +103,64 @@ def poll_supabase():
                     mark_post_as_published(post_id)
                     last_seen_id = post_id
 
-
             time.sleep(30)  # Poll every 30 seconds
 
         except Exception as e:
             print("⚠️ Error in polling:", str(e))
             time.sleep(60)
 
+def poll_weighted_products():
+    global last_seen_id_weighted
+    while True:
+        try:
+            response = supabase.table("weighted_products")\
+                .select("*")\
+                .eq("published", False)\
+                .order("id", desc=True)\
+                .limit(1)\
+                .execute()
+
+            if response.data:
+                row = response.data[0]
+                if row.get("published") is True:
+                    print(f"🚫 Weighted Row {row['id']} already published — skipping.")
+                    time.sleep(10)
+                    return
+
+            post_id = row["id"]
+            title = row.get("product_name", "Untitled Post")
+            content = str(row.get("id", ""))
+            product_name = row.get("product_name", "")
+            iframe_html = row.get("iframe_html", None)
+
+            if post_id != globals().get('last_seen_id_weighted', None):
+                print("🆕 New weighted product detected (id={}): {}".format(post_id, title))
+                success = product_to_wordpress(title, content, product_name, post_id, iframe_html)
+
+                if success:
+                    try:
+                        response = supabase.table("weighted_products")\
+                            .update({"published": True})\
+                            .eq("id", post_id)\
+                            .eq("published", False)\
+                            .execute()
+                        print("🔁 Weighted update response:", response.data)
+                    except Exception as e:
+                        print(f"❌ Failed to mark weighted row {post_id} as published:", str(e))
+                    globals()['last_seen_id_weighted'] = post_id
+
+            time.sleep(30)
+
+        except Exception as e:
+            print("⚠️ Error in weighted polling:", str(e))
+            time.sleep(60)
+
 def start_polling():
-    poll_thread = threading.Thread(target=poll_supabase, daemon=True)
+    poll_thread = threading.Thread(target=poll_products, daemon=True)
     poll_thread.start()
-    return poll_thread
+    weighted_thread = threading.Thread(target=poll_weighted_products, daemon=True)
+    weighted_thread.start()
+    return poll_thread, weighted_thread
 
 if __name__ == "__main__":
     # Starts polling immediately when run directly
