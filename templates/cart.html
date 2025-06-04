@@ -560,6 +560,12 @@
             const promoDiscounts = parseFloat(document.getElementById('cart-promo-discounts').textContent.replace(/Promo Code.*: -\$/, '')) || 0;
             const deliveryTime = document.getElementById('delivery-time').value;
 
+            // Reject orders with total less than $45.00
+            if (total < 45) {
+                alert('Order total must be at least $45.00. Please add more items to your cart.');
+                return;
+            }
+
             // Get flowerItems and productItems arrays
             const { flowerItems, productItems } = getCartItemsByType();
 
