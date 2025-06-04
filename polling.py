@@ -30,6 +30,7 @@ WP_POSTS = f"{wp_base}posts"
 # w
 last_seen_id = None
 last_seen_id_weighted = None
+last_seen_id_tag = None
 
 def product_to_wordpress(title, content, product_name=None, post_id=None, iframe_html=None):
     # Generate slug if product_name and post_id are provided
@@ -69,6 +70,32 @@ def mark_post_as_published(post_id):
         print("🔁 Update response:", response.data)
     except Exception as e:
         print(f"❌ Failed to mark row {post_id} as published:", str(e))
+
+def tag_to_wordpress(title, content, name=None, iframe_html=None):
+    # Generate slug if name is provided
+    slug = None
+    if name:
+        slug = f"{name}".replace(" ", "-").lower()
+    post_data = {
+        "title": title,
+        "content": content,
+        "status": "publish"
+    }
+    if slug:
+        post_data["slug"] = slug
+    if iframe_html:
+        post_data["meta"] = {"iframe_embed": iframe_html}
+    response = requests.post(
+        WP_POSTS,
+        auth=(wp_username, wp_password),
+        json=post_data
+    )
+    if response.status_code == 201:
+        print("✅ WordPress tag post created:", title)
+        return True
+    else:
+        print("❌ Failed to create tag post:", response.status_code, response.text)
+        return False
 
 def poll_products():
     global last_seen_id
@@ -155,12 +182,60 @@ def poll_weighted_products():
             print("⚠️ Error in weighted polling:", str(e))
             time.sleep(60)
 
+def poll_tags():
+    global last_seen_id_tag
+    while True:
+        try:
+            response = supabase.table("tags")\
+                .select("*")\
+                .eq("published", False)\
+                .order("id", desc=True)\
+                .limit(1)\
+                .execute()
+
+            if response.data:
+                row = response.data[0]
+                if row.get("published") is True:
+                    print(f"🚫 Tag Row {row['id']} already published — skipping.")
+                    time.sleep(10)
+                    return
+
+            post_id = row["id"]
+            title = row.get("name", "Untitled Tag")
+            content = str(row.get("id", ""))
+            name = row.get("name", "")
+            iframe_html = row.get("iframe_html", None)
+
+            if post_id != globals().get('last_seen_id_tag', None):
+                print("🆕 New tag detected (id={}): {}".format(post_id, title))
+                success = tag_to_wordpress(title, content, name, iframe_html)
+
+                if success:
+                    try:
+                        response = supabase.table("tags")\
+                            .update({"published": True})\
+                            .eq("id", post_id)\
+                            .eq("published", False)\
+                            .execute()
+                        print("🔁 Tag update response:", response.data)
+                    except Exception as e:
+                        print(f"❌ Failed to mark tag row {post_id} as published:", str(e))
+                    globals()['last_seen_id_tag'] = post_id
+
+            time.sleep(30)
+
+        except Exception as e:
+            print("⚠️ Error in tag polling:", str(e))
+            time.sleep(60)
+
 def start_polling():
     poll_thread = threading.Thread(target=poll_products, daemon=True)
     poll_thread.start()
     weighted_thread = threading.Thread(target=poll_weighted_products, daemon=True)
     weighted_thread.start()
-    return poll_thread, weighted_thread
+    tag_thread = threading.Thread(target=poll_tags, daemon=True)
+    tag_thread.start()
+    return poll_thread, weighted_thread, tag_thread
 
 if __name__ == "__main__":
     # Starts polling immediately when run directly
