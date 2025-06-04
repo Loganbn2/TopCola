@@ -8,7 +8,6 @@ import requests
 import threading
 from product_data import get_product_info, get_product_ids_by_tag
 
-'''
 # CORS configuration
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:5000", "http://localhost:5000"], "methods": ["GET", "POST", "PUT", "DELETE"], "allow_headers": "*"}})
@@ -28,18 +27,27 @@ wp_password = "kEET N0me NIpe eBSr y2pC KH7P"
 
 WP_POSTS = f"{wp_base}posts"
 
-# Supabase Polling Configuration
+# w
 last_seen_id = None
 
-def post_to_wordpress(title, content):
+def product_to_wordpress(title, content, product_name=None, post_id=None, iframe_html=None):
+    # Generate slug if product_name and post_id are provided
+    slug = None
+    if product_name and post_id:
+        slug = f"{product_name}-{post_id}".replace(" ", "-").lower()
+    post_data = {
+        "title": title,
+        "content": content,
+        "status": "publish"
+    }
+    if slug:
+        post_data["slug"] = slug
+    if iframe_html:
+        post_data["meta"] = {"iframe_embed": iframe_html}
     response = requests.post(
         WP_POSTS,
         auth=(wp_username, wp_password),
-        json={
-            "title": title,
-            "content": content,
-            "status": "publish"
-        }
+        json=post_data
     )
     if response.status_code == 201:
         print("✅ WordPress post created:", title)
@@ -52,7 +60,7 @@ def mark_post_as_published(post_id):
     print(f"🔍 Trying to mark post ID {post_id} as published")
 
     try:
-        response = supabase.table("Products")\
+        response = supabase.table("products")\
             .update({"published": True})\
             .eq("id", post_id)\
             .eq("published", False)\
@@ -66,7 +74,7 @@ def poll_supabase():
     while True:
         try:
             # Fetch unpublished posts
-            response = supabase.table("Products")\
+            response = supabase.table("products")\
                 .select("*")\
                 .eq("published", False)\
                 .order("id", desc=True)\
@@ -81,25 +89,34 @@ def poll_supabase():
                     return
 
             post_id = row["id"]
-            title = row.get("Product Name", "Untitled Post")
+            title = row.get("product_name", "Untitled Post")
             content = str(row.get("id", ""))
+            product_name = row.get("product_name", "")
+            iframe_html = row.get("iframe_html", None)
 
             if post_id != last_seen_id:
                 print("🆕 New post detected (id={}): {}".format(post_id, title))
-                success = post_to_wordpress(title, content)
+                success = product_to_wordpress(title, content, product_name, post_id, iframe_html)
 
                 if success:
                     mark_post_as_published(post_id)
                     last_seen_id = post_id
 
 
-            time.sleep(300)  # Poll every 30 seconds
+            time.sleep(30)  # Poll every 30 seconds
 
         except Exception as e:
             print("⚠️ Error in polling:", str(e))
             time.sleep(60)
 
-# Starts polling immediately
-poll_thread = threading.Thread(target=poll_supabase, daemon=True)
-poll_thread.start()
-'''
+def start_polling():
+    poll_thread = threading.Thread(target=poll_supabase, daemon=True)
+    poll_thread.start()
+    return poll_thread
+
+if __name__ == "__main__":
+    # Starts polling immediately when run directly
+    start_polling()
+    # Keep the main thread alive
+    while True:
+        time.sleep(3600)

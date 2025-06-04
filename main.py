@@ -10,6 +10,7 @@ from product_data import get_product_info, get_product_ids_by_tag, get_flower_in
 from profits_data import get_order_data
 from random import shuffle
 from datetime import datetime, timedelta
+import polling
 
 
 # CORS configuration
@@ -202,4 +203,5 @@ def profits_reports(delta=7):
 
 # run
 if __name__ == "__main__":
+    polling.start_polling()
     app.run(debug=True, host='0.0.0.0', port=5001)
