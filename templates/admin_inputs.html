@@ -26,6 +26,7 @@
             const description = document.getElementById('product-description').value;
             const original_price = document.getElementById('product-original-price').value;
             const group = document.getElementById('product-group').value.trim();
+            const imagesInput = document.getElementById('product-images-input');
 
             if (!product_name || isNaN(price) || isNaN(cost)) {
                 showMessage('Please fill out all required fields.', false);
@@ -44,10 +45,16 @@
             if (tags.length > 0) payload.tags = tags;
             if (options.length > 0) payload.options = options;
 
+            // Prepare form data for images
+            const formData = new FormData();
+            for (let i = 0; i < imagesInput.files.length; i++) {
+                formData.append('images', imagesInput.files[i]);
+            }
+            formData.append('payload', JSON.stringify(payload));
+
             fetch('/api/add-product', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                method: 'POST', 
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
@@ -156,6 +163,75 @@
                     optionsInput.value = '';
                 }
             });
+            </script>
+
+            <label for="product-images">Images</label>
+            <div id="images-upload-container" style="border: 2px dashed #ccc; border-radius: 5px; padding: 20px; background: #fafafa; text-align: center; margin-bottom: 10px; cursor: pointer;">
+                <span id="images-upload-text">Drag & drop images here or click to upload</span>
+                <input type="file" id="product-images-input" accept="image/*" multiple style="display: none;">
+                <div id="images-preview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
+            </div>
+            <script>
+            // Image upload logic (frontend only, does not send data yet)
+            const imagesUploadContainer = document.getElementById('images-upload-container');
+            const imagesInput = document.getElementById('product-images-input');
+            const imagesPreview = document.getElementById('images-preview');
+            const imagesUploadText = document.getElementById('images-upload-text');
+
+            imagesUploadContainer.addEventListener('click', () => imagesInput.click());
+
+            imagesUploadContainer.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                imagesUploadContainer.style.borderColor = '#007bff';
+            });
+            imagesUploadContainer.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                imagesUploadContainer.style.borderColor = '#ccc';
+            });
+            imagesUploadContainer.addEventListener('drop', function(e) {
+                e.preventDefault();
+                imagesUploadContainer.style.borderColor = '#ccc';
+                handleFiles(e.dataTransfer.files);
+            });
+            imagesInput.addEventListener('change', function(e) {
+                handleFiles(e.target.files);
+            });
+            function handleFiles(files) {
+                imagesPreview.innerHTML = '';
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imgWrapper = document.createElement('div');
+                        imgWrapper.style.position = 'relative';
+                        imgWrapper.style.display = 'inline-block';
+
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.maxWidth = '80px';
+                        img.style.maxHeight = '80px';
+                        img.style.borderRadius = '5px';
+                        imgWrapper.appendChild(img);
+
+                        // Add remove button (white x)
+                        const removeBtn = document.createElement('span');
+                        removeBtn.textContent = '×';
+                        removeBtn.style.cssText = 'position:absolute;top:2px;right:6px;background:rgba(255,255,255,0.85);color:#333;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,0.08);z-index:2;';
+                        removeBtn.onclick = function() {
+                            imagesPreview.removeChild(imgWrapper);
+                            // Remove file from imagesInput.files (not possible directly, so just clear all if any removed)
+                            // For now, clear all and let user re-add as needed
+                            imagesInput.value = '';
+                            imagesUploadText.style.display = imagesPreview.children.length === 0 ? 'inline' : 'none';
+                        };
+                        imgWrapper.appendChild(removeBtn);
+
+                        imagesPreview.appendChild(imgWrapper);
+                    };
+                    reader.readAsDataURL(file);
+                }
+                imagesUploadText.style.display = files.length ? 'none' : 'inline';
+            }
             </script>
 
             <button type="submit">Add Product</button>

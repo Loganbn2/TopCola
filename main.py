@@ -11,6 +11,8 @@ from profits_data import get_order_data
 from random import shuffle
 from datetime import datetime, timedelta
 import polling
+from werkzeug.utils import secure_filename
+import json
 
 
 # CORS configuration
@@ -215,7 +217,18 @@ def render_admin_inputs():
 @app.route('/api/add-product', methods=['POST'])
 def add_product():
     try:
-        data = request.json
+        if request.content_type and request.content_type.startswith('multipart/form-data'):
+            # Handle images and JSON payload
+            files = request.files.getlist('images')
+            payload = request.form.get('payload')
+            if payload:
+                data = json.loads(payload)
+            else:
+                return jsonify({'error': 'Missing product data.'}), 400
+        else:
+            data = request.json
+            files = []
+
         product_name = data.get('product_name', '')
         price = data.get('price', 0.0)
         cost = data.get('cost', 0.0)
@@ -227,6 +240,20 @@ def add_product():
 
         if not product_name or price is None or cost is None:
             return jsonify({'error': 'Missing required fields.'}), 400
+
+        # Upload images to Supabase Storage
+        image_urls = []
+        for file in files:
+            filename = secure_filename(file.filename)
+            file_data = file.read()
+            # Upload to Supabase Storage bucket 'product-images'
+            storage_response = supabase.storage.from_('product-images').upload(filename, file_data, {'content-type': file.mimetype})
+            if hasattr(storage_response, 'error') and storage_response.error:
+                logging.error(f"Error uploading image: {storage_response.error}")
+                continue
+            # Construct public URL
+            image_url = f"{filename}"
+            image_urls.append(image_url)
 
         product_data = {
             'product_name': product_name,
@@ -244,6 +271,8 @@ def add_product():
             product_data['tags'] = tags
         if options is not None:
             product_data['options'] = options
+        if image_urls:
+            product_data['images'] = image_urls
 
         response = supabase.table('products').insert(product_data).execute()
         if response.data and len(response.data) > 0:
