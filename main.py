@@ -219,20 +219,21 @@ def add_product():
         product_name = data.get('product_name', '')
         price = data.get('price', 0.0)
         cost = data.get('cost', 0.0)
-        description = data.get('description', '')
+        description = data.get('description', None)
         original_price = data.get('original_price', None)
         group = data.get('group', None)
 
-        if not product_name or price is None or cost is None or not description:
+        if not product_name or price is None or cost is None:
             return jsonify({'error': 'Missing required fields.'}), 400
 
         product_data = {
             'product_name': product_name,
             'price': price,
             'cost': cost,
-            'description': description,
             'created_at': time.strftime('%Y-%m-%d %H:%M:%S')
         }
+        if description is not None:
+            product_data['description'] = description
         if original_price is not None:
             product_data['original_price'] = original_price
         if group:

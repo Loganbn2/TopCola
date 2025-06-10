@@ -23,11 +23,11 @@
             const product_name = document.getElementById('product-name').value.trim();
             const price = parseFloat(document.getElementById('product-price').value);
             const cost = parseFloat(document.getElementById('product-cost').value);
-            const description = document.getElementById('product-description').value.trim();
+            const description = document.getElementById('product-description').value;
             const original_price = document.getElementById('product-original-price').value;
             const group = document.getElementById('product-group').value.trim();
 
-            if (!product_name || isNaN(price) || isNaN(cost) || !description) {
+            if (!product_name || isNaN(price) || isNaN(cost)) {
                 showMessage('Please fill out all required fields.', false);
                 return;
             }
@@ -36,9 +36,9 @@
             const payload = {
                 product_name,
                 price,
-                cost,
-                description
+                cost
             };
+            if (description && description.trim() !== "") payload.description = description.trim();
             if (original_price !== "") payload.original_price = parseFloat(original_price);
             if (group !== "") payload.group = group;
 
@@ -87,8 +87,8 @@
             <label for="product-group">Group</label>
             <input type="text" id="product-group">
 
-            <label for="product-description">Description*</label>
-            <textarea id="product-description" rows="3" required></textarea>
+            <label for="product-description">Description</label>
+            <textarea id="product-description" rows="3"></textarea>
 
             <button type="submit">Add Product</button>
         </form>
