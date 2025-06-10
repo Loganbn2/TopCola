@@ -222,6 +222,8 @@ def add_product():
         description = data.get('description', None)
         original_price = data.get('original_price', None)
         group = data.get('group', None)
+        tags = data.get('tags', None)
+        options = data.get('options', None)
 
         if not product_name or price is None or cost is None:
             return jsonify({'error': 'Missing required fields.'}), 400
@@ -238,6 +240,10 @@ def add_product():
             product_data['original_price'] = original_price
         if group:
             product_data['group'] = group
+        if tags is not None:
+            product_data['tags'] = tags
+        if options is not None:
+            product_data['options'] = options
 
         response = supabase.table('products').insert(product_data).execute()
         if response.data and len(response.data) > 0:

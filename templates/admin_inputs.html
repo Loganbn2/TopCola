@@ -41,6 +41,8 @@
             if (description && description.trim() !== "") payload.description = description.trim();
             if (original_price !== "") payload.original_price = parseFloat(original_price);
             if (group !== "") payload.group = group;
+            if (tags.length > 0) payload.tags = tags;
+            if (options.length > 0) payload.options = options;
 
             fetch('/api/add-product', {
                 method: 'POST',
@@ -89,6 +91,72 @@
 
             <label for="product-description">Description</label>
             <textarea id="product-description" rows="3"></textarea>
+
+            <label for="product-tags">Tags</label>
+            <div id="tags-input-container" style="display: flex; flex-wrap: wrap; gap: 5px; border: 1px solid #ccc; border-radius: 5px; padding: 5px; min-height: 40px; background: #fafafa;">
+                <input type="text" id="product-tags-input" style="border: none; outline: none; flex: 1; min-width: 100px; background: transparent; font-size: 16px;" placeholder="Type a tag and press space...">
+            </div>
+            <script>
+            // Tag input logic (frontend only, does not send data yet)
+            const tagsInput = document.getElementById('product-tags-input');
+            const tagsContainer = document.getElementById('tags-input-container');
+            let tags = [];
+            tagsInput.addEventListener('keydown', function(e) {
+                if (e.key === ' ' && tagsInput.value.trim() !== '') {
+                    e.preventDefault();
+                    const tag = tagsInput.value.trim();
+                    tags.push(tag);
+                    const tagElem = document.createElement('span');
+                    tagElem.style.cssText = 'background:#e0e0e0; border-radius:3px; padding:2px 8px 2px 8px; margin-right:3px; display:inline-flex; align-items:center; gap:4px;';
+                    tagElem.textContent = tag;
+                    // Add remove button (x)
+                    const removeBtn = document.createElement('span');
+                    removeBtn.textContent = '×';
+                    removeBtn.style.cssText = 'margin-left:6px; color:#888; cursor:pointer; font-weight:bold;';
+                    removeBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        tagsContainer.removeChild(tagElem);
+                        tags = tags.filter(t => t !== tag);
+                    };
+                    tagElem.appendChild(removeBtn);
+                    tagsContainer.insertBefore(tagElem, tagsInput);
+                    tagsInput.value = '';
+                }
+            });
+            </script>
+
+            <label for="product-options">Options</label>
+            <div id="options-input-container" style="display: flex; flex-wrap: wrap; gap: 5px; border: 1px solid #ccc; border-radius: 5px; padding: 5px; min-height: 40px; background: #fafafa; margin-bottom: 10px;">
+                <input type="text" id="product-options-input" style="border: none; outline: none; flex: 1; min-width: 100px; background: transparent; font-size: 16px;" placeholder="Type an option and press space...">
+            </div>
+            <script>
+            // Option input logic (frontend only, does not send data yet)
+            const optionsInput = document.getElementById('product-options-input');
+            const optionsContainer = document.getElementById('options-input-container');
+            let options = [];
+            optionsInput.addEventListener('keydown', function(e) {
+                if (e.key === ' ' && optionsInput.value.trim() !== '') {
+                    e.preventDefault();
+                    const option = optionsInput.value.trim();
+                    options.push(option);
+                    const optionElem = document.createElement('span');
+                    optionElem.style.cssText = 'background:#e0e0e0; border-radius:3px; padding:2px 8px 2px 8px; margin-right:3px; display:inline-flex; align-items:center; gap:4px;';
+                    optionElem.textContent = option;
+                    // Add remove button (x)
+                    const removeBtn = document.createElement('span');
+                    removeBtn.textContent = '×';
+                    removeBtn.style.cssText = 'margin-left:6px; color:#888; cursor:pointer; font-weight:bold;';
+                    removeBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        optionsContainer.removeChild(optionElem);
+                        options = options.filter(t => t !== option);
+                    };
+                    optionElem.appendChild(removeBtn);
+                    optionsContainer.insertBefore(optionElem, optionsInput);
+                    optionsInput.value = '';
+                }
+            });
+            </script>
 
             <button type="submit">Add Product</button>
         </form>
