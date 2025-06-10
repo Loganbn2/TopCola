@@ -17,6 +17,21 @@
         .success, .error { margin-top: 15px; text-align: center; font-weight: bold; }
         .success { color: green; }
         .error { color: red; }
+        .tab-btn {
+            padding: 10px 28px;
+            border-radius: 6px 6px 0 0;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            background: #f4f4f4;
+            font-weight: bold;
+            font-size: 17px;
+            color: #888;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            background: #fff;
+            color: #007bff;
+        }
     </style>
     <script>
         function submitProduct() {
@@ -51,7 +66,9 @@
                 formData.append('images', imagesInput.files[i]);
             }
             formData.append('payload', JSON.stringify(payload));
+            formData.append('bucket', 'product-images');
 
+            // Remove imagesInput.value reset here so files persist after submit
             fetch('/api/add-product', {
                 method: 'POST', 
                 body: formData
@@ -61,6 +78,9 @@
                 if (data.message) {
                     showMessage(data.message, true);
                     document.getElementById('admin-form').reset();
+                    // Also clear preview and show upload text
+                    imagesPreview.innerHTML = '';
+                    imagesUploadText.style.display = 'inline';
                 } else {
                     showMessage('Product could not be added. Please ensure that all groups and tags added can be found in the admin console.', false);
                 }
@@ -75,172 +95,394 @@
             msgDiv.textContent = msg;
             msgDiv.className = success ? 'success' : 'error';
         }
+
+        // Tab switching logic
+        function initTabs() {
+            const tabAddProduct = document.getElementById('tab-add-product');
+            const tabAddFlower = document.getElementById('tab-add-flower');
+            const addProductSection = document.getElementById('add-product-section');
+            const addFlowerSection = document.getElementById('add-flower-section');
+
+            tabAddProduct.onclick = function() {
+                tabAddProduct.classList.add('active');
+                tabAddFlower.classList.remove('active');
+                addProductSection.style.display = '';
+                addFlowerSection.style.display = 'none';
+            };
+            tabAddFlower.onclick = function() {
+                tabAddFlower.classList.add('active');
+                tabAddProduct.classList.remove('active');
+                addProductSection.style.display = 'none';
+                addFlowerSection.style.display = '';
+            };
+
+            // Trigger click on the first tab to set initial state
+            tabAddProduct.click();
+        }
+
+        document.addEventListener('DOMContentLoaded', initTabs);
     </script>
 </head>
 <body>
     <div class="admin-container">
-        <h1>Add New Product</h1>
-        <form id="admin-form" onsubmit="event.preventDefault(); submitProduct();">
-            <label for="product-name">Product Name*</label>
-            <input type="text" id="product-name" required>
+        <div style="display: flex; justify-content: center; margin-bottom: 30px; gap: 10px;">
+            <button id="tab-add-product" type="button" class="tab-btn active">Add Product</button>
+            <button id="tab-add-flower" type="button" class="tab-btn">Add Flower</button>
+        </div>
+        <div id="add-product-section">
+            <form id="admin-form" onsubmit="event.preventDefault(); submitProduct();">
+                <label for="product-name">Product Name*</label>
+                <input type="text" id="product-name" required>
 
-            <label for="product-price">Price ($)*</label>
-            <input type="number" id="product-price" step="0.01" min="0" required>
+                <div style="display: flex; gap: 12px; align-items: flex-end;">
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <label for="product-price">Price ($)*</label>
+                        <input type="number" id="product-price" step="0.01" min="0" required>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <label for="product-cost">Cost ($)*</label>
+                        <input type="number" id="product-cost" step="0.01" min="0" required>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <label for="product-original-price">Original Price ($)</label>
+                        <input type="number" id="product-original-price" step="0.01" min="0">
+                    </div>
+                </div>
 
-            <label for="product-cost">Cost ($)*</label>
-            <input type="number" id="product-cost" step="0.01" min="0" required>
+                <label for="product-group">Group</label>
+                <input type="text" id="product-group">
 
-            <label for="product-original-price">Original Price ($)</label>
-            <input type="number" id="product-original-price" step="0.01" min="0">
+                <label for="product-description">Description</label>
+                <textarea id="product-description" rows="3"></textarea>
 
-            <label for="product-group">Group</label>
-            <input type="text" id="product-group">
-
-            <label for="product-description">Description</label>
-            <textarea id="product-description" rows="3"></textarea>
-
-            <label for="product-tags">Tags</label>
-            <div id="tags-input-container" style="display: flex; flex-wrap: wrap; gap: 5px; border: 1px solid #ccc; border-radius: 5px; padding: 5px; min-height: 40px; background: #fafafa;">
-                <input type="text" id="product-tags-input" style="border: none; outline: none; flex: 1; min-width: 100px; background: transparent; font-size: 16px;" placeholder="Type a tag and press space...">
-            </div>
-            <script>
-            // Tag input logic (frontend only, does not send data yet)
-            const tagsInput = document.getElementById('product-tags-input');
-            const tagsContainer = document.getElementById('tags-input-container');
-            let tags = [];
-            tagsInput.addEventListener('keydown', function(e) {
-                if (e.key === ' ' && tagsInput.value.trim() !== '') {
-                    e.preventDefault();
-                    const tag = tagsInput.value.trim();
-                    tags.push(tag);
-                    const tagElem = document.createElement('span');
-                    tagElem.style.cssText = 'background:#e0e0e0; border-radius:3px; padding:2px 8px 2px 8px; margin-right:3px; display:inline-flex; align-items:center; gap:4px;';
-                    tagElem.textContent = tag;
-                    // Add remove button (x)
-                    const removeBtn = document.createElement('span');
-                    removeBtn.textContent = '×';
-                    removeBtn.style.cssText = 'margin-left:6px; color:#888; cursor:pointer; font-weight:bold;';
-                    removeBtn.onclick = function(e) {
-                        e.stopPropagation();
-                        tagsContainer.removeChild(tagElem);
-                        tags = tags.filter(t => t !== tag);
-                    };
-                    tagElem.appendChild(removeBtn);
-                    tagsContainer.insertBefore(tagElem, tagsInput);
-                    tagsInput.value = '';
-                }
-            });
-            </script>
-
-            <label for="product-options">Options</label>
-            <div id="options-input-container" style="display: flex; flex-wrap: wrap; gap: 5px; border: 1px solid #ccc; border-radius: 5px; padding: 5px; min-height: 40px; background: #fafafa; margin-bottom: 10px;">
-                <input type="text" id="product-options-input" style="border: none; outline: none; flex: 1; min-width: 100px; background: transparent; font-size: 16px;" placeholder="Type an option and press space...">
-            </div>
-            <script>
-            // Option input logic (frontend only, does not send data yet)
-            const optionsInput = document.getElementById('product-options-input');
-            const optionsContainer = document.getElementById('options-input-container');
-            let options = [];
-            optionsInput.addEventListener('keydown', function(e) {
-                if (e.key === ' ' && optionsInput.value.trim() !== '') {
-                    e.preventDefault();
-                    const option = optionsInput.value.trim();
-                    options.push(option);
-                    const optionElem = document.createElement('span');
-                    optionElem.style.cssText = 'background:#e0e0e0; border-radius:3px; padding:2px 8px 2px 8px; margin-right:3px; display:inline-flex; align-items:center; gap:4px;';
-                    optionElem.textContent = option;
-                    // Add remove button (x)
-                    const removeBtn = document.createElement('span');
-                    removeBtn.textContent = '×';
-                    removeBtn.style.cssText = 'margin-left:6px; color:#888; cursor:pointer; font-weight:bold;';
-                    removeBtn.onclick = function(e) {
-                        e.stopPropagation();
-                        optionsContainer.removeChild(optionElem);
-                        options = options.filter(t => t !== option);
-                    };
-                    optionElem.appendChild(removeBtn);
-                    optionsContainer.insertBefore(optionElem, optionsInput);
-                    optionsInput.value = '';
-                }
-            });
-            </script>
-
-            <label for="product-images">Images</label>
-            <div id="images-upload-container" style="border: 2px dashed #ccc; border-radius: 5px; padding: 20px; background: #fafafa; text-align: center; margin-bottom: 10px; cursor: pointer;">
-                <span id="images-upload-text">Drag & drop images here or click to upload</span>
-                <input type="file" id="product-images-input" accept="image/*" multiple style="display: none;">
-                <div id="images-preview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
-            </div>
-            <script>
-            // Image upload logic (frontend only, does not send data yet)
-            const imagesUploadContainer = document.getElementById('images-upload-container');
-            const imagesInput = document.getElementById('product-images-input');
-            const imagesPreview = document.getElementById('images-preview');
-            const imagesUploadText = document.getElementById('images-upload-text');
-
-            imagesUploadContainer.addEventListener('click', () => imagesInput.click());
-
-            imagesUploadContainer.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                imagesUploadContainer.style.borderColor = '#007bff';
-            });
-            imagesUploadContainer.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                imagesUploadContainer.style.borderColor = '#ccc';
-            });
-            imagesUploadContainer.addEventListener('drop', function(e) {
-                e.preventDefault();
-                imagesUploadContainer.style.borderColor = '#ccc';
-                handleFiles(e.dataTransfer.files);
-            });
-            imagesInput.addEventListener('change', function(e) {
-                handleFiles(e.target.files);
-            });
-            function handleFiles(files) {
-                imagesPreview.innerHTML = '';
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const imgWrapper = document.createElement('div');
-                        imgWrapper.style.position = 'relative';
-                        imgWrapper.style.display = 'inline-block';
-
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.style.maxWidth = '80px';
-                        img.style.maxHeight = '80px';
-                        img.style.borderRadius = '5px';
-                        imgWrapper.appendChild(img);
-
-                        // Add remove button (white x)
+                <label for="product-tags">Tags</label>
+                <div id="tags-input-container" style="display: flex; flex-wrap: wrap; gap: 5px; border: 1px solid #ccc; border-radius: 5px; padding: 5px; min-height: 40px; background: #fafafa;">
+                    <input type="text" id="product-tags-input" style="border: none; outline: none; flex: 1; min-width: 100px; background: transparent; font-size: 16px;" placeholder="Type a tag and press space...">
+                </div>
+                <script>
+                // Tag input logic (frontend only, does not send data yet)
+                const tagsInput = document.getElementById('product-tags-input');
+                const tagsContainer = document.getElementById('tags-input-container');
+                let tags = [];
+                tagsInput.addEventListener('keydown', function(e) {
+                    if (e.key === ' ' && tagsInput.value.trim() !== '') {
+                        e.preventDefault();
+                        const tag = tagsInput.value.trim();
+                        tags.push(tag);
+                        const tagElem = document.createElement('span');
+                        tagElem.style.cssText = 'background:#e0e0e0; border-radius:3px; padding:2px 8px 2px 8px; margin-right:3px; display:inline-flex; align-items:center; gap:4px;';
+                        tagElem.textContent = tag;
+                        // Add remove button (x)
                         const removeBtn = document.createElement('span');
                         removeBtn.textContent = '×';
-                        removeBtn.style.cssText = 'position:absolute;top:2px;right:6px;background:rgba(255,255,255,0.85);color:#333;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,0.08);z-index:2;';
-                        removeBtn.onclick = function() {
-                            imagesPreview.removeChild(imgWrapper);
-                            // Remove file from imagesInput.files (not possible directly, so just clear all if any removed)
-                            // For now, clear all and let user re-add as needed
-                            imagesInput.value = '';
-                            imagesUploadText.style.display = imagesPreview.children.length === 0 ? 'inline' : 'none';
+                        removeBtn.style.cssText = 'margin-left:6px; color:#888; cursor:pointer; font-weight:bold;';
+                        removeBtn.onclick = function(e) {
+                            e.stopPropagation();
+                            tagsContainer.removeChild(tagElem);
+                            tags = tags.filter(t => t !== tag);
                         };
-                        imgWrapper.appendChild(removeBtn);
+                        tagElem.appendChild(removeBtn);
+                        tagsContainer.insertBefore(tagElem, tagsInput);
+                        tagsInput.value = '';
+                    }
+                });
+                </script>
 
-                        imagesPreview.appendChild(imgWrapper);
-                    };
-                    reader.readAsDataURL(file);
+                <label for="product-options">Options</label>
+                <div id="options-input-container" style="display: flex; flex-wrap: wrap; gap: 5px; border: 1px solid #ccc; border-radius: 5px; padding: 5px; min-height: 40px; background: #fafafa; margin-bottom: 10px;">
+                    <input type="text" id="product-options-input" style="border: none; outline: none; flex: 1; min-width: 100px; background: transparent; font-size: 16px;" placeholder="Type an option and press space...">
+                </div>
+                <script>
+                // Option input logic (frontend only, does not send data yet)
+                const optionsInput = document.getElementById('product-options-input');
+                const optionsContainer = document.getElementById('options-input-container');
+                let options = [];
+                optionsInput.addEventListener('keydown', function(e) {
+                    if (e.key === ' ' && optionsInput.value.trim() !== '') {
+                        e.preventDefault();
+                        const option = optionsInput.value.trim();
+                        options.push(option);
+                        const optionElem = document.createElement('span');
+                        optionElem.style.cssText = 'background:#e0e0e0; border-radius:3px; padding:2px 8px 2px 8px; margin-right:3px; display:inline-flex; align-items:center; gap:4px;';
+                        optionElem.textContent = option;
+                        // Add remove button (x)
+                        const removeBtn = document.createElement('span');
+                        removeBtn.textContent = '×';
+                        removeBtn.style.cssText = 'margin-left:6px; color:#888; cursor:pointer; font-weight:bold;';
+                        removeBtn.onclick = function(e) {
+                            e.stopPropagation();
+                            optionsContainer.removeChild(optionElem);
+                            options = options.filter(t => t !== option);
+                        };
+                        optionElem.appendChild(removeBtn);
+                        optionsContainer.insertBefore(optionElem, optionsInput);
+                        optionsInput.value = '';
+                    }
+                });
+                </script>
+
+                <label for="product-images">Images</label>
+                <div id="images-upload-container" style="border: 2px dashed #ccc; border-radius: 5px; padding: 20px; background: #fafafa; text-align: center; margin-bottom: 10px; cursor: pointer;">
+                    <span id="images-upload-text">Drag & drop images here or click to upload</span>
+                    <input type="file" id="product-images-input" accept="image/*" multiple style="display: none;">
+                    <div id="images-preview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
+                </div>
+                <script>
+                // Image upload logic (frontend only, does not send data yet)
+                const imagesUploadContainer = document.getElementById('images-upload-container');
+                const imagesInput = document.getElementById('product-images-input');
+                const imagesPreview = document.getElementById('images-preview');
+                const imagesUploadText = document.getElementById('images-upload-text');
+
+                imagesUploadContainer.addEventListener('click', () => imagesInput.click());
+
+                imagesUploadContainer.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    imagesUploadContainer.style.borderColor = '#007bff';
+                });
+                imagesUploadContainer.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    imagesUploadContainer.style.borderColor = '#ccc';
+                });
+                imagesUploadContainer.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    imagesUploadContainer.style.borderColor = '#ccc';
+                    handleFiles(e.dataTransfer.files);
+                });
+                imagesInput.addEventListener('change', function(e) {
+                    handleFiles(e.target.files);
+                });
+                function handleFiles(files) {
+                    imagesPreview.innerHTML = '';
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const imgWrapper = document.createElement('div');
+                            imgWrapper.style.position = 'relative';
+                            imgWrapper.style.display = 'inline-block';
+
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.style.maxWidth = '80px';
+                            img.style.maxHeight = '80px';
+                            img.style.borderRadius = '5px';
+                            imgWrapper.appendChild(img);
+
+                            // Add remove button (white x)
+                            const removeBtn = document.createElement('span');
+                            removeBtn.textContent = '×';
+                            removeBtn.style.cssText = 'position:absolute;top:2px;right:6px;background:rgba(255,255,255,0.85);color:#333;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,0.08);z-index:2;';
+                            removeBtn.onclick = function() {
+                                imagesPreview.removeChild(imgWrapper);
+                                // Remove file from imagesInput.files (not possible directly, so just clear all if any removed)
+                                // For now, clear all and let user re-add as needed
+                                imagesInput.value = '';
+                                imagesUploadText.style.display = imagesPreview.children.length === 0 ? 'inline' : 'none';
+                            };
+                            imgWrapper.appendChild(removeBtn);
+
+                            imagesPreview.appendChild(imgWrapper);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                    imagesUploadText.style.display = files.length ? 'none' : 'inline';
                 }
-                imagesUploadText.style.display = files.length ? 'none' : 'inline';
-            }
-            </script>
+                </script>
 
-            <button type="submit">Add Product</button>
-        </form>
-        <div id="admin-message"></div>
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}
+                <button type="submit">Add Product</button>
+            </form>
+            <div id="admin-message"></div>
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+        </div>
+        <div id="add-flower-section" style="display:none;">
+            <form id="weighted-admin-form" onsubmit="event.preventDefault(); submitWeightedProduct();">
+                <label for="weighted-product-name">Product Name*</label>
+                <input type="text" id="weighted-product-name" required>
+
+                <div style="display: flex; gap: 12px; align-items: flex-end;">
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <label for="weighted-product-price">Price per g ($)*</label>
+                        <input type="number" id="weighted-product-price" step="0.01" min="0" required>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <label for="weighted-product-cost">Cost per g ($)*</label>
+                        <input type="number" id="weighted-product-cost" step="0.01" min="0" required>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <label for="weighted-product-price-tier">Price Tier*</label>
+                        <input type="number" id="weighted-product-price-tier" min="0" required>
+                    </div>
+                </div>
+
+                <label for="weighted-product-description">Description</label>
+                <textarea id="weighted-product-description" rows="3"></textarea>
+
+                <label for="weighted-product-tags">Tags</label>
+                <div id="weighted-tags-input-container" style="display: flex; flex-wrap: wrap; gap: 5px; border: 1px solid #ccc; border-radius: 5px; padding: 5px; min-height: 40px; background: #fafafa;">
+                    <input type="text" id="weighted-product-tags-input" style="border: none; outline: none; flex: 1; min-width: 100px; background: transparent; font-size: 16px;" placeholder="Type a tag and press space...">
+                </div>
+                <script>
+                // Tag input logic for weighted product
+                const weightedTagsInput = document.getElementById('weighted-product-tags-input');
+                const weightedTagsContainer = document.getElementById('weighted-tags-input-container');
+                let weightedTags = [];
+                weightedTagsInput.addEventListener('keydown', function(e) {
+                    if (e.key === ' ' && weightedTagsInput.value.trim() !== '') {
+                        e.preventDefault();
+                        const tag = weightedTagsInput.value.trim();
+                        weightedTags.push(tag);
+                        const tagElem = document.createElement('span');
+                        tagElem.style.cssText = 'background:#e0e0e0; border-radius:3px; padding:2px 8px 2px 8px; margin-right:3px; display:inline-flex; align-items:center; gap:4px;';
+                        tagElem.textContent = tag;
+                        // Add remove button (x)
+                        const removeBtn = document.createElement('span');
+                        removeBtn.textContent = '×';
+                        removeBtn.style.cssText = 'margin-left:6px; color:#888; cursor:pointer; font-weight:bold;';
+                        removeBtn.onclick = function(e) {
+                            e.stopPropagation();
+                            weightedTagsContainer.removeChild(tagElem);
+                            weightedTags = weightedTags.filter(t => t !== tag);
+                        };
+                        tagElem.appendChild(removeBtn);
+                        weightedTagsContainer.insertBefore(tagElem, weightedTagsInput);
+                        weightedTagsInput.value = '';
+                    }
+                });
+                </script>
+
+                <label for="weighted-product-images">Images</label>
+                <div id="weighted-images-upload-container" style="border: 2px dashed #ccc; border-radius: 5px; padding: 20px; background: #fafafa; text-align: center; margin-bottom: 10px; cursor: pointer;">
+                    <span id="weighted-images-upload-text">Drag & drop images here or click to upload</span>
+                    <input type="file" id="weighted-product-images-input" accept="image/*" multiple style="display: none;">
+                    <div id="weighted-images-preview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
+                </div>
+                <script>
+                // Image upload logic for weighted product
+                const weightedImagesUploadContainer = document.getElementById('weighted-images-upload-container');
+                const weightedImagesInput = document.getElementById('weighted-product-images-input');
+                const weightedImagesPreview = document.getElementById('weighted-images-preview');
+                const weightedImagesUploadText = document.getElementById('weighted-images-upload-text');
+
+                weightedImagesUploadContainer.addEventListener('click', () => weightedImagesInput.click());
+
+                weightedImagesUploadContainer.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    weightedImagesUploadContainer.style.borderColor = '#007bff';
+                });
+                weightedImagesUploadContainer.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    weightedImagesUploadContainer.style.borderColor = '#ccc';
+                });
+                weightedImagesUploadContainer.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    weightedImagesUploadContainer.style.borderColor = '#ccc';
+                    handleWeightedFiles(e.dataTransfer.files);
+                });
+                weightedImagesInput.addEventListener('change', function(e) {
+                    handleWeightedFiles(e.target.files);
+                });
+                function handleWeightedFiles(files) {
+                    weightedImagesPreview.innerHTML = '';
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const imgWrapper = document.createElement('div');
+                            imgWrapper.style.position = 'relative';
+                            imgWrapper.style.display = 'inline-block';
+
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.style.maxWidth = '80px';
+                            img.style.maxHeight = '80px';
+                            img.style.borderRadius = '5px';
+                            imgWrapper.appendChild(img);
+
+                            // Add remove button (white x)
+                            const removeBtn = document.createElement('span');
+                            removeBtn.textContent = '×';
+                            removeBtn.style.cssText = 'position:absolute;top:2px;right:6px;background:rgba(255,255,255,0.85);color:#333;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,0.08);z-index:2;';
+                            removeBtn.onclick = function() {
+                                weightedImagesPreview.removeChild(imgWrapper);
+                                weightedImagesInput.value = '';
+                                weightedImagesUploadText.style.display = weightedImagesPreview.children.length === 0 ? 'inline' : 'none';
+                            };
+                            imgWrapper.appendChild(removeBtn);
+
+                            weightedImagesPreview.appendChild(imgWrapper);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                    weightedImagesUploadText.style.display = files.length ? 'none' : 'inline';
+                }
+                </script>
+
+                <button type="submit">Add Weighted Product</button>
+            </form>
+            <div id="weighted-admin-message"></div>
+        </div>
     </div>
+    <script>
+    function submitWeightedProduct() {
+        const product_name = document.getElementById('weighted-product-name').value.trim();
+        const price = parseFloat(document.getElementById('weighted-product-price').value);
+        const cost = parseFloat(document.getElementById('weighted-product-cost').value);
+        const description = document.getElementById('weighted-product-description').value;
+        const price_tier = parseInt(document.getElementById('weighted-product-price-tier').value);
+        const imagesInput = document.getElementById('weighted-product-images-input');
+
+        if (!product_name || isNaN(price) || isNaN(cost) || isNaN(price_tier)) {
+            showWeightedMessage('Please fill out all required fields.', false);
+            return;
+        }
+
+        const payload = {
+            product_name,
+            price,
+            cost,
+            price_tier
+        };
+        if (description && description.trim() !== "") payload.description = description.trim();
+        if (weightedTags.length > 0) payload.tags = weightedTags;
+
+        // Prepare form data for images
+        const formData = new FormData();
+        for (let i = 0; i < imagesInput.files.length; i++) {
+            formData.append('images', imagesInput.files[i]);
+        }
+        formData.append('payload', JSON.stringify(payload));
+        formData.append('bucket', 'weighted-product-images');
+
+        fetch('/api/add-weighted-product', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                showWeightedMessage(data.message, true);
+                document.getElementById('weighted-admin-form').reset();
+                weightedTags = [];
+                document.getElementById('weighted-tags-input-container').querySelectorAll('span').forEach(e => e.remove());
+                weightedImagesPreview.innerHTML = '';
+                weightedImagesUploadText.style.display = 'inline';
+            } else {
+                showWeightedMessage('Weighted product could not be added. Please ensure all tags can be found in the admin console.', false);
+            }
+        })
+        .catch(error => {
+            showWeightedMessage('Weighted product could not be added. Please ensure all tags can be found in the admin console.', false);
+        });
+    }
+    function showWeightedMessage(msg, success) {
+        const msgDiv = document.getElementById('weighted-admin-message');
+        msgDiv.textContent = msg;
+        msgDiv.className = success ? 'success' : 'error';
+    }
+    </script>
 </body>
 </html>
 

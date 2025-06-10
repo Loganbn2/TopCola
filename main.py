@@ -243,16 +243,17 @@ def add_product():
 
         # Upload images to Supabase Storage
         image_urls = []
+        bucket = request.form.get('bucket', 'product-images') if request.content_type and request.content_type.startswith('multipart/form-data') else 'product-images'
         for file in files:
             filename = secure_filename(file.filename)
+            # Ensure unique filename by prefixing with timestamp
+            unique_filename = f"{int(time.time())}_{filename}"
             file_data = file.read()
-            # Upload to Supabase Storage bucket 'product-images'
-            storage_response = supabase.storage.from_('product-images').upload(filename, file_data, {'content-type': file.mimetype})
+            storage_response = supabase.storage.from_(bucket).upload(unique_filename, file_data, {'content-type': file.mimetype})
             if hasattr(storage_response, 'error') and storage_response.error:
                 logging.error(f"Error uploading image: {storage_response.error}")
                 continue
-            # Construct public URL
-            image_url = f"{filename}"
+            image_url = f"{unique_filename}"
             image_urls.append(image_url)
 
         product_data = {
@@ -290,6 +291,69 @@ def add_product():
             return jsonify({'error': 'Failed to add product'}), 500
     except Exception as e:
         logging.error(f"Error in add_product endpoint: {e}")
+        return jsonify({'error': f"An error occurred: {str(e)}"}), 500
+
+# API endpoint to add a weighted product to the 'weighted_products' table
+@app.route('/api/add-weighted-product', methods=['POST'])
+def add_weighted_product():
+    try:
+        if request.content_type and request.content_type.startswith('multipart/form-data'):
+            files = request.files.getlist('images')
+            payload = request.form.get('payload')
+            if payload:
+                data = json.loads(payload)
+            else:
+                return jsonify({'error': 'Missing product data.'}), 400
+        else:
+            data = request.json
+            files = []
+
+        product_name = data.get('product_name', '')
+        price = data.get('price', 0.0)
+        cost = data.get('cost', 0.0)
+        description = data.get('description', None)
+        tags = data.get('tags', None)
+        price_tier = data.get('price_tier', None)
+
+        if not product_name or price is None or cost is None or price_tier is None:
+            return jsonify({'error': 'Missing required fields.'}), 400
+
+        # Upload images to Supabase Storage
+        image_urls = []
+        for file in files:
+            filename = secure_filename(file.filename)
+            # Ensure unique filename by prefixing with timestamp
+            unique_filename = f"{int(time.time())}_{filename}"
+            file_data = file.read()
+            storage_response = supabase.storage.from_('weighted-product-images').upload(unique_filename, file_data, {'content-type': file.mimetype})
+            if hasattr(storage_response, 'error') and storage_response.error:
+                logging.error(f"Error uploading image: {storage_response.error}")
+                continue
+            image_url = f"{unique_filename}"
+            image_urls.append(image_url)
+
+        weighted_product_data = {
+            'product_name': product_name,
+            'price/g': price,  # Store as price/g
+            'cost/g': cost,    # Store as cost/g
+            'price_tier': price_tier,
+            'created_at': time.strftime('%Y-%m-%d %H:%M:%S')
+        }
+        if description is not None:
+            weighted_product_data['description'] = description
+        if tags is not None:
+            weighted_product_data['tags'] = tags
+        if image_urls:
+            weighted_product_data['images'] = image_urls
+
+        response = supabase.table('weighted_products').insert(weighted_product_data).execute()
+        if response.data and len(response.data) > 0:
+            return jsonify({'message': 'Weighted product added successfully', 'product_id': response.data[0]['id']}), 201
+        else:
+            logging.error(f"Error adding weighted product: {response.error}")
+            return jsonify({'error': 'Failed to add weighted product'}), 500
+    except Exception as e:
+        logging.error(f"Error in add_weighted_product endpoint: {e}")
         return jsonify({'error': f"An error occurred: {str(e)}"}), 500
 
 # run
