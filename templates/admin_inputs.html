@@ -70,18 +70,6 @@
             z-index: 1000;
             justify-content: space-between;
         }
-        nav button {
-            background: none;
-            border: none;
-            color: #333;
-            font-size: 17px;
-            padding: 14px 0;
-            margin: 0 18px;
-            border-radius: 5px;
-            text-align: left;
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
         .nav-logo {
             width: 120px;
             margin: 10px auto 18px auto;
@@ -93,6 +81,37 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            position: relative;
+        }
+        .nav-submenu {
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            left: 210px;
+            top: 2px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            z-index: 2000;
+            min-width: 160px;
+        }
+        .nav-submenu button {
+            background: none;
+            border: none;
+            color: #333;
+            font-size: 16px;
+            padding: 10px 18px;
+            text-align: left;
+            border-radius: 0;
+            cursor: pointer;
+            opacity: 1;
+            width: 100%; /* Make submenu buttons full width */
+            box-sizing: border-box;
+            display: block;
+        }
+        .nav-submenu button:hover {
+            background: #f1f1f1;
         }
         .main-content {
             flex: 1;
@@ -235,18 +254,45 @@
             tabAddProduct.click();
         }
 
-        document.addEventListener('DOMContentLoaded', initTabs);
+        document.addEventListener('DOMContentLoaded', function() {
+            initTabs();
+            // Profit Reports submenu logic
+            const profitBtn = document.getElementById('profit-reports-btn');
+            const submenu = document.getElementById('profit-reports-submenu');
+            let submenuTimeout;
+            profitBtn.addEventListener('mouseenter', function() {
+                clearTimeout(submenuTimeout);
+                submenu.style.display = 'flex';
+            });
+            profitBtn.addEventListener('mouseleave', function() {
+                submenuTimeout = setTimeout(() => submenu.style.display = 'none', 200);
+            });
+            submenu.addEventListener('mouseenter', function() {
+                clearTimeout(submenuTimeout);
+                submenu.style.display = 'flex';
+            });
+            submenu.addEventListener('mouseleave', function() {
+                submenuTimeout = setTimeout(() => submenu.style.display = 'none', 200);
+            });
+        });
     </script>
 </head>
 <body>
     <div style="display: flex; min-height: 100vh;">
         <nav>
             <div class="nav-btns">
-                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; cursor: not-allowed; opacity: 0.7;">Orders</button>
-                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; cursor: not-allowed; opacity: 0.7;">Customers</button>
-                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; cursor: not-allowed; opacity: 0.7;">Profit Reports</button>
-                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; cursor: not-allowed; opacity: 0.7;">Admin</button>
-                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; cursor: not-allowed; opacity: 0.7;">Database</button>
+                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.location.href='https://topcola.onrender.com/orders'; return false;">Orders</button>
+                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" id="profit-reports-btn" type="button">Profit Reports</button>
+                <div class="nav-submenu" id="profit-reports-submenu">
+                    <button onclick="window.location.href='/profits-reports/7'">7 Days</button>
+                    <button onclick="window.location.href='/profits-reports/14'">14 Days</button>
+                    <button onclick="window.location.href='/profits-reports/30'">30 Days</button>
+                    <button onclick="window.location.href='/profits-reports/60'">60 Days</button>
+                    <button onclick="window.location.href='/profits-reports/90'">90 Days</button>
+                    <button onclick="window.location.href='/profits-reports/365'">1 Year</button>
+                </div>
+                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.location.href='https://topcola.onrender.com/admin'; return false;">Admin</button>
+                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.location.href='https://supabase.com/dashboard/project/otnrvaybkwsvzxgwfhfc/editor'; return false;">Database</button>
             </div>
             <img src="/static/ndc.png" alt="Nicholson Digital Co." class="nav-logo" />
         </nav>

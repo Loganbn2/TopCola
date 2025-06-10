@@ -1,256 +1,376 @@
-<style>
-  body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: #ffffff;
-    color: #222;
-    margin: 0;
-    padding: 0 0 40px 0;
-    font-size: 14px;
-    text-align: left;
-  }
-  h1 {
-    margin-top: 32px;
-    margin-bottom: 24px;
-    padding-left: 40px;
-    font-size: 18px;
-    font-weight: 600;
-    color: #000000;
-    text-align: left;
-  }
-  table {
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 95%;
-    margin: 0 0 28px 40px;
-    background: #fff;
-    border-radius: 5px;
-    overflow: hidden;
-    font-size: 14px;
-    text-align: left;
-  }
-  th, td {
-    padding: 10px 5px;
-    text-align: left;
-    font-size: 14px;
-    height: 15px;
-  }
-  th {
-    background: #000000;
-    color: #fff;
-    font-weight: 500;
-    font-size: 14px;
-    text-align: left;
-  }
-  tr:nth-child(even) td {
-    background: #f4f6fa;
-  }
-  tr:hover td {
-    background: #eaf1fb;
-    transition: background 0.2s;
-  }
-  td {
-    font-size: 14px;
-    text-align: left;
-  }
-  table:last-of-type td {
-    border-bottom: none;
-  }
-  .summary-table th {
-    background: #000000;
-    font-size: 14px;
-    text-align: left;
-  }
-  .summary-table td {
-    font-weight: 500;
-    color: #000000;
-    background: #f7f8fa;
-    font-size: 14px;
-    text-align: left;
-  }
-  .summary-table {
-    margin-bottom: 12px;
-    margin-left: 40px;
-    width: 45%;
-    font-size: 14px;
-    text-align: left;
-  }
-  .error {
-    color: #d32f2f;
-    background: #fff0f0;
-    border: 1px solid #f8bcbc;
-    padding: 10px 18px;
-    border-radius: 6px;
-    width: 80%;
-    margin: 18px auto;
-    text-align: left;
-    font-size: 14px;
-  }
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profits Reports</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; }
+        nav {
+            width: 210px;
+            min-height: 100vh;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #f1f1f1;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 24px 0 0 0;
+            gap: 8px;
+            z-index: 1000;
+            justify-content: space-between;
+        }
+        .nav-logo {
+            width: 120px;
+            margin: 10px auto 18px auto;
+            display: block;
+            opacity: 0.85;
+            padding-bottom: 30px;
+        }
+        .nav-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+        }
+        .nav-submenu {
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            left: 210px;
+            top: 2px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            z-index: 2000;
+            min-width: 160px;
+        }
+        .nav-submenu button {
+            background: none;
+            border: none;
+            color: #333;
+            font-size: 16px;
+            padding: 10px 18px;
+            text-align: left;
+            border-radius: 0;
+            cursor: pointer;
+            opacity: 1;
+            width: 100%;
+            box-sizing: border-box;
+            display: block;
+        }
+        .nav-submenu button:hover {
+            background: #f1f1f1;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-left: 210px;
+        }
+        body {
+          font-family: 'Segoe UI', Arial, sans-serif;
+          background: #ffffff;
+          color: #222;
+          margin: 0;
+          padding: 0 0 40px 0;
+          font-size: 14px;
+          text-align: left;
+        }
+        h1 {
+          margin-top: 32px;
+          margin-bottom: 24px;
+          padding-left: 40px;
+          font-size: 18px;
+          font-weight: 600;
+          color: #000000;
+          text-align: left;
+        }
+        table {
+          border-collapse: separate;
+          border-spacing: 0;
+          width: 95%;
+          margin: 0 0 28px 40px;
+          background: #fff;
+          border-radius: 5px;
+          overflow: hidden;
+          font-size: 14px;
+          text-align: left;
+        }
+        th, td {
+          padding: 10px 5px;
+          text-align: left;
+          font-size: 14px;
+          height: 15px;
+        }
+        th {
+          background: #000000;
+          color: #fff;
+          font-weight: 500;
+          font-size: 14px;
+          text-align: left;
+        }
+        tr:nth-child(even) td {
+          background: #f4f6fa;
+        }
+        tr:hover td {
+          background: #eaf1fb;
+          transition: background 0.2s;
+        }
+        td {
+          font-size: 14px;
+          text-align: left;
+        }
+        table:last-of-type td {
+          border-bottom: none;
+        }
+        .summary-table th {
+          background: #000000;
+          font-size: 14px;
+          text-align: left;
+        }
+        .summary-table td {
+          font-weight: 500;
+          color: #000000;
+          background: #f7f8fa;
+          font-size: 14px;
+          text-align: left;
+        }
+        .summary-table {
+          margin-bottom: 12px;
+          margin-left: 40px;
+          width: 45%;
+          font-size: 14px;
+          text-align: left;
+        }
+        .error {
+          color: #d32f2f;
+          background: #fff0f0;
+          border: 1px solid #f8bcbc;
+          padding: 10px 18px;
+          border-radius: 6px;
+          width: 80%;
+          margin: 18px auto;
+          text-align: left;
+          font-size: 14px;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Profit Reports submenu logic
+            const profitBtn = document.getElementById('profit-reports-btn');
+            const submenu = document.getElementById('profit-reports-submenu');
+            let submenuTimeout;
+            profitBtn.addEventListener('mouseenter', function() {
+                clearTimeout(submenuTimeout);
+                submenu.style.display = 'flex';
+            });
+            profitBtn.addEventListener('mouseleave', function() {
+                submenuTimeout = setTimeout(() => submenu.style.display = 'none', 200);
+            });
+            submenu.addEventListener('mouseenter', function() {
+                clearTimeout(submenuTimeout);
+                submenu.style.display = 'flex';
+            });
+            submenu.addEventListener('mouseleave', function() {
+                submenuTimeout = setTimeout(() => submenu.style.display = 'none', 200);
+            });
+        });
+    </script>
+</head>
+<body>
+    <div style="display: flex; min-height: 100vh;">
+        <nav>
+            <div class="nav-btns">
+                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.location.href='https://topcola.onrender.com/orders'; return false;">Orders</button>
+                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" id="profit-reports-btn" type="button">Profit Reports</button>
+                <div class="nav-submenu" id="profit-reports-submenu">
+                    <button onclick="window.location.href='/profits-reports/7'">7 Days</button>
+                    <button onclick="window.location.href='/profits-reports/14'">14 Days</button>
+                    <button onclick="window.location.href='/profits-reports/30'">30 Days</button>
+                    <button onclick="window.location.href='/profits-reports/60'">60 Days</button>
+                    <button onclick="window.location.href='/profits-reports/90'">90 Days</button>
+                    <button onclick="window.location.href='/profits-reports/365'">1 Year</button>
+                </div>
+                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.location.href='https://topcola.onrender.com/admin'; return false;">Admin</button>
+                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.location.href='https://supabase.com/dashboard/project/otnrvaybkwsvzxgwfhfc/editor'; return false;">Database</button>
+            </div>
+            <img src="/static/ndc.png" alt="Nicholson Digital Co." class="nav-logo" />
+        </nav>
+        <div class="main-content">
+          <h1>All Orders</h1>
+          {% if error %}
+            <div class="error">{{ error }}</div>
+          {% endif %}
 
-<h1>All Orders</h1>
-{% if error %}
-  <div class="error">{{ error }}</div>
-{% endif %}
-
-{% if orders and orders|length > 0 %}
-  {% set exclude_keys = ['items', 'flower', 'address', 'city', 'state', 'item_cost', 'flower_cost', 'zip', 'phone', 'email', 'fulfillment_status', 'delivery_time'] %}
-  {% set filtered_orders = [] %}
-  {% set ns = namespace(total_sum=0, total_count=0, discounts_sum=0, discounts_count=0, bxgo_sum=0, bxgo_count=0, volume_sum=0, volume_count=0, promo_sum=0, promo_count=0, profit_sum=0, profit_count=0, margin_sum=0, margin_count=0, profit_margin_num=0, profit_margin_den=0) %}
-  {% for order in orders %}
-    {% if order['created_at'] and order['created_at'] > cutoff_date.strftime('%Y-%m-%d %H:%M:%S') %}
-      {% set _ = filtered_orders.append(order) %}
-      {% if order['total'] is not none %}
-        {% set ns.total_sum = ns.total_sum + (order['total']|float) %}
-        {% set ns.total_count = ns.total_count + 1 %}
-        {% set ns.profit_margin_den = ns.profit_margin_den + (order['total']|float) %}
-      {% endif %}
-      {% if order['total_discounts'] is not none %}
-        {% set ns.discounts_sum = ns.discounts_sum + (order['total_discounts']|float) %}
-        {% set ns.discounts_count = ns.discounts_count + 1 %}
-      {% endif %}
-      {% if order['BXGO_discounts'] is not none %}
-        {% set ns.bxgo_sum = ns.bxgo_sum + (order['BXGO_discounts']|float) %}
-        {% set ns.bxgo_count = ns.bxgo_count + 1 %}
-      {% endif %}
-      {% if order['volume_discounts'] is not none %}
-        {% set ns.volume_sum = ns.volume_sum + (order['volume_discounts']|float) %}
-        {% set ns.volume_count = ns.volume_count + 1 %}
-      {% endif %}
-      {% if order['promo_discounts'] is not none %}
-        {% set ns.promo_sum = ns.promo_sum + (order['promo_discounts']|float) %}
-        {% set ns.promo_count = ns.promo_count + 1 %}
-      {% endif %}
-      {% if order['order_profit'] is not none %}
-        {% set ns.profit_sum = ns.profit_sum + (order['order_profit']|float) %}
-        {% set ns.profit_count = ns.profit_count + 1 %}
-        {% set ns.profit_margin_num = ns.profit_margin_num + (order['order_profit']|float) %}
-      {% endif %}
-      {% if order['profit_margin'] is not none %}
-        {% set ns.margin_sum = ns.margin_sum + (order['profit_margin']|float) %}
-        {% set ns.margin_count = ns.margin_count + 1 %}
-      {% endif %}
-    {% endif %}
-  {% endfor %}
-  <table class="summary-table" border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 20px;">
-    <thead>
-      <tr>
-        <th>Average Order Total</th>
-        <th>Average Total Discounts</th>
-        <th>Average Order Profit</th>
-        <th>Profit Margin</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          {% if ns.total_count > 0 %}
-            ${{ '%.2f' % ((ns.total_sum / ns.total_count)|float) }}
+          {% if orders and orders|length > 0 %}
+            {% set exclude_keys = ['items', 'flower', 'address', 'city', 'state', 'item_cost', 'flower_cost', 'zip', 'phone', 'email', 'fulfillment_status', 'delivery_time'] %}
+            {% set filtered_orders = [] %}
+            {% set ns = namespace(total_sum=0, total_count=0, discounts_sum=0, discounts_count=0, bxgo_sum=0, bxgo_count=0, volume_sum=0, volume_count=0, promo_sum=0, promo_count=0, profit_sum=0, profit_count=0, margin_sum=0, margin_count=0, profit_margin_num=0, profit_margin_den=0) %}
+            {% for order in orders %}
+              {% if order['created_at'] and order['created_at'] > cutoff_date.strftime('%Y-%m-%d %H:%M:%S') %}
+                {% set _ = filtered_orders.append(order) %}
+                {% if order['total'] is not none %}
+                  {% set ns.total_sum = ns.total_sum + (order['total']|float) %}
+                  {% set ns.total_count = ns.total_count + 1 %}
+                  {% set ns.profit_margin_den = ns.profit_margin_den + (order['total']|float) %}
+                {% endif %}
+                {% if order['total_discounts'] is not none %}
+                  {% set ns.discounts_sum = ns.discounts_sum + (order['total_discounts']|float) %}
+                  {% set ns.discounts_count = ns.discounts_count + 1 %}
+                {% endif %}
+                {% if order['BXGO_discounts'] is not none %}
+                  {% set ns.bxgo_sum = ns.bxgo_sum + (order['BXGO_discounts']|float) %}
+                  {% set ns.bxgo_count = ns.bxgo_count + 1 %}
+                {% endif %}
+                {% if order['volume_discounts'] is not none %}
+                  {% set ns.volume_sum = ns.volume_sum + (order['volume_discounts']|float) %}
+                  {% set ns.volume_count = ns.volume_count + 1 %}
+                {% endif %}
+                {% if order['promo_discounts'] is not none %}
+                  {% set ns.promo_sum = ns.promo_sum + (order['promo_discounts']|float) %}
+                  {% set ns.promo_count = ns.promo_count + 1 %}
+                {% endif %}
+                {% if order['order_profit'] is not none %}
+                  {% set ns.profit_sum = ns.profit_sum + (order['order_profit']|float) %}
+                  {% set ns.profit_count = ns.profit_count + 1 %}
+                  {% set ns.profit_margin_num = ns.profit_margin_num + (order['order_profit']|float) %}
+                {% endif %}
+                {% if order['profit_margin'] is not none %}
+                  {% set ns.margin_sum = ns.margin_sum + (order['profit_margin']|float) %}
+                  {% set ns.margin_count = ns.margin_count + 1 %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            <table class="summary-table" border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 20px;">
+              <thead>
+                <tr>
+                  <th>Average Order Total</th>
+                  <th>Average Total Discounts</th>
+                  <th>Average Order Profit</th>
+                  <th>Profit Margin</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    {% if ns.total_count > 0 %}
+                      ${{ '%.2f' % ((ns.total_sum / ns.total_count)|float) }}
+                    {% else %}
+                      N/A
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if ns.discounts_count > 0 %}
+                      ${{ '%.2f' % ((ns.discounts_sum / ns.discounts_count)|float) }}
+                    {% else %}
+                      N/A
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if ns.profit_count > 0 %}
+                      ${{ '%.2f' % ((ns.profit_sum / ns.profit_count)|float) }}
+                    {% else %}
+                      N/A
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if ns.profit_margin_den > 0 %}
+                      {{ ((ns.profit_margin_num / ns.profit_margin_den) * 100) | round(0) | int }}%
+                    {% else %}
+                      N/A
+                    {% endif %}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table class="summary-table" border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 20px;">
+              <thead>
+                <tr>
+                  <th>Average BXGO Discounts</th>
+                  <th>Average Flower Discounts</th>
+                  <th>Average Promo Discounts</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    {% if ns.bxgo_count > 0 %}
+                      ${{ '%.2f' % ((ns.bxgo_sum / ns.bxgo_count)|float) }}
+                    {% else %}
+                      N/A
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if ns.volume_count > 0 %}
+                      ${{ '%.2f' % ((ns.volume_sum / ns.volume_count)|float) }}
+                    {% else %}
+                      N/A
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if ns.promo_count > 0 %}
+                      ${{ '%.2f' % ((ns.promo_sum / ns.promo_count)|float) }}
+                    {% else %}
+                      N/A
+                    {% endif %}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table border="1" cellpadding="5" cellspacing="0">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Full Name</th>
+                  <th>Order Date</th>
+                  <th>Final Order Total</th>
+                  <th>Total Discounts</th>
+                  <th>Order Profit</th>
+                  <th>Profit Margin</th>
+                  <th>BXGO Discounts</th>
+                  <th>Flower Discounts</th>
+                  <th>Promo Discounts</th>
+                  <th>Payment Method</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in filtered_orders %}
+                  <tr>
+                    <td>{{ order['id'] }}</td>
+                    <td>{{ order['full_name'] }}</td>
+                    <td>
+                      {% set dt = order['created_at'][:10] %}
+                      {% set year = dt[0:4] %}
+                      {% set month = dt[5:7]|int %}
+                      {% set day = dt[8:10]|int %}
+                      {% set month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+                      {{ month_names[month-1] }} {{ day }}, {{ year }}
+                    </td>
+                    <td>{% if order['total'] is not none %}${{ '%.2f' % (order['total']|float) }}{% endif %}</td>
+                    <td>{% if order['total_discounts'] is not none %}${{ '%.2f' % (order['total_discounts']|float) }}{% endif %}</td>
+                    <td>{% if order['order_profit'] is not none %}${{ '%.2f' % (order['order_profit']|float) }}{% endif %}</td>
+                    <td>{% if order['profit_margin'] is not none %}{{ (order['profit_margin']|float * 100) | round(0) | int }}%{% endif %}</td>
+                    <td>{% if order['BXGO_discounts'] is not none %}${{ '%.2f' % (order['BXGO_discounts']|float) }}{% endif %}</td>
+                    <td>{% if order['volume_discounts'] is not none %}${{ '%.2f' % (order['volume_discounts']|float) }}{% endif %}</td>
+                    <td>{% if order['promo_discounts'] is not none %}${{ '%.2f' % (order['promo_discounts']|float) }}{% endif %}</td>
+                    <td>{{ order['payment_method'] }}</td>
+                  </tr>
+                {% endfor %}
+                {% if filtered_orders|length == 0 %}
+                  <tr><td colspan="11">No orders in the last 14 days.</td></tr>
+                {% endif %}
+              </tbody>
+            </table>
           {% else %}
-            N/A
+            <p>No orders found.</p>
           {% endif %}
-        </td>
-        <td>
-          {% if ns.discounts_count > 0 %}
-            ${{ '%.2f' % ((ns.discounts_sum / ns.discounts_count)|float) }}
-          {% else %}
-            N/A
-          {% endif %}
-        </td>
-        <td>
-          {% if ns.profit_count > 0 %}
-            ${{ '%.2f' % ((ns.profit_sum / ns.profit_count)|float) }}
-          {% else %}
-            N/A
-          {% endif %}
-        </td>
-        <td>
-          {% if ns.profit_margin_den > 0 %}
-            {{ ((ns.profit_margin_num / ns.profit_margin_den) * 100) | round(0) | int }}%
-          {% else %}
-            N/A
-          {% endif %}
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <table class="summary-table" border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 20px;">
-    <thead>
-      <tr>
-        <th>Average BXGO Discounts</th>
-        <th>Average Flower Discounts</th>
-        <th>Average Promo Discounts</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          {% if ns.bxgo_count > 0 %}
-            ${{ '%.2f' % ((ns.bxgo_sum / ns.bxgo_count)|float) }}
-          {% else %}
-            N/A
-          {% endif %}
-        </td>
-        <td>
-          {% if ns.volume_count > 0 %}
-            ${{ '%.2f' % ((ns.volume_sum / ns.volume_count)|float) }}
-          {% else %}
-            N/A
-          {% endif %}
-        </td>
-        <td>
-          {% if ns.promo_count > 0 %}
-            ${{ '%.2f' % ((ns.promo_sum / ns.promo_count)|float) }}
-          {% else %}
-            N/A
-          {% endif %}
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-      <tr>
-        <th>Order ID</th>
-        <th>Full Name</th>
-        <th>Order Date</th>
-        <th>Final Order Total</th>
-        <th>Total Discounts</th>
-        <th>Order Profit</th>
-        <th>Profit Margin</th>
-        <th>BXGO Discounts</th>
-        <th>Flower Discounts</th>
-        <th>Promo Discounts</th>
-        <th>Payment Method</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for order in filtered_orders %}
-        <tr>
-          <td>{{ order['id'] }}</td>
-          <td>{{ order['full_name'] }}</td>
-          <td>
-            {% set dt = order['created_at'][:10] %}
-            {% set year = dt[0:4] %}
-            {% set month = dt[5:7]|int %}
-            {% set day = dt[8:10]|int %}
-            {% set month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
-            {{ month_names[month-1] }} {{ day }}, {{ year }}
-          </td>
-          <td>{% if order['total'] is not none %}${{ '%.2f' % (order['total']|float) }}{% endif %}</td>
-          <td>{% if order['total_discounts'] is not none %}${{ '%.2f' % (order['total_discounts']|float) }}{% endif %}</td>
-          <td>{% if order['order_profit'] is not none %}${{ '%.2f' % (order['order_profit']|float) }}{% endif %}</td>
-          <td>{% if order['profit_margin'] is not none %}{{ (order['profit_margin']|float * 100) | round(0) | int }}%{% endif %}</td>
-          <td>{% if order['BXGO_discounts'] is not none %}${{ '%.2f' % (order['BXGO_discounts']|float) }}{% endif %}</td>
-          <td>{% if order['volume_discounts'] is not none %}${{ '%.2f' % (order['volume_discounts']|float) }}{% endif %}</td>
-          <td>{% if order['promo_discounts'] is not none %}${{ '%.2f' % (order['promo_discounts']|float) }}{% endif %}</td>
-          <td>{{ order['payment_method'] }}</td>
-        </tr>
-      {% endfor %}
-      {% if filtered_orders|length == 0 %}
-        <tr><td colspan="11">No orders in the last 14 days.</td></tr>
-      {% endif %}
-    </tbody>
-  </table>
-{% else %}
-  <p>No orders found.</p>
-{% endif %}
+        </div>
+    </div>
+</body>
+</html>
