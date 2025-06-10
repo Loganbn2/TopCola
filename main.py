@@ -200,6 +200,61 @@ def profits_reports(delta=7):
         logging.error(f"Error rendering profits reports: {e}")
         return render_template('profits_reports.html', orders=[], error=f"An error occurred: {str(e)}", cutoff_date=None, delta=delta)
 
+# admin_inputs.html
+@app.route('/admin', methods=['GET'])
+def render_admin_inputs():
+    try:
+        # You can add logic here to fetch data for the admin_inputs page if needed
+        return render_template('admin_inputs.html', error=None)
+    except Exception as e:
+        logging.error(f"Error rendering admin inputs: {e}")
+        return render_template('admin_inputs.html', error=f"An error occurred: {str(e)}")
+
+
+# API endpoint to add a product to the 'products' table
+@app.route('/api/add-product', methods=['POST'])
+def add_product():
+    try:
+        data = request.json
+        product_name = data.get('product_name', '')
+        price = data.get('price', 0.0)
+        cost = data.get('cost', 0.0)
+        description = data.get('description', '')
+        original_price = data.get('original_price', None)
+        group = data.get('group', None)
+
+        if not product_name or price is None or cost is None or not description:
+            return jsonify({'error': 'Missing required fields.'}), 400
+
+        product_data = {
+            'product_name': product_name,
+            'price': price,
+            'cost': cost,
+            'description': description,
+            'created_at': time.strftime('%Y-%m-%d %H:%M:%S')
+        }
+        if original_price is not None:
+            product_data['original_price'] = original_price
+        if group:
+            product_data['group'] = group
+
+        response = supabase.table('products').insert(product_data).execute()
+        if response.data and len(response.data) > 0:
+            return jsonify({'message': 'Product added successfully', 'product_id': response.data[0]['id']}), 201
+        else:
+            # Check for foreign key violation on group
+            error_str = str(response.error) if response.error else ''
+            if (
+                'violates foreign key constraint' in error_str and 'products_group_fkey' in error_str
+            ) or (
+                'Key (group)' in error_str and 'is not present in table "groups"' in error_str
+            ):
+                return jsonify({'error': 'Group does not exist.'}), 400
+            logging.error(f"Error adding product: {response.error}")
+            return jsonify({'error': 'Failed to add product'}), 500
+    except Exception as e:
+        logging.error(f"Error in add_product endpoint: {e}")
+        return jsonify({'error': f"An error occurred: {str(e)}"}), 500
 
 # run
 if __name__ == "__main__":

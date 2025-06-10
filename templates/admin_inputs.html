@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Inputs</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; }
+        .admin-container { max-width: 600px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        h1 { text-align: center; }
+        form { display: flex; flex-direction: column; gap: 15px; }
+        label { font-weight: bold; }
+        input, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
+        button { padding: 10px; background: #007bff; color: #fff; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .success, .error { margin-top: 15px; text-align: center; font-weight: bold; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+    <script>
+        function submitProduct() {
+            const product_name = document.getElementById('product-name').value.trim();
+            const price = parseFloat(document.getElementById('product-price').value);
+            const cost = parseFloat(document.getElementById('product-cost').value);
+            const description = document.getElementById('product-description').value.trim();
+            const original_price = document.getElementById('product-original-price').value;
+            const group = document.getElementById('product-group').value.trim();
+
+            if (!product_name || isNaN(price) || isNaN(cost) || !description) {
+                showMessage('Please fill out all required fields.', false);
+                return;
+            }
+
+            // Only include non-required fields if they have a value
+            const payload = {
+                product_name,
+                price,
+                cost,
+                description
+            };
+            if (original_price !== "") payload.original_price = parseFloat(original_price);
+            if (group !== "") payload.group = group;
+
+            fetch('/api/add-product', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    showMessage(data.message, true);
+                    document.getElementById('admin-form').reset();
+                } else {
+                    showMessage('Product could not be added. Please ensure that all groups and tags added can be found in the admin console.', false);
+                }
+            })
+            .catch(error => {
+                showMessage('Product could not be added. Please ensure that all groups and tags added can be found in the admin console.', false);
+            });
+        }
+
+        function showMessage(msg, success) {
+            const msgDiv = document.getElementById('admin-message');
+            msgDiv.textContent = msg;
+            msgDiv.className = success ? 'success' : 'error';
+        }
+    </script>
+</head>
+<body>
+    <div class="admin-container">
+        <h1>Add New Product</h1>
+        <form id="admin-form" onsubmit="event.preventDefault(); submitProduct();">
+            <label for="product-name">Product Name*</label>
+            <input type="text" id="product-name" required>
+
+            <label for="product-price">Price ($)*</label>
+            <input type="number" id="product-price" step="0.01" min="0" required>
+
+            <label for="product-cost">Cost ($)*</label>
+            <input type="number" id="product-cost" step="0.01" min="0" required>
+
+            <label for="product-original-price">Original Price ($)</label>
+            <input type="number" id="product-original-price" step="0.01" min="0">
+
+            <label for="product-group">Group</label>
+            <input type="text" id="product-group">
+
+            <label for="product-description">Description*</label>
+            <textarea id="product-description" rows="3" required></textarea>
+
+            <button type="submit">Add Product</button>
+        </form>
+        <div id="admin-message"></div>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+    </div>
+</body>
+</html>
+
