@@ -406,6 +406,67 @@ def add_promo_code():
         logging.error(f"Error in add_promo_code endpoint: {e}")
         return jsonify({'error': f"An error occurred: {str(e)}"}), 500
 
+# API endpoint to add a group to the 'groups' table
+@app.route('/api/add-bxgo-group', methods=['POST'])
+def add_bxgo_group():
+    try:
+        data = request.json
+        group = data.get('group', '').strip() if data else ''
+        BOGO = bool(data.get('BOGO', False))
+        B2GO = bool(data.get('B2GO', False))
+        B3GO = bool(data.get('B3GO', False))
+        if not group:
+            return jsonify({'error': 'Group name is required.'}), 400
+        insert_data = {'group': group, 'BOGO': BOGO, 'B2GO': B2GO, 'B3GO': B3GO}
+        response = supabase.table('groups').insert(insert_data).execute()
+        if response.data and len(response.data) > 0:
+            inserted = response.data[0]
+            group_id = inserted.get('id') or next(iter(inserted.values()), None)
+            return jsonify({'message': 'Group added successfully', 'group_id': group_id}), 201
+        else:
+            error_str = str(response.error) if response.error else ''
+            if 'duplicate key value' in error_str or 'already exists' in error_str:
+                return jsonify({'error': 'Group already exists.'}), 400
+            return jsonify({'error': 'Failed to add group.'}), 500
+    except Exception as e:
+        logging.error(f"Error in add_bxgo_group endpoint: {e}")
+        return jsonify({'error': f"An error occurred: {str(e)}"}), 500
+
+# API endpoint to add a flower price tier to the 'volume_discounts' table
+@app.route('/api/add-flower-price-tier', methods=['POST'])
+def add_flower_price_tier():
+    try:
+        data = request.json
+        tier = data.get('tier', None)
+        discount_4g = data.get('4g_discount', None)
+        discount_7g = data.get('7g_discount', None)
+        discount_14g = data.get('14g_discount', None)
+        discount_28g = data.get('28g_discount', None)
+        if tier is None:
+            return jsonify({'error': 'Tier is required.'}), 400
+        insert_data = {'tier': tier}
+        if discount_4g is not None:
+            insert_data['4g_discount'] = discount_4g
+        if discount_7g is not None:
+            insert_data['7g_discount'] = discount_7g
+        if discount_14g is not None:
+            insert_data['14g_discount'] = discount_14g
+        if discount_28g is not None:
+            insert_data['28g_discount'] = discount_28g
+        response = supabase.table('volume_discounts').insert(insert_data).execute()
+        if response.data and len(response.data) > 0:
+            inserted = response.data[0]
+            tier_id = inserted.get('id') or next(iter(inserted.values()), None)
+            return jsonify({'message': 'Flower price tier added successfully', 'tier_id': tier_id}), 201
+        else:
+            error_str = str(response.error) if response.error else ''
+            if 'duplicate key value' in error_str or 'already exists' in error_str:
+                return jsonify({'error': 'Tier already exists.'}), 400
+            return jsonify({'error': 'Failed to add flower price tier.'}), 500
+    except Exception as e:
+        logging.error(f"Error in add_flower_price_tier endpoint: {e}")
+        return jsonify({'error': f"An error occurred: {str(e)}"}), 500
+
 # run
 if __name__ == "__main__":
     polling.start_polling()

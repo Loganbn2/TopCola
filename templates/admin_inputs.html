@@ -355,6 +355,79 @@
                 msgDiv.className = 'error';
             });
         }
+
+        function submitBXGOGroup() {
+            const group = document.getElementById('bxgo-group').value.trim();
+            const bogo = document.getElementById('bogo').checked;
+            const b2go = document.getElementById('b2go').checked;
+            const b3go = document.getElementById('b3go').checked;
+            const msgDiv = document.getElementById('add-bxgo-group-message');
+            if (!group) {
+                msgDiv.textContent = 'Group name is required.';
+                msgDiv.className = 'error';
+                return;
+            }
+            const payload = { group, BOGO: bogo, B2GO: b2go, B3GO: b3go };
+            fetch('/api/add-bxgo-group', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    msgDiv.textContent = data.message;
+                    msgDiv.className = 'success';
+                    document.getElementById('add-bxgo-group-form').reset();
+                } else {
+                    msgDiv.textContent = 'Could not add group.';
+                    msgDiv.className = 'error';
+                }
+            })
+            .catch(() => {
+                msgDiv.textContent = 'Could not add group.';
+                msgDiv.className = 'error';
+            });
+        }
+
+        function submitFlowerPriceTier() {
+            const tier = document.getElementById('tier').value;
+            const discount4g = document.getElementById('discount-4g').value;
+            const discount7g = document.getElementById('discount-7g').value;
+            const discount14g = document.getElementById('discount-14g').value;
+            const discount28g = document.getElementById('discount-28g').value;
+            const msgDiv = document.getElementById('add-flower-price-tier-message');
+            if (!tier) {
+                msgDiv.textContent = 'Tier is required.';
+                msgDiv.className = 'error';
+                return;
+            }
+            const payload = { tier: parseInt(tier) };
+            if (discount4g !== "") payload['4g_discount'] = parseFloat(discount4g);
+            if (discount7g !== "") payload['7g_discount'] = parseFloat(discount7g);
+            if (discount14g !== "") payload['14g_discount'] = parseFloat(discount14g);
+            if (discount28g !== "") payload['28g_discount'] = parseFloat(discount28g);
+            fetch('/api/add-flower-price-tier', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    msgDiv.textContent = data.message;
+                    msgDiv.className = 'success';
+                    document.getElementById('add-flower-price-tier-form').reset();
+                } else {
+                    msgDiv.textContent = 'Could not add flower price tier.';
+                    msgDiv.className = 'error';
+                }
+            })
+            .catch(() => {
+                msgDiv.textContent = 'Could not add flower price tier.';
+                msgDiv.className = 'error';
+            });
+        }
     </script>
 </head>
 <body>
@@ -372,7 +445,7 @@
                     <button onclick="window.location.href='/profits-reports/365'">1 Year</button>
                 </div>
                 <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.location.href='https://topcola.onrender.com/admin'; return false;">Admin</button>
-                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.location.href='https://supabase.com/dashboard/project/otnrvaybkwsvzxgwfhfc/editor'; return false;">Database</button>
+                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.open('https://supabase.com/dashboard/project/otnrvaybkwsvzxgwfhfc/editor', '_blank'); return false;">Database</button>
             </div>
             <img src="/static/ndc.png" alt="Nicholson Digital Co." class="nav-logo" />
         </nav>
@@ -686,7 +759,17 @@
                     </form>
                     <div id="weighted-admin-message"></div>
                 </div>
-                <div id="add-bxgo-group-section" style="display:none;"></div>
+                <div id="add-bxgo-group-section" style="display:none;">
+                    <form id="add-bxgo-group-form" onsubmit="event.preventDefault(); submitBXGOGroup();" style="display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 400px;">
+                        <label for="bxgo-group">Group Name*</label>
+                        <input type="text" id="bxgo-group" name="bxgo-group" required autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
+                        <label><input type="checkbox" id="bogo" name="bogo"> BOGO</label>
+                        <label><input type="checkbox" id="b2go" name="b2go"> B2GO</label>
+                        <label><input type="checkbox" id="b3go" name="b3go"> B3GO</label>
+                        <button type="submit">Add BXGO Group</button>
+                        <div id="add-bxgo-group-message" style="margin-top:8px; text-align:center;"></div>
+                    </form>
+                </div>
                 <div id="add-promo-code-section" style="display:none;">
                     <form id="add-promo-code-form" onsubmit="event.preventDefault(); submitPromoCode();" style="display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 400px;">
                         <label for="promo-code">Promo Code*</label>
@@ -707,7 +790,22 @@
                         <div id="add-tag-message" style="margin-top:8px; text-align:center;"></div>
                     </form>
                 </div>
-                <div id="add-flower-price-tier-section" style="display:none;"></div>
+                <div id="add-flower-price-tier-section" style="display:none;">
+                    <form id="add-flower-price-tier-form" onsubmit="event.preventDefault(); submitFlowerPriceTier();" style="display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 400px;">
+                        <label for="tier">Tier*</label>
+                        <input type="number" id="tier" name="tier" required min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
+                        <label for="discount-4g">4g Discount ($)</label>
+                        <input type="number" id="discount-4g" name="discount-4g" step="0.01" min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
+                        <label for="discount-7g">7g Discount ($)</label>
+                        <input type="number" id="discount-7g" name="discount-7g" step="0.01" min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
+                        <label for="discount-14g">14g Discount ($)</label>
+                        <input type="number" id="discount-14g" name="discount-14g" step="0.01" min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
+                        <label for="discount-28g">28g Discount ($)</label>
+                        <input type="number" id="discount-28g" name="discount-28g" step="0.01" min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
+                        <button type="submit">Add Flower Price Tier</button>
+                        <div id="add-flower-price-tier-message" style="margin-top:8px; text-align:center;"></div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
