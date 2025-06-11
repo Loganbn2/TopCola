@@ -356,6 +356,56 @@ def add_weighted_product():
         logging.error(f"Error in add_weighted_product endpoint: {e}")
         return jsonify({'error': f"An error occurred: {str(e)}"}), 500
 
+# API endpoint to add a tag to the 'tag' table
+@app.route('/api/add-tag', methods=['POST'])
+def add_tag():
+    try:
+        data = request.json
+        name = data.get('name', '').strip() if data else ''
+        if not name:
+            return jsonify({'error': 'Tag name is required.'}), 400
+        response = supabase.table('tags').insert({'name': name}).execute()
+        if response.data and len(response.data) > 0:
+            return jsonify({'message': 'Tag added successfully', 'tag_id': response.data[0]['id']}), 201
+        else:
+            error_str = str(response.error) if response.error else ''
+            if 'duplicate key value' in error_str or 'already exists' in error_str:
+                return jsonify({'error': 'Tag already exists.'}), 400
+            return jsonify({'error': 'Failed to add tag.'}), 500
+    except Exception as e:
+        logging.error(f"Error in add_tag endpoint: {e}")
+        return jsonify({'error': f"An error occurred: {str(e)}"}), 500
+
+# API endpoint to add a promo code to the 'promo_codes' table
+@app.route('/api/add-promo-code', methods=['POST'])
+def add_promo_code():
+    try:
+        data = request.json
+        code = data.get('code', '').strip() if data else ''
+        dollars_off = data.get('dollars_off', None)
+        percent_off = data.get('percent_off', None)
+        if not code:
+            return jsonify({'error': 'Promo code is required.'}), 400
+        insert_data = {'code': code}
+        if dollars_off is not None:
+            insert_data['dollars_off'] = dollars_off
+        if percent_off is not None:
+            insert_data['percent_off'] = percent_off
+        response = supabase.table('promo_codes').insert(insert_data).execute()
+        if response.data and len(response.data) > 0:
+            # Defensive: return the first key if 'id' is not present
+            inserted = response.data[0]
+            promo_code_id = inserted.get('id') or next(iter(inserted.values()), None)
+            return jsonify({'message': 'Promo code added successfully', 'promo_code_id': promo_code_id}), 201
+        else:
+            error_str = str(response.error) if response.error else ''
+            if 'duplicate key value' in error_str or 'already exists' in error_str:
+                return jsonify({'error': 'Promo code already exists.'}), 400
+            return jsonify({'error': 'Failed to add promo code.'}), 500
+    except Exception as e:
+        logging.error(f"Error in add_promo_code endpoint: {e}")
+        return jsonify({'error': f"An error occurred: {str(e)}"}), 500
+
 # run
 if __name__ == "__main__":
     polling.start_polling()

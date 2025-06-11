@@ -275,6 +275,86 @@
                 submenuTimeout = setTimeout(() => submenu.style.display = 'none', 200);
             });
         });
+
+        // Tag modal logic
+        const openTagModalBtn = document.getElementById('open-add-tag-modal');
+        const tagModal = document.getElementById('add-tag-modal');
+        const closeTagModalBtn = document.getElementById('close-add-tag-modal');
+        openTagModalBtn.addEventListener('click', function() {
+            tagModal.style.display = 'flex';
+            document.getElementById('tag-name').focus();
+            document.getElementById('add-tag-message').textContent = '';
+        });
+        closeTagModalBtn.addEventListener('click', function() {
+            tagModal.style.display = 'none';
+        });
+        tagModal.addEventListener('click', function(e) {
+            if (e.target === tagModal) tagModal.style.display = 'none';
+        });
+        function submitTag() {
+            const tagName = document.getElementById('tag-name').value.trim();
+            const msgDiv = document.getElementById('add-tag-message');
+            if (!tagName) {
+                msgDiv.textContent = 'Tag name is required.';
+                msgDiv.className = 'error';
+                return;
+            }
+            fetch('/api/add-tag', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: tagName })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    msgDiv.textContent = data.message;
+                    msgDiv.className = 'success';
+                    document.getElementById('add-tag-form').reset();
+                } else {
+                    msgDiv.textContent = 'Could not add tag.';
+                    msgDiv.className = 'error';
+                }
+            })
+            .catch(() => {
+                msgDiv.textContent = 'Could not add tag.';
+                msgDiv.className = 'error';
+            });
+        }
+
+        function submitPromoCode() {
+            const code = document.getElementById('promo-code').value.trim();
+            const dollarsOff = document.getElementById('dollars-off').value;
+            const percentOff = document.getElementById('percent-off').value;
+            const msgDiv = document.getElementById('add-promo-code-message');
+            if (!code) {
+                msgDiv.textContent = 'Promo code is required.';
+                msgDiv.className = 'error';
+                return;
+            }
+            const payload = { code };
+            if (dollarsOff !== "") payload.dollars_off = parseFloat(dollarsOff);
+            if (percentOff !== "") payload.percent_off = parseInt(percentOff);
+            fetch('/api/add-promo-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    msgDiv.textContent = data.message;
+                    msgDiv.className = 'success';
+                    document.getElementById('add-promo-code-form').reset();
+                } else {
+                    msgDiv.textContent = 'Could not add promo code.';
+                    msgDiv.className = 'error';
+                }
+            })
+            .catch(() => {
+                msgDiv.textContent = 'Could not add promo code.';
+                msgDiv.className = 'error';
+            });
+        }
     </script>
 </head>
 <body>
@@ -607,8 +687,26 @@
                     <div id="weighted-admin-message"></div>
                 </div>
                 <div id="add-bxgo-group-section" style="display:none;"></div>
-                <div id="add-promo-code-section" style="display:none;"></div>
-                <div id="add-tag-section" style="display:none;"></div>
+                <div id="add-promo-code-section" style="display:none;">
+                    <form id="add-promo-code-form" onsubmit="event.preventDefault(); submitPromoCode();" style="display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 400px;">
+                        <label for="promo-code">Promo Code*</label>
+                        <input type="text" id="promo-code" name="promo-code" required autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
+                        <label for="dollars-off">Dollars Off</label>
+                        <input type="number" id="dollars-off" name="dollars-off" step="0.01" min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
+                        <label for="percent-off">Percent Off</label>
+                        <input type="number" id="percent-off" name="percent-off" min="0" max="100" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
+                        <button type="submit">Add Promo Code</button>
+                        <div id="add-promo-code-message" style="margin-top:8px; text-align:center;"></div>
+                    </form>
+                </div>
+                <div id="add-tag-section" style="display:none;">
+                    <form id="add-tag-form" onsubmit="event.preventDefault(); submitTag();" style="display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 400px;">
+                        <label for="tag-name">Tag Name*</label>
+                        <input type="text" id="tag-name" name="tag-name" required autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
+                        <button type="submit">Add Tag</button>
+                        <div id="add-tag-message" style="margin-top:8px; text-align:center;"></div>
+                    </form>
+                </div>
                 <div id="add-flower-price-tier-section" style="display:none;"></div>
             </div>
         </div>
