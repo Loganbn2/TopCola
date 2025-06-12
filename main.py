@@ -544,6 +544,31 @@ def delete_product():
     except Exception as e:
         return {"error": str(e)}, 500
 
+# API endpoint to delete a weighted product and its associated WordPress post
+@app.route('/api/delete-weighted-product', methods=['POST'])
+def delete_weighted_product():
+    try:
+        data = request.get_json()
+        product_id = data.get('product_id')
+        if not product_id:
+            return {"error": "No product_id provided."}, 400
+        # Fetch the weighted product from Supabase to get wp_post_id
+        response = supabase.table('weighted_products').select('wp_post_id').eq('id', product_id).execute()
+        if not response.data or len(response.data) == 0:
+            return {"error": f"Weighted product with id {product_id} not found."}, 404
+        wp_post_id = response.data[0].get('wp_post_id')
+        if not wp_post_id:
+            return {"error": f"No wp_post_id found for weighted product {product_id}."}, 400
+        # Delete the WordPress post
+        wp_deleted = delete_wordpress_post(wp_post_id)
+        if not wp_deleted:
+            return {"error": f"Failed to delete WordPress post {wp_post_id}."}, 500
+        # Optionally, delete the weighted product from Supabase
+        supabase.table('weighted_products').delete().eq('id', product_id).execute()
+        return {"message": f"Weighted product {product_id} and WordPress post {wp_post_id} deleted successfully."}
+    except Exception as e:
+        return {"error": str(e)}, 500
+
 # run
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5001)

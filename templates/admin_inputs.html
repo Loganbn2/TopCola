@@ -297,7 +297,7 @@
                 submenuTimeout = setTimeout(() => submenu.style.display = 'none', 200);
             });
 
-            // Delete Product Modal logic (move here to ensure DOM is loaded)
+            // Delete Product Modal logic
             const openDeleteProductModalBtn = document.getElementById('open-delete-product-modal');
             const deleteProductModal = document.getElementById('delete-product-modal');
             const closeDeleteProductModalBtn = document.getElementById('close-delete-product-modal');
@@ -346,6 +346,58 @@
             deleteProductModal.addEventListener('click', function(e) {
                 if (e.target === deleteProductModal) deleteProductModal.style.display = 'none';
             });
+
+            // Delete Weighted Product Modal logic
+            const openDeleteWeightedProductModalBtn = document.getElementById('open-delete-weighted-product-modal');
+            const deleteWeightedProductModal = document.getElementById('delete-weighted-product-modal');
+            const closeDeleteWeightedProductModalBtn = document.getElementById('close-delete-weighted-product-modal');
+            const deleteWeightedProductBtn = document.getElementById('delete-weighted-product-btn');
+            const deleteWeightedProductMessage = document.getElementById('delete-weighted-product-message');
+
+            if (openDeleteWeightedProductModalBtn && deleteWeightedProductModal && closeDeleteWeightedProductModalBtn && deleteWeightedProductBtn && deleteWeightedProductMessage) {
+                openDeleteWeightedProductModalBtn.addEventListener('click', function() {
+                    deleteWeightedProductModal.style.display = 'flex';
+                    deleteWeightedProductMessage.textContent = '';
+                    document.getElementById('delete-weighted-product-id').value = '';
+                    document.getElementById('delete-weighted-product-id').focus();
+                });
+
+                deleteWeightedProductBtn.addEventListener('click', function() {
+                    const productId = document.getElementById('delete-weighted-product-id').value.trim();
+                    if (!productId) {
+                        deleteWeightedProductMessage.textContent = 'Please enter a product ID.';
+                        deleteWeightedProductMessage.className = 'error';
+                        return;
+                    }
+                    deleteWeightedProductMessage.textContent = 'Deleting...';
+                    deleteWeightedProductMessage.className = '';
+                    fetch('/api/delete-weighted-product', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ product_id: productId })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.message) {
+                            deleteWeightedProductMessage.textContent = data.message;
+                            deleteWeightedProductMessage.className = 'success';
+                        } else {
+                            deleteWeightedProductMessage.textContent = data.error || 'Failed to delete product.';
+                            deleteWeightedProductMessage.className = 'error';
+                        }
+                    })
+                    .catch(() => {
+                        deleteWeightedProductMessage.textContent = 'Failed to delete product.';
+                        deleteWeightedProductMessage.className = 'error';
+                    });
+                });
+                closeDeleteWeightedProductModalBtn.addEventListener('click', function() {
+                    deleteWeightedProductModal.style.display = 'none';
+                });
+                deleteWeightedProductModal.addEventListener('click', function(e) {
+                    if (e.target === deleteWeightedProductModal) deleteWeightedProductModal.style.display = 'none';
+                });
+            }
         });
 
         // Tag modal logic
@@ -551,6 +603,56 @@
             if (e.target === deleteProductModal) deleteProductModal.style.display = 'none';
         });
         // For now, Delete Product button does nothing
+
+        // Delete Weighted Product Modal logic
+        const openDeleteWeightedProductModalBtn = document.getElementById('open-delete-weighted-product-modal');
+        const deleteWeightedProductModal = document.getElementById('delete-weighted-product-modal');
+        const closeDeleteWeightedProductModalBtn = document.getElementById('close-delete-weighted-product-modal');
+        const deleteWeightedProductBtn = document.getElementById('delete-weighted-product-btn');
+        const deleteWeightedProductMessage = document.getElementById('delete-weighted-product-message');
+
+        openDeleteWeightedProductModalBtn.addEventListener('click', function() {
+            deleteWeightedProductModal.style.display = 'flex';
+            deleteWeightedProductMessage.textContent = '';
+            document.getElementById('delete-weighted-product-id').value = '';
+            document.getElementById('delete-weighted-product-id').focus();
+        });
+
+        deleteWeightedProductBtn.addEventListener('click', function() {
+            const productId = document.getElementById('delete-weighted-product-id').value.trim();
+            if (!productId) {
+                deleteWeightedProductMessage.textContent = 'Please enter a product ID.';
+                deleteWeightedProductMessage.className = 'error';
+                return;
+            }
+            deleteWeightedProductMessage.textContent = 'Deleting...';
+            deleteWeightedProductMessage.className = '';
+            fetch('/api/delete-weighted-product', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: productId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    deleteWeightedProductMessage.textContent = data.message;
+                    deleteWeightedProductMessage.className = 'success';
+                } else {
+                    deleteWeightedProductMessage.textContent = data.error || 'Failed to delete product.';
+                    deleteWeightedProductMessage.className = 'error';
+                }
+            })
+            .catch(() => {
+                deleteWeightedProductMessage.textContent = 'Failed to delete product.';
+                deleteWeightedProductMessage.className = 'error';
+            });
+        });
+        closeDeleteWeightedProductModalBtn.addEventListener('click', function() {
+            deleteWeightedProductModal.style.display = 'none';
+        });
+        deleteWeightedProductModal.addEventListener('click', function(e) {
+            if (e.target === deleteWeightedProductModal) deleteWeightedProductModal.style.display = 'none';
+        });
     </script>
 </head>
 <body>
@@ -594,6 +696,18 @@
                         <input type="text" id="delete-product-id" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px; width:100%;">
                         <button id="delete-product-btn" style="background:#d32f2f; color:#fff; width:100%; font-size:16px; border:none; border-radius:5px; padding:10px; margin-top:10px; cursor:pointer;">Delete Product</button>
                         <div id="delete-product-message" style="margin-top:8px; text-align:center;"></div>
+                      </div>
+                    </div>
+
+                    <!-- Delete Old Flower Modal -->
+                    <div id="delete-weighted-product-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); z-index:3000; align-items:center; justify-content:center;">
+                      <div style="background:#fff; border-radius:8px; padding:32px 28px 24px 28px; min-width:320px; box-shadow:0 2px 16px rgba(0,0,0,0.12); position:relative; display:flex; flex-direction:column; gap:18px; align-items:center;">
+                        <span id="close-delete-weighted-product-modal" style="position:absolute; top:10px; right:16px; font-size:22px; color:#888; cursor:pointer;">&times;</span>
+                        <h2 style="margin:0 0 10px 0; font-size:22px;">Delete Old Flower Product</h2>
+                        <label for="delete-weighted-product-id" style="font-weight:bold;">ID</label>
+                        <input type="text" id="delete-weighted-product-id" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px; width:100%;">
+                        <button id="delete-weighted-product-btn" style="background:#d32f2f; color:#fff; width:100%; font-size:16px; border:none; border-radius:5px; padding:10px; margin-top:10px; cursor:pointer;">Delete Flower</button>
+                        <div id="delete-weighted-product-message" style="margin-top:8px; text-align:center;"></div>
                       </div>
                     </div>
 
@@ -774,6 +888,9 @@
                         {% endif %}
                     </div>
                     <div id="add-flower-section" style="display:none;">
+                        <div style="display:flex; justify-content:flex-start; margin-bottom:10px;">
+                          <button id="open-delete-weighted-product-modal" type="button" style="background:none; color:#d32f2f; font-size:14px; border:none; border-radius:5px; padding:4px 0; margin-bottom:8px; cursor:pointer; opacity:0.7; transition:opacity 0.2s; text-align:left; min-width:0;">Delete Old Flower Product</button>
+                        </div>
                         <form id="weighted-admin-form" onsubmit="event.preventDefault(); submitWeightedProduct();">
                             <label for="weighted-product-name">Product Name*</label>
                             <input type="text" id="weighted-product-name" required>
