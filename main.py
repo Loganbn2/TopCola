@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 import polling
 from werkzeug.utils import secure_filename
 import json
+import re
 
 
 # CORS configuration
@@ -33,6 +34,11 @@ def shuffle_filter(seq):
     shuffled = list(seq)
     shuffle(shuffled)
     return shuffled
+
+# Register custom Jinja2 filter for regex replacement
+@app.template_filter('regex_replace')
+def regex_replace_filter(s, find, replace):
+    return re.sub(find, replace, s)
 
 # product_list.html
 @app.route('/products-list/<string:tag>', methods=['GET'])
