@@ -37,8 +37,10 @@ def product_to_wordpress(title, content, product_name=None, post_id=None, iframe
     slug = None
     if product_name and post_id:
         slug = f"{product_name}-{post_id}".replace(" ", "-").lower()
+    # Format title: replace '-' with ' ' and capitalize each word
+    formatted_title = title.replace('-', ' ').title()
     post_data = {
-        "title": title,
+        "title": formatted_title,
         "content": content,
         "status": "publish"
     }
@@ -52,7 +54,7 @@ def product_to_wordpress(title, content, product_name=None, post_id=None, iframe
         json=post_data
     )
     if response.status_code == 201:
-        print("✅ WordPress post created:", title)
+        print("✅ WordPress post created:", formatted_title)
         return True
     else:
         print("❌ Failed to create post:", response.status_code, response.text)
@@ -76,8 +78,10 @@ def tag_to_wordpress(title, content, name=None, iframe_html=None):
     slug = None
     if name:
         slug = f"{name}".replace(" ", "-").lower()
+    # Format title: replace '-' with ' ' and capitalize each word
+    formatted_title = title.replace('-', ' ').title()
     post_data = {
-        "title": title,
+        "title": formatted_title,
         "content": content,
         "status": "publish"
     }
@@ -91,7 +95,7 @@ def tag_to_wordpress(title, content, name=None, iframe_html=None):
         json=post_data
     )
     if response.status_code == 201:
-        print("✅ WordPress tag post created:", title)
+        print("✅ WordPress tag post created:", formatted_title)
         return True
     else:
         print("❌ Failed to create tag post:", response.status_code, response.text)
