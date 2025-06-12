@@ -823,6 +823,7 @@
                             const imagesInput = document.getElementById('product-images-input');
                             const imagesPreview = document.getElementById('images-preview');
                             const imagesUploadText = document.getElementById('images-upload-text');
+                            let selectedProductImages = [];
 
                             imagesUploadContainer.addEventListener('click', () => imagesInput.click());
 
@@ -843,9 +844,13 @@
                                 handleFiles(e.target.files);
                             });
                             function handleFiles(files) {
+                                // Convert FileList to array and merge with selectedProductImages
+                                selectedProductImages = selectedProductImages.concat(Array.from(files));
+                                renderProductImagesPreview();
+                            }
+                            function renderProductImagesPreview() {
                                 imagesPreview.innerHTML = '';
-                                for (let i = 0; i < files.length; i++) {
-                                    const file = files[i];
+                                selectedProductImages.forEach((file, idx) => {
                                     const reader = new FileReader();
                                     reader.onload = function(e) {
                                         const imgWrapper = document.createElement('div');
@@ -864,19 +869,18 @@
                                         removeBtn.textContent = '×';
                                         removeBtn.style.cssText = 'position:absolute;top:2px;right:6px;background:rgba(255,255,255,0.85);color:#333;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,0.08);z-index:2;';
                                         removeBtn.onclick = function() {
-                                            imagesPreview.removeChild(imgWrapper);
-                                            // Remove file from imagesInput.files (not possible directly, so just clear all if any removed)
-                                            // For now, clear all and let user re-add as needed
-                                            imagesInput.value = '';
-                                            imagesUploadText.style.display = imagesPreview.children.length === 0 ? 'inline' : 'none';
+                                            selectedProductImages.splice(idx, 1);
+                                            renderProductImagesPreview();
                                         };
                                         imgWrapper.appendChild(removeBtn);
 
                                         imagesPreview.appendChild(imgWrapper);
                                     };
                                     reader.readAsDataURL(file);
-                                }
-                                imagesUploadText.style.display = files.length ? 'none' : 'inline';
+                                });
+                                imagesUploadText.style.display = selectedProductImages.length ? 'none' : 'inline';
+                                // Reset input so same file can be re-added if removed
+                                imagesInput.value = '';
                             }
                             </script>
 
@@ -958,6 +962,7 @@
                             const weightedImagesInput = document.getElementById('weighted-product-images-input');
                             const weightedImagesPreview = document.getElementById('weighted-images-preview');
                             const weightedImagesUploadText = document.getElementById('weighted-images-upload-text');
+                            let selectedWeightedImages = [];
 
                             weightedImagesUploadContainer.addEventListener('click', () => weightedImagesInput.click());
 
@@ -978,9 +983,12 @@
                                 handleWeightedFiles(e.target.files);
                             });
                             function handleWeightedFiles(files) {
+                                selectedWeightedImages = selectedWeightedImages.concat(Array.from(files));
+                                renderWeightedImagesPreview();
+                            }
+                            function renderWeightedImagesPreview() {
                                 weightedImagesPreview.innerHTML = '';
-                                for (let i = 0; i < files.length; i++) {
-                                    const file = files[i];
+                                selectedWeightedImages.forEach((file, idx) => {
                                     const reader = new FileReader();
                                     reader.onload = function(e) {
                                         const imgWrapper = document.createElement('div');
@@ -999,17 +1007,17 @@
                                         removeBtn.textContent = '×';
                                         removeBtn.style.cssText = 'position:absolute;top:2px;right:6px;background:rgba(255,255,255,0.85);color:#333;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,0.08);z-index:2;';
                                         removeBtn.onclick = function() {
-                                            weightedImagesPreview.removeChild(imgWrapper);
-                                            weightedImagesInput.value = '';
-                                            weightedImagesUploadText.style.display = weightedImagesPreview.children.length === 0 ? 'inline' : 'none';
+                                            selectedWeightedImages.splice(idx, 1);
+                                            renderWeightedImagesPreview();
                                         };
                                         imgWrapper.appendChild(removeBtn);
 
                                         weightedImagesPreview.appendChild(imgWrapper);
                                     };
                                     reader.readAsDataURL(file);
-                                }
-                                weightedImagesUploadText.style.display = files.length ? 'none' : 'inline';
+                                });
+                                weightedImagesUploadText.style.display = selectedWeightedImages.length ? 'none' : 'inline';
+                                weightedImagesInput.value = '';
                             }
                             </script>
 
@@ -1075,7 +1083,7 @@
         const cost = parseFloat(document.getElementById('weighted-product-cost').value);
         const description = document.getElementById('weighted-product-description').value;
         const price_tier = parseInt(document.getElementById('weighted-product-price-tier').value);
-        const imagesInput = document.getElementById('weighted-product-images-input');
+        // const imagesInput = document.getElementById('weighted-product-images-input');
 
         if (!product_name || isNaN(price) || isNaN(cost) || isNaN(price_tier)) {
             showWeightedMessage('Please fill out all required fields.', false);
@@ -1093,8 +1101,8 @@
 
         // Prepare form data for images
         const formData = new FormData();
-        for (let i = 0; i < imagesInput.files.length; i++) {
-            formData.append('images', imagesInput.files[i]);
+        for (let i = 0; i < selectedWeightedImages.length; i++) {
+            formData.append('images', selectedWeightedImages[i]);
         }
         formData.append('payload', JSON.stringify(payload));
         formData.append('bucket', 'weighted-product-images');
@@ -1110,6 +1118,7 @@
                 document.getElementById('weighted-admin-form').reset();
                 weightedTags = [];
                 document.getElementById('weighted-tags-input-container').querySelectorAll('span').forEach(e => e.remove());
+                selectedWeightedImages = [];
                 weightedImagesPreview.innerHTML = '';
                 weightedImagesUploadText.style.display = 'inline';
             } else {
