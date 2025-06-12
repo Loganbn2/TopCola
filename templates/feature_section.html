@@ -106,7 +106,13 @@
                 {% else %}
                     <img class="img" src="https://otnrvaybkwsvzxgwfhfc.supabase.co/storage/v1/object/public/product-images/{{ item.images[0] }}" alt="Primary Product Image">
                     <h3>{{ item.product_name }}</h3>
-                    <p><span style="text-decoration: line-through; color: rgb(93, 93, 93);">${{ '%.2f'|format(item.original_price) }}</span>  ${{ '%.2f'|format(item.price) }} </p>
+                    <p>
+                      {% if item.original_price and item.original_price != item.price %}
+                        <span style="text-decoration: line-through; color: rgb(93, 93, 93);">${{ '%.2f'|format(item.original_price) }}</span>  ${{ '%.2f'|format(item.price) }}
+                      {% else %}
+                        ${{ '%.2f'|format(item.price) }}
+                      {% endif %}
+                    </p>
                     <button onclick="window.open('https://topcoladelivery.com/{{ (item.product_name | replace(' ', '-') | lower) ~ '-' ~ item.id }}','_blank'); return false;">Select Options</button>
                 {% endif %}
             </div>
