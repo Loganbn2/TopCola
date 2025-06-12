@@ -28,6 +28,15 @@ url="https://otnrvaybkwsvzxgwfhfc.supabase.co"
 key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90bnJ2YXlia3dzdnp4Z3dmaGZjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjcyNjAwMiwiZXhwIjoyMDYyMzAyMDAyfQ.yu6OmOqNGqkeBwq00tKvZGU0gNdTY3c9c7u4dSeaGBg"
 supabase: Client = create_client(url, key)
 
+# wordpress configuration
+wp_base = "https://topcoladelivery.com/wp-json/wp/v2/"
+wp_username = "Logan"
+wp_password = "kEET N0me NIpe eBSr y2pC KH7P"
+
+WP_POSTS = f"{wp_base}posts"
+
+import requests
+
 # Register custom Jinja2 filter for shuffling
 @app.template_filter('shuffle')
 def shuffle_filter(seq):
@@ -472,6 +481,53 @@ def add_flower_price_tier():
     except Exception as e:
         logging.error(f"Error in add_flower_price_tier endpoint: {e}")
         return jsonify({'error': f"An error occurred: {str(e)}"}), 500
+
+# wordpress configuration
+wp_base = "https://topcoladelivery.com/wp-json/wp/v2/"
+wp_username = "Logan"
+wp_password = "kEET N0me NIpe eBSr y2pC KH7P"
+
+WP_POSTS = f"{wp_base}posts"
+
+def delete_wordpress_post(post_id):
+    """
+    Delete a WordPress post by its ID.
+    Returns True if deleted, False otherwise.
+    """
+    url = f"{WP_POSTS}/{post_id}?force=true"
+    response = requests.delete(url, auth=(wp_username, wp_password))
+    if response.status_code == 200 or response.status_code == 410:
+        return True
+    else:
+        print(f"❌ Failed to delete WordPress post {post_id}: {response.status_code} {response.text}")
+        return False
+
+from flask import request
+
+# API endpoint to delete a product and its associated WordPress post
+@app.route('/api/delete-product', methods=['POST'])
+def delete_product():
+    try:
+        data = request.get_json()
+        product_id = data.get('product_id')
+        if not product_id:
+            return {"error": "No product_id provided."}, 400
+        # Fetch the product from Supabase to get wp_post_id
+        response = supabase.table('products').select('wp_post_id').eq('id', product_id).execute()
+        if not response.data or len(response.data) == 0:
+            return {"error": f"Product with id {product_id} not found."}, 404
+        wp_post_id = response.data[0].get('wp_post_id')
+        if not wp_post_id:
+            return {"error": f"No wp_post_id found for product {product_id}."}, 400
+        # Delete the WordPress post
+        wp_deleted = delete_wordpress_post(wp_post_id)
+        if not wp_deleted:
+            return {"error": f"Failed to delete WordPress post {wp_post_id}."}, 500
+        # Optionally, delete the product from Supabase
+        supabase.table('products').delete().eq('id', product_id).execute()
+        return {"message": f"Product {product_id} and WordPress post {wp_post_id} deleted successfully."}
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 # run
 if __name__ == "__main__":

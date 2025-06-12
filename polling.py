@@ -55,6 +55,16 @@ def product_to_wordpress(title, content, product_name=None, post_id=None, iframe
     )
     if response.status_code == 201:
         print("✅ WordPress post created:", formatted_title)
+        wp_post_id = response.json().get("id")
+        # Update Supabase: set published=True and wp_post_id=<WP Post ID>
+        try:
+            supabase.table("products") \
+                .update({"published": True, "wp_post_id": wp_post_id}) \
+                .eq("id", post_id) \
+                .execute()
+            print(f"📝 Updated Supabase for product {post_id} with WP Post ID {wp_post_id}")
+        except Exception as e:
+            print(f"❌ Failed to update Supabase with WP Post ID for product {post_id}: {str(e)}")
         return True
     else:
         print("❌ Failed to create post:", response.status_code, response.text)
