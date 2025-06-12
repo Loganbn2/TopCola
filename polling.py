@@ -32,7 +32,7 @@ last_seen_id = None
 last_seen_id_weighted = None
 last_seen_id_tag = None
 
-def product_to_wordpress(title, content, product_name=None, post_id=None, iframe_html=None):
+def product_to_wordpress(title, content, product_name=None, post_id=None, iframe_html=None, table_name="products"):
     # Generate slug if product_name and post_id are provided
     slug = None
     if product_name and post_id:
@@ -56,15 +56,15 @@ def product_to_wordpress(title, content, product_name=None, post_id=None, iframe
     if response.status_code == 201:
         print("✅ WordPress post created:", formatted_title)
         wp_post_id = response.json().get("id")
-        # Update Supabase: set published=True and wp_post_id=<WP Post ID>
+        # Update Supabase: set published=True and wp_post_id=<WP Post ID> in the correct table
         try:
-            supabase.table("products") \
+            supabase.table(table_name) \
                 .update({"published": True, "wp_post_id": wp_post_id}) \
                 .eq("id", post_id) \
                 .execute()
-            print(f"📝 Updated Supabase for product {post_id} with WP Post ID {wp_post_id}")
+            print(f"📝 Updated Supabase for {table_name} {post_id} with WP Post ID {wp_post_id}")
         except Exception as e:
-            print(f"❌ Failed to update Supabase with WP Post ID for product {post_id}: {str(e)}")
+            print(f"❌ Failed to update Supabase with WP Post ID for {table_name} {post_id}: {str(e)}")
         return True
     else:
         print("❌ Failed to create post:", response.status_code, response.text)
@@ -138,7 +138,7 @@ def poll_products():
 
             if post_id != last_seen_id:
                 print("🆕 New post detected (id={}): {}".format(post_id, title))
-                success = product_to_wordpress(title, content, product_name, post_id, iframe_html)
+                success = product_to_wordpress(title, content, product_name, post_id, iframe_html, table_name="products")
 
                 if success:
                     mark_post_as_published(post_id)
@@ -176,7 +176,7 @@ def poll_weighted_products():
 
             if post_id != globals().get('last_seen_id_weighted', None):
                 print("🆕 New weighted product detected (id={}): {}".format(post_id, title))
-                success = product_to_wordpress(title, content, product_name, post_id, iframe_html)
+                success = product_to_wordpress(title, content, product_name, post_id, iframe_html, table_name="weighted_products")
 
                 if success:
                     try:
