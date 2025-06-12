@@ -102,12 +102,12 @@
                     <img class="img" src="https://otnrvaybkwsvzxgwfhfc.supabase.co/storage/v1/object/public/weighted-product-images/{{ item.images[0] }}" alt="Primary Product Image">
                     <h3>{{ item.product_name }}</h3>
                     <p>${{ '%.2f' |format(item['price/g']) }}/g</p>
-                    <button onclick="location.href='https://topcoladelivery.com/flower-details/{{ item.id }}'">Select Options</button>
+                    <button onclick="window.open('https://topcoladelivery.com/flower-details/{{ (item.product_name | replace(' ', '-') | lower) ~ '-' ~ item.id }}','_blank'); return false;">Select Options</button>
                 {% else %}
                     <img class="img" src="https://otnrvaybkwsvzxgwfhfc.supabase.co/storage/v1/object/public/product-images/{{ item.images[0] }}" alt="Primary Product Image">
                     <h3>{{ item.product_name }}</h3>
                     <p><span style="text-decoration: line-through; color: rgb(93, 93, 93);">${{ '%.2f'|format(item.original_price) }}</span>  ${{ '%.2f'|format(item.price) }} </p>
-                    <button onclick="location.href='https://topcoladelivery.com/product-details/{{ item.id }}'">Select Options</button>
+                    <button onclick="window.open('https://topcoladelivery.com/{{ (item.product_name | replace(' ', '-') | lower) ~ '-' ~ item.id }}','_blank'); return false;">Select Options</button>
                 {% endif %}
             </div>
         {% endfor %}
