@@ -252,7 +252,7 @@ def start_polling():
     return poll_thread, weighted_thread, tag_thread
 
 if __name__ == "__main__":
-    # Starts polling immediately when run directly
+    # Starts polling immediately when run directly as a worker
     start_polling()
     # Keep the main thread alive
     while True:

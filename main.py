@@ -504,6 +504,21 @@ def delete_wordpress_post(post_id):
 
 from flask import request
 
+@app.route('/api/delete-wp-post', methods=['POST'])
+def api_delete_wp_post():
+    data = request.get_json()
+    post_id = data.get('post_id')
+    if not post_id:
+        return {"error": "No post_id provided."}, 400
+    try:
+        success = delete_wordpress_post(post_id)
+        if success:
+            return {"message": f"Post {post_id} deleted successfully."}
+        else:
+            return {"error": f"Failed to delete post {post_id}."}, 500
+    except Exception as e:
+        return {"error": str(e)}, 500
+
 # API endpoint to delete a product and its associated WordPress post
 @app.route('/api/delete-product', methods=['POST'])
 def delete_product():
@@ -531,5 +546,4 @@ def delete_product():
 
 # run
 if __name__ == "__main__":
-    polling.start_polling()
     app.run(debug=True, host='0.0.0.0', port=5001)
