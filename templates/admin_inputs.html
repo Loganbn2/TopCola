@@ -147,39 +147,37 @@
             const product_name = document.getElementById('product-name').value.trim();
             const price = parseFloat(document.getElementById('product-price').value);
             const cost = parseFloat(document.getElementById('product-cost').value);
-            const description = document.getElementById('product-description').value;
             const original_price = document.getElementById('product-original-price').value;
-            const group = document.getElementById('product-group').value.trim();
-            const imagesInput = document.getElementById('product-images-input');
+            const group = document.getElementById('product-group').value;
+            const description = document.getElementById('product-description').value;
+            // const imagesInput = document.getElementById('product-images-input');
 
             if (!product_name || isNaN(price) || isNaN(cost)) {
                 showMessage('Please fill out all required fields.', false);
                 return;
             }
 
-            // Only include non-required fields if they have a value
             const payload = {
                 product_name,
                 price,
                 cost
             };
+            if (original_price && original_price.trim() !== "") payload.original_price = parseFloat(original_price);
+            if (group && group.trim() !== "") payload.group = group.trim();
             if (description && description.trim() !== "") payload.description = description.trim();
-            if (original_price !== "") payload.original_price = parseFloat(original_price);
-            if (group !== "") payload.group = group;
             if (tags.length > 0) payload.tags = tags;
             if (options.length > 0) payload.options = options;
 
             // Prepare form data for images
             const formData = new FormData();
-            for (let i = 0; i < imagesInput.files.length; i++) {
-                formData.append('images', imagesInput.files[i]);
+            for (let i = 0; i < selectedProductImages.length; i++) {
+                formData.append('images', selectedProductImages[i]);
             }
             formData.append('payload', JSON.stringify(payload));
             formData.append('bucket', 'product-images');
 
-            // Remove imagesInput.value reset here so files persist after submit
             fetch('/api/add-product', {
-                method: 'POST', 
+                method: 'POST',
                 body: formData
             })
             .then(response => response.json())
@@ -187,15 +185,19 @@
                 if (data.message) {
                     showMessage(data.message, true);
                     document.getElementById('admin-form').reset();
-                    // Also clear preview and show upload text
+                    tags = [];
+                    options = [];
+                    document.getElementById('tags-input-container').querySelectorAll('span').forEach(e => e.remove());
+                    document.getElementById('options-input-container').querySelectorAll('span').forEach(e => e.remove());
+                    selectedProductImages = [];
                     imagesPreview.innerHTML = '';
                     imagesUploadText.style.display = 'inline';
                 } else {
-                    showMessage('Product could not be added. Please ensure that all groups and tags added can be found in the admin console.', false);
+                    showMessage('Product could not be added. Please ensure all tags can be found in the admin console.', false);
                 }
             })
             .catch(error => {
-                showMessage('Product could not be added. Please ensure that all groups and tags added can be found in the admin console.', false);
+                showMessage('Product could not be added. Please ensure all tags can be found in the admin console.', false);
             });
         }
 
