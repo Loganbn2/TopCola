@@ -122,12 +122,11 @@
         }
         .cart-item span {
             width: auto; /* Remove fixed width */
-            display: block; /* Allow to fill available width */
+            display: inline; /* Allow to fill available width */
             overflow: visible; /* Show all text */
             text-overflow: unset; /* Remove ellipsis */
             white-space: normal; /* Allow wrapping */
             word-break: break-word; /* Break long words if needed */
-            text-align: left;
         }
         .product-name-container {
             width: 300px; /* Fixed width for product name container */
@@ -154,12 +153,18 @@
             white-space: nowrap; /* Prevent text wrapping */
         }
         .cart-item .total-container {
+            width: 70px;
+            min-width: 60px;
+            max-width: 80px;
             text-align: center; /* Align line item totals to the center */
+            flex: 0 0 70px;
         }
         .cart-item .delete-button-container {
-            width: 50px; /* Fixed width for delete button container */
+            width: 40px;
+            min-width: 30px;
+            max-width: 50px;
             text-align: right; /* Align the delete button to the right */
-            display: inline-block; /* Ensure the width is applied */
+            flex: 0 0 40px;
         }
         form {
             display: flex;
@@ -242,6 +247,125 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+        }
+
+        .cart-item-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 5px;
+            width: 100%;
+        }
+        .cart-item-row > * {
+            align-self: center;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Mobile styles */
+        @media (max-width: 700px) {
+            .cart-container {
+                flex-direction: column;
+                width: 90%;
+                padding: 5px;
+            }
+            .cart-column, .form-column {
+                width: 100%;
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .cart-column {
+                margin-bottom: 30px;
+            }
+            form {
+                padding-right: 0;
+            }
+            .product-name-container {
+                width: 100%;
+                padding-bottom: 10px;
+            }
+            .cart-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+            }
+            .cart-item .product-name-container {
+                width: 100%;
+                margin-bottom: 4px;
+                text-align: left;
+            }
+            .cart-item .cart-item-row {
+                display: flex;
+                flex-direction: row;
+                align-items: center !important;
+                justify-content: flex-start;
+                gap: 5px;
+                width: 100%;
+            }
+            .cart-item .cart-item-row > * {
+                align-self: center !important;
+                display: flex;
+                align-items: center;
+            }
+            .cart-item .cart-item-row .delete-button-container,
+            .cart-item .cart-item-row .total-container,
+            .cart-item .cart-item-row .quantity-container {
+                display: flex;
+                align-items: center !important;
+                justify-content: center;
+            }
+            .cart-total, .subtotal, .discounts-total {
+                padding-left: 0;
+            }
+            .promo-code input {
+                width: 70%;
+            }
+            .city-state-container {
+                flex-direction: column;
+                gap: 0;
+            }
+            form input, form select, form button {
+                width: 80%;
+                max-width: 350px;
+                margin-left: 0;
+                margin-right: 0;
+            }
+            .form-column, .form-column * {
+                text-align: left !important;
+            }
+            .cart-container,
+            .cart-column,
+            .form-column,
+            .cart-item,
+            .cart-item-row,
+            .cart-item span,
+            .product-name-container,
+            .quantity-container,
+            .cart-item .total-container,
+            .cart-item .delete-button-container,
+            .cart-total,
+            .subtotal,
+            .discounts-total,
+            .promo-code,
+            .promo-code input,
+            .promo-code label,
+            form input,
+            form select,
+            form button,
+            h2,
+            label {
+                font-size: 14px !important;
+            }
+            h2 {
+                font-size: 18px !important;
+            }
+            .cart-total, .subtotal, .discounts-total {
+                font-size: 14px !important;
+            }
+            .quantity-button, .delete-button {
+                font-size: 14px !important;
+            }
         }
     </style>
     <script>
@@ -351,19 +475,23 @@
                 const lineItem = document.createElement('div');
                 lineItem.className = `cart-item ${item.type === 'flower_line_item' ? 'flower-line-item' : 'product-line-item'}`;
                 lineItem.id = `cart-item-${index}`;
-                // Inline product name and option, no line breaks
                 const optionText = item.option ? ` <span style='font-style:italic;'>${item.option}</span>` : '';
-                lineItem.innerHTML =
-                    `<span class="product-name-container" style="display:inline; white-space:normal;">${item.productName}${optionText}</span>` +
-                    `<div>` +
-                        `<button onclick="updateQuantity(${index}, -1)" class="quantity-button">-</button>` +
-                        `<span id="quantity-${index}" class="quantity-container">${item.quantity}${item.type === 'flower_line_item' ? 'g' : ''}</span>` +
-                        `<button onclick="updateQuantity(${index}, 1)" class="quantity-button">+</button>` +
-                    `</div>` +
-                    `<span id="total-${index}" class="total-container">${item.total}</span>` +
-                    `<div class="delete-button-container">` +
-                        `<button onclick="deleteItem(${index})" class="delete-button">&times;</button>` +
-                    `</div>`;
+                // Product name row
+                const productNameRow = `<span class="product-name-container" style="display:inline; white-space:normal;">${item.productName}${optionText}</span>`;
+                // Row for quantity, total, and remove button
+                const controlsRow = `
+                    <div class="cart-item-row">
+                        <div>
+                            <button onclick="updateQuantity(${index}, -1)" class="quantity-button">-</button>
+                            <span id="quantity-${index}" class="quantity-container">${item.quantity}${item.type === 'flower_line_item' ? 'g' : ''}</span>
+                            <button onclick="updateQuantity(${index}, 1)" class="quantity-button">+</button>
+                        </div>
+                        <span id="total-${index}" class="total-container">${item.total}</span>
+                        <div class="delete-button-container">
+                            <button onclick="deleteItem(${index})" class="delete-button">&times;</button>
+                        </div>
+                    </div>`;
+                lineItem.innerHTML = productNameRow + controlsRow;
                 cartContainer.appendChild(lineItem);
                 subtotal += parseFloat(item.total.replace('$', '')) || 0;
             });
