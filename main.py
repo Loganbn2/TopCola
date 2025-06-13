@@ -155,7 +155,7 @@ def place_order():
         if response.data and len(response.data) > 0:
             return jsonify({"message": "Order placed successfully", "order_id": response.data[0]['id']}), 201
         else:
-            logging.error(f"Error placing order: {response.error}")
+            logging.error(f"Error placing order: {response}")
             return jsonify({"error": "Failed to place order"}), 500
 
     except Exception as e:
@@ -568,6 +568,41 @@ def delete_weighted_product():
         return {"message": f"Weighted product {product_id} and WordPress post {wp_post_id} deleted successfully."}
     except Exception as e:
         return {"error": str(e)}, 500
+
+# orders.html
+@app.route('/orders', methods=['GET'])
+def render_orders():
+    try:
+        orders, error = get_order_data(supabase)
+        return render_template('orders.html', orders=orders, error=error)
+    except Exception as e:
+        logging.error(f"Error rendering orders: {e}")
+        return render_template('orders.html', orders=[], error=f"An error occurred: {str(e)}")
+
+# update fulfillment status
+@app.route('/update-fulfillment', methods=['POST'])
+def update_fulfillment():
+    try:
+        data = request.get_json()
+        order_id = data.get('order_id')
+        status = data.get('status')
+        total = data.get('total')
+        update_data = {}
+        if status is not None:
+            update_data['fulfillment_status'] = status
+        if total is not None:
+            try:
+                update_data['total'] = float(total)
+            except Exception:
+                return jsonify({'success': False, 'error': 'Invalid total value'}), 400
+        if not order_id or not update_data:
+            return jsonify({'success': False, 'error': 'Missing order_id or update data'}), 400
+        response = supabase.table('orders').update(update_data).eq('id', order_id).execute()
+        if hasattr(response, 'error') and response.error:
+            return jsonify({'success': False, 'error': str(response.error)}), 500
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 # run
 if __name__ == "__main__":

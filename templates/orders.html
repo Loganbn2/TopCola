@@ -3,10 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profits Reports</title>
+    <title>Orders</title>
     <link rel="stylesheet" href="/static/styles.css">
     <style>
-        body { font-family: Arial, sans-serif; background: #f9f9f9; }
+        html, body {
+          height: 100%;
+          overflow: hidden;
+        }
+        body {
+          min-height: 100vh;
+          height: 100vh;
+          font-family: 'Segoe UI', Arial, sans-serif;
+          background: #ffffff;
+          color: #222;
+          margin: 0;
+          padding: 0 0 40px 0;
+          font-size: 14px;
+          text-align: left;
+        }
         nav {
             width: 210px;
             min-height: 100vh;
@@ -68,10 +82,24 @@
             background: #f1f1f1;
         }
         .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            margin-left: 210px;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          margin-left: 210px;
+          overflow: hidden;
+          padding-right: 40px;
+          height: 100vh;
+          min-height: 0;
+        }
+        .table-wrapper {
+          flex: 1 1 auto;
+          max-height: calc(100vh - 120px);
+          min-height: 0;
+          overflow-y: auto;
+          overflow-x: auto;
+          margin: 0 0 28px 40px;
+          border-radius: 5px;
+          background: #fff;
         }
         body {
           font-family: 'Segoe UI', Arial, sans-serif;
@@ -94,26 +122,42 @@
         table {
           border-collapse: separate;
           border-spacing: 0;
-          width: 95%;
-          margin: 0 0 28px 40px;
+          width: auto;
+          min-width: 100%;
+          margin: 0;
           background: #fff;
           border-radius: 5px;
-          overflow: hidden;
           font-size: 14px;
           text-align: left;
+          table-layout: auto;
+          border: 1px solid #e5e7eb;
+        }
+        thead tr {
+          background: #dbeafe;
+          position: sticky;
+          top: 0;
+          z-index: 2;
         }
         th, td {
-          padding: 10px 5px;
-          text-align: left;
-          font-size: 14px;
-          height: 15px;
+          border: 1px solid #e5e7eb !important;
+          background-clip: padding-box;
         }
-        th {
-          background: #000000;
-          color: #fff;
-          font-weight: 500;
-          font-size: 14px;
-          text-align: left;
+        /* Set explicit min-width for each column to force minimum width, but allow expansion */
+        th:nth-child(1), td:nth-child(1) { min-width: 70px; }
+        th:nth-child(2), td:nth-child(2) { min-width: 100px; }
+        th:nth-child(3), td:nth-child(3) { min-width: 120px; }
+        th:nth-child(4), td:nth-child(4) { min-width: 130px; }
+        th:nth-child(5), td:nth-child(5) { min-width: 250px; }
+        th:nth-child(6), td:nth-child(6) { min-width: 120px; }
+        th:nth-child(7), td:nth-child(7) { min-width: 300px; }
+        th:nth-child(8), td:nth-child(8) { min-width: 300px; }
+        th:nth-child(9), td:nth-child(9) { min-width: 130px; }
+        th:nth-child(10), td:nth-child(10) { min-width: 130px; }
+        th:nth-child(11), td:nth-child(11) { min-width: 80px; }
+        pre {
+          margin: 0;
+          overflow-y: auto;
+          white-space: pre;
         }
         tr:nth-child(even) td {
           background: #f4f6fa;
@@ -121,13 +165,6 @@
         tr:hover td {
           background: #eaf1fb;
           transition: background 0.2s;
-        }
-        td {
-          font-size: 14px;
-          text-align: left;
-        }
-        table:last-of-type td {
-          border-bottom: none;
         }
         .summary-table th {
           background: #000000;
@@ -159,8 +196,96 @@
           text-align: left;
           font-size: 14px;
         }
+        .bubble {
+          display: inline-block;
+          background: #17633a;
+          color: #fff;
+          border-radius: 16px;
+          padding: 2px 10px;
+          margin: 2px 0;
+          font-weight: 500;
+          font-size: 13px;
+        }
+        .bubble-light {
+          display: inline-block;
+          background: #d6f8c5;
+          color: #222;
+          border-radius: 16px;
+          padding: 2px 10px;
+          margin: 2px 0;
+          font-weight: 500;
+          font-size: 13px;
+        }
+        .bubble-gray {
+          display: inline-block;
+          background: #e5e7eb;
+          color: #222;
+          border-radius: 16px;
+          padding: 2px 10px;
+          margin: 2px 0;
+          font-weight: 500;
+          font-size: 13px;
+        }
+        .dropdown-menu {
+          font-size: 14px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .dropdown-option {
+          padding: 8px 16px;
+          cursor: pointer;
+          color: #222;
+          background: #fff;
+          border-bottom: 1px solid #e5e7eb;
+          transition: background 0.15s;
+        }
+        .dropdown-option:last-child {
+          border-bottom: none;
+        }
+        .dropdown-option:hover {
+          background: #dbeafe;
+        }
+        .fulfillment-bubble:focus {
+          outline: 2px solid #17633a;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        .bubble-fulfillment-completed {
+          background: #d6f8c5 !important;
+          color: #17633a !important;
+        }
+        .bubble-fulfillment-processing {
+          background: #fff9c4 !important;
+          color: #b59b00 !important;
+        }
+        .bubble-fulfillment-received {
+          background: #ffe0b2 !important;
+          color: #b26a00 !important;
+        }
+        .bubble-fulfillment-canceled {
+          background: #ffcdd2 !important;
+          color: #b71c1c !important;
+        }
     </style>
     <script>
+        function setFulfillmentBubbleColor(bubble, status) {
+          bubble.classList.remove(
+            'bubble-fulfillment-completed',
+            'bubble-fulfillment-processing',
+            'bubble-fulfillment-received',
+            'bubble-fulfillment-canceled'
+          );
+          if (status === 'Completed') {
+            bubble.classList.add('bubble-fulfillment-completed');
+          } else if (status === 'Processing') {
+            bubble.classList.add('bubble-fulfillment-processing');
+          } else if (status === 'Received') {
+            bubble.classList.add('bubble-fulfillment-received');
+          } else if (status === 'Canceled') {
+            bubble.classList.add('bubble-fulfillment-canceled');
+          }
+        }
         document.addEventListener('DOMContentLoaded', function() {
             // Profit Reports submenu logic
             const profitBtn = document.getElementById('profit-reports-btn');
@@ -180,6 +305,153 @@
             submenu.addEventListener('mouseleave', function() {
                 submenuTimeout = setTimeout(() => submenu.style.display = 'none', 200);
             });
+            document.querySelectorAll('.fulfillment-bubble').forEach(function(bubble) {
+              setFulfillmentBubbleColor(bubble, bubble.textContent.trim());
+            });
+        });
+        function toggleDropdown(el) {
+          var menu = el.parentElement.querySelector('.dropdown-menu');
+          var isOpen = menu.style.display === 'block';
+          document.querySelectorAll('.dropdown-menu').forEach(function(m) { m.style.display = 'none'; });
+          menu.style.display = isOpen ? 'none' : 'block';
+        }
+        document.addEventListener('click', function(e) {
+          if (!e.target.classList.contains('fulfillment-bubble')) {
+            document.querySelectorAll('.dropdown-menu').forEach(function(m) { m.style.display = 'none'; });
+          }
+        });
+        function selectFulfillment(optionEl, value) {
+          var bubble = optionEl.closest('.fulfillment-dropdown').querySelector('.fulfillment-bubble');
+          var orderId = bubble.getAttribute('data-order-id');
+          var originalText = bubble.textContent;
+          // Show spinner
+          bubble.innerHTML = '<span class="spinner" style="display:inline-block;width:16px;height:16px;border:2px solid #ccc;border-top:2px solid #17633a;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;"></span>';
+          optionEl.parentElement.style.display = 'none';
+          const start = Date.now();
+          fetch('/update-fulfillment', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ order_id: orderId, status: value }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            const elapsed = Date.now() - start;
+            const minDelay = 500;
+            const finish = () => {
+              if (!data.success) {
+                alert('Failed to update fulfillment status.');
+                bubble.textContent = originalText;
+                setFulfillmentBubbleColor(bubble, originalText.trim());
+              } else {
+                bubble.textContent = value;
+                setFulfillmentBubbleColor(bubble, value);
+              }
+            };
+            if (elapsed < minDelay) {
+              setTimeout(finish, minDelay - elapsed);
+            } else {
+              finish();
+            }
+          })
+          .catch(() => {
+            const elapsed = Date.now() - start;
+            const minDelay = 500;
+            const finish = () => {
+              alert('Error updating fulfillment status.');
+              bubble.textContent = originalText;
+              setFulfillmentBubbleColor(bubble, originalText.trim());
+            };
+            if (elapsed < minDelay) {
+              setTimeout(finish, minDelay - elapsed);
+            } else {
+              finish();
+            }
+          });
+        }
+        function makeOrderTotalEditable(bubble, orderId, originalValue) {
+          if (bubble.dataset.editing === 'true') return;
+          bubble.dataset.editing = 'true';
+          const input = document.createElement('input');
+          input.type = 'number';
+          input.step = '0.01';
+          input.value = originalValue.replace(/[^\d.\-]/g, '');
+          input.style.width = '70px';
+          input.style.fontSize = '13px';
+          input.style.borderRadius = '8px';
+          input.style.border = '1px solid #ccc';
+          input.style.padding = '2px 6px';
+          input.style.margin = '0';
+          input.style.boxSizing = 'border-box';
+          bubble.innerHTML = '';
+          bubble.appendChild(input);
+          input.focus();
+          input.select();
+          function finishEdit(save) {
+            if (!bubble.dataset.editing) return;
+            bubble.dataset.editing = '';
+            let newValue = input.value;
+            if (save && newValue && newValue !== originalValue.replace(/[^\d.\-]/g, '')) {
+              // Show spinner
+              bubble.innerHTML = '<span class="spinner" style="display:inline-block;width:16px;height:16px;border:2px solid #ccc;border-top:2px solid #17633a;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;"></span>';
+              const start = Date.now();
+              fetch('/update-fulfillment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order_id: orderId, status: null, total: newValue }),
+              })
+              .then(response => response.json())
+              .then(data => {
+                const elapsed = Date.now() - start;
+                const minDelay = 500;
+                const finish = () => {
+                  if (!data.success) {
+                    alert('Failed to update order total.');
+                    bubble.innerHTML = `$${parseFloat(originalValue).toFixed(2)}`;
+                  } else {
+                    bubble.innerHTML = `$${parseFloat(newValue).toFixed(2)}`;
+                  }
+                };
+                if (elapsed < minDelay) {
+                  setTimeout(finish, minDelay - elapsed);
+                } else {
+                  finish();
+                }
+              })
+              .catch(() => {
+                bubble.innerHTML = `$${parseFloat(originalValue).toFixed(2)}`;
+                alert('Error updating order total.');
+              });
+            } else {
+              bubble.innerHTML = `$${parseFloat(originalValue).toFixed(2)}`;
+            }
+          }
+          input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+              finishEdit(true);
+            } else if (e.key === 'Escape') {
+              finishEdit(false);
+            }
+          });
+          input.addEventListener('blur', function() { finishEdit(true); });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+          document.querySelectorAll('td span.bubble').forEach(function(bubble) {
+            if (bubble.textContent.trim().startsWith('$')) {
+              var tr = bubble.closest('tr');
+              var orderIdSpan = tr ? tr.querySelector('span[data-order-id]') : null;
+              var orderId = orderIdSpan ? orderIdSpan.getAttribute('data-order-id') : null;
+              if (orderId) {
+                bubble.style.cursor = 'pointer';
+                bubble.addEventListener('click', function(e) {
+                  if (!bubble.dataset.editing) {
+                    makeOrderTotalEditable(bubble, orderId, bubble.textContent.trim());
+                  }
+                });
+              }
+            }
+          });
         });
     </script>
 </head>
@@ -209,161 +481,138 @@
           {% endif %}
 
           {% if orders and orders|length > 0 %}
-            {% set exclude_keys = ['items', 'flower', 'address', 'city', 'state', 'item_cost', 'flower_cost', 'zip', 'phone', 'email', 'fulfillment_status', 'delivery_time'] %}
-            {% set filtered_orders = [] %}
-            {% set ns = namespace(total_sum=0, total_count=0, discounts_sum=0, discounts_count=0, bxgo_sum=0, bxgo_count=0, volume_sum=0, volume_count=0, promo_sum=0, promo_count=0, profit_sum=0, profit_count=0, margin_sum=0, margin_count=0, profit_margin_num=0, profit_margin_den=0) %}
-            {% for order in orders %}
-              {% if order['created_at'] and order['created_at'] > cutoff_date.strftime('%Y-%m-%d %H:%M:%S') %}
-                {% set _ = filtered_orders.append(order) %}
-                {% if order['total'] is not none %}
-                  {% set ns.total_sum = ns.total_sum + (order['total']|float) %}
-                  {% set ns.total_count = ns.total_count + 1 %}
-                  {% set ns.profit_margin_den = ns.profit_margin_den + (order['total']|float) %}
-                {% endif %}
-                {% if order['total_discounts'] is not none %}
-                  {% set ns.discounts_sum = ns.discounts_sum + (order['total_discounts']|float) %}
-                  {% set ns.discounts_count = ns.discounts_count + 1 %}
-                {% endif %}
-                {% if order['BXGO_discounts'] is not none %}
-                  {% set ns.bxgo_sum = ns.bxgo_sum + (order['BXGO_discounts']|float) %}
-                  {% set ns.bxgo_count = ns.bxgo_count + 1 %}
-                {% endif %}
-                {% if order['volume_discounts'] is not none %}
-                  {% set ns.volume_sum = ns.volume_sum + (order['volume_discounts']|float) %}
-                  {% set ns.volume_count = ns.volume_count + 1 %}
-                {% endif %}
-                {% if order['promo_discounts'] is not none %}
-                  {% set ns.promo_sum = ns.promo_sum + (order['promo_discounts']|float) %}
-                  {% set ns.promo_count = ns.promo_count + 1 %}
-                {% endif %}
-                {% if order['order_profit'] is not none %}
-                  {% set ns.profit_sum = ns.profit_sum + (order['order_profit']|float) %}
-                  {% set ns.profit_count = ns.profit_count + 1 %}
-                  {% set ns.profit_margin_num = ns.profit_margin_num + (order['order_profit']|float) %}
-                {% endif %}
-                {% if order['profit_margin'] is not none %}
-                  {% set ns.margin_sum = ns.margin_sum + (order['profit_margin']|float) %}
-                  {% set ns.margin_count = ns.margin_count + 1 %}
-                {% endif %}
-              {% endif %}
-            {% endfor %}
-            <table class="summary-table" border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 20px;">
-              <thead>
-                <tr>
-                  <th>Average Order Total</th>
-                  <th>Average Total Discounts</th>
-                  <th>Average Order Profit</th>
-                  <th>Profit Margin</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    {% if ns.total_count > 0 %}
-                      ${{ '%.2f' % ((ns.total_sum / ns.total_count)|float) }}
-                    {% else %}
-                      N/A
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if ns.discounts_count > 0 %}
-                      ${{ '%.2f' % ((ns.discounts_sum / ns.discounts_count)|float) }}
-                    {% else %}
-                      N/A
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if ns.profit_count > 0 %}
-                      ${{ '%.2f' % ((ns.profit_sum / ns.profit_count)|float) }}
-                    {% else %}
-                      N/A
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if ns.profit_margin_den > 0 %}
-                      {{ ((ns.profit_margin_num / ns.profit_margin_den) * 100) | round(0) | int }}%
-                    {% else %}
-                      N/A
-                    {% endif %}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <table class="summary-table" border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 20px;">
-              <thead>
-                <tr>
-                  <th>Average BXGO Discounts</th>
-                  <th>Average Flower Discounts</th>
-                  <th>Average Promo Discounts</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    {% if ns.bxgo_count > 0 %}
-                      ${{ '%.2f' % ((ns.bxgo_sum / ns.bxgo_count)|float) }}
-                    {% else %}
-                      N/A
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if ns.volume_count > 0 %}
-                      ${{ '%.2f' % ((ns.volume_sum / ns.volume_count)|float) }}
-                    {% else %}
-                      N/A
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if ns.promo_count > 0 %}
-                      ${{ '%.2f' % ((ns.promo_sum / ns.promo_count)|float) }}
-                    {% else %}
-                      N/A
-                    {% endif %}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <table border="1" cellpadding="5" cellspacing="0">
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Full Name</th>
-                  <th>Order Date</th>
-                  <th>Final Order Total</th>
-                  <th>Total Discounts</th>
-                  <th>Order Profit</th>
-                  <th>Profit Margin</th>
-                  <th>BXGO Discounts</th>
-                  <th>Flower Discounts</th>
-                  <th>Promo Discounts</th>
-                  <th>Payment Method</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for order in filtered_orders %}
+            {% set sorted_orders = orders|sort(attribute='created_at', reverse=true) %}
+            <div class="table-wrapper">
+              <table border="1" cellpadding="5" cellspacing="0">
+                <thead>
                   <tr>
-                    <td>{{ order['id'] }}</td>
-                    <td>{{ order['full_name'] }}</td>
+                    <th>Order ID</th>
+                    <th>Order Date</th>
+                    <th>Delivery Time</th>
+                    <th>Fulfillment Status</th>
+                    <th>Customer</th>
+                    <th>Final Order Total</th>
+                    <th>Items</th>
+                    <th>Flower</th>
+                    <th>Discounts</th>
+                    <th>Profit</th>
+                    <th>Payment Method</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for order in sorted_orders %}
+                  <tr>
+                    <td><span class="bubble-gray">{{ order['id'] }}</span></td>
                     <td>
-                      {% set dt = order['created_at'][:10] %}
-                      {% set year = dt[0:4] %}
-                      {% set month = dt[5:7]|int %}
-                      {% set day = dt[8:10]|int %}
-                      {% set month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
-                      {{ month_names[month-1] }} {{ day }}, {{ year }}
+                      {% if order['created_at'] %}
+                        {% set dt = order['created_at'] %}
+                        {% set year = dt[0:4]|int %}
+                        {% set month = dt[5:7]|int %}
+                        {% set day = dt[8:10]|int %}
+                        {% set hour = dt[11:13]|int %}
+                        {% set minute = dt[14:16]|int %}
+                        {% set ampm = 'AM' %}
+                        {# Convert UTC to Pacific Time (UTC-7 for DST, UTC-8 for Standard) #}
+                        {% set month_for_dst = month %}
+                        {% set day_for_dst = day %}
+                        {% set dst_start = 8 %} {# Second Sunday in March is always between 8-14 #}
+                        {% set dst_end = 1 %} {# First Sunday in November is always between 1-7 #}
+                        {% set is_dst = (month_for_dst > 3 and month_for_dst < 11) or (month_for_dst == 3 and day_for_dst >= dst_start) or (month_for_dst == 11 and day_for_dst < dst_end) %}
+                        {% set offset = -7 if is_dst else -8 %}
+                        {% set hour_pacific = hour + offset %}
+                        {% if hour_pacific < 0 %}
+                          {% set hour_pacific = hour_pacific + 24 %}
+                          {% set day = day - 1 %}
+                          {# Not handling month/year underflow for simplicity #}
+                        {% elif hour_pacific >= 24 %}
+                          {% set hour_pacific = hour_pacific - 24 %}
+                          {% set day = day + 1 %}
+                          {# Not handling month/year overflow for simplicity #}
+                        {% endif %}
+                        {% set hour12 = hour_pacific if hour_pacific == 0 or hour_pacific == 12 else hour_pacific % 12 %}
+                        {% set hour12 = 12 if hour12 == 0 else hour12 %}
+                        {% set ampm = 'AM' if hour_pacific < 12 else 'PM' %}
+                        {% set month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+                        <span class="bubble-gray">{{ month_names[month-1] }} {{ day }}, {{ year }}<br>{{ '%d' % hour12 }}:{{ '%02d' % minute }} {{ ampm }}</span>
+                      {% endif %}
                     </td>
-                    <td>{% if order['total'] is not none %}${{ '%.2f' % (order['total']|float) }}{% endif %}</td>
-                    <td>{% if order['total_discounts'] is not none %}${{ '%.2f' % (order['total_discounts']|float) }}{% endif %}</td>
-                    <td>{% if order['order_profit'] is not none %}${{ '%.2f' % (order['order_profit']|float) }}{% endif %}</td>
-                    <td>{% if order['profit_margin'] is not none %}{{ (order['profit_margin']|float * 100) | round(0) | int }}%{% endif %}</td>
-                    <td>{% if order['BXGO_discounts'] is not none %}${{ '%.2f' % (order['BXGO_discounts']|float) }}{% endif %}</td>
-                    <td>{% if order['volume_discounts'] is not none %}${{ '%.2f' % (order['volume_discounts']|float) }}{% endif %}</td>
-                    <td>{% if order['promo_discounts'] is not none %}${{ '%.2f' % (order['promo_discounts']|float) }}{% endif %}</td>
-                    <td>{{ order['payment_method'] }}</td>
+                    <td>
+                      {% if order['delivery_time'] %}
+                        {% set dt = order['delivery_time'] %}
+                        {% set year = dt[0:4]|int %}
+                        {% set month = dt[5:7]|int %}
+                        {% set day = dt[8:10]|int %}
+                        {% set hour = dt[11:13]|int %}
+                        {% set minute = dt[14:16]|int %}
+                        {% set hour12 = hour if hour == 0 or hour == 12 else hour % 12 %}
+                        {% set hour12 = 12 if hour12 == 0 else hour12 %}
+                        {% set ampm = 'AM' if hour < 12 else 'PM' %}
+                        {% set month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+                        <span class="bubble-gray">{{ month_names[month-1] }} {{ day }}, {{ year }}<br>{{ '%d' % hour12 }}:{{ '%02d' % minute }} {{ ampm }}</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="fulfillment-dropdown" style="position: relative; display: inline-block;">
+                        <span class="bubble-gray fulfillment-bubble" tabindex="0" onclick="toggleDropdown(this)" data-order-id="{{ order['id'] }}"
+  {% if order['fulfillment_status'] == 'Completed' %}class="bubble-gray fulfillment-bubble bubble-fulfillment-completed"{% elif order['fulfillment_status'] == 'Processing' %}class="bubble-gray fulfillment-bubble bubble-fulfillment-processing"{% elif order['fulfillment_status'] == 'Received' %}class="bubble-gray fulfillment-bubble bubble-fulfillment-received"{% elif order['fulfillment_status'] == 'Canceled' %}class="bubble-gray fulfillment-bubble bubble-fulfillment-canceled"{% endif %}>
+  {{ order['fulfillment_status'] }}
+</span>
+                        <div class="dropdown-menu" style="display: none; position: absolute; left: 0; top: 110%; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 140px; z-index: 10;">
+                          <div class="dropdown-option" onclick="selectFulfillment(this, 'Received')">Received</div>
+                          <div class="dropdown-option" onclick="selectFulfillment(this, 'Processing')">Processing</div>
+                          <div class="dropdown-option" onclick="selectFulfillment(this, 'Canceled')">Canceled</div>
+                          <div class="dropdown-option" onclick="selectFulfillment(this, 'Completed')">Completed</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="bubble-gray">&#128100; {{ order['full_name'] }}</span><br>
+                      {% if order['phone'] %}<span class="bubble-gray">&#128222; {{ order['phone'] }}</span>{% endif %}
+                      {% if order['email'] %}<br><span class="bubble-gray">&#9993; {{ order['email'] }}</span>{% endif %}
+                      {% if order['address'] or order['city'] or order['state'] or order['zip'] %}<br><br><span class="bubble-gray">&#128205; {{ order['address'] }}</span><br><span class="bubble-gray">{{ order['city'] }}, {{ order['state'] }} {{ order['zip'] }}</span>{% endif %}
+                    </td>
+                    <td>{% if order['total'] is not none %}<span class="bubble">${{ '%.2f' % (order['total']|float) }}</span>{% endif %}</td>
+                    <td>
+                      {% if order['items'] %}
+                        {% set non_empty_items = order['items'] | selectattr('productID') | list %}
+                        {% for item in non_empty_items %}
+                          {%- set parts = [] -%}
+                          {%- if item['option'] %}{% set _ = parts.append(item['option']) %}{% endif -%}
+                          {% if parts|length > 0 %}<span class="bubble-gray">{{ parts | join(', ') }}</span><br>{% endif %}
+                          <span class="bubble-gray"><b>Product ID:</b> {{ item['productID'] }}</span><br>
+                          <span class="bubble-gray">{{ item['productName'] }}</span><br>
+                          <span class="bubble"><b>Quantity:</b> {{ item['quantity'] }}</span> <span class="bubble"><b>Total:</b> {{ item['total'] }}</span>{% if not loop.last %}<br><br>{% endif %}
+                        {% endfor %}
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if order['flower'] %}
+                        {% set non_empty_flower = order['flower'] | selectattr('productID') | list %}
+                        {% for item in non_empty_flower %}
+                          {%- set parts = [] -%}
+                          {%- if item['option'] %}{% set _ = parts.append(item['option']) %}{% endif -%}
+                          {% if parts|length > 0 %}<span class="bubble-gray">{{ parts | join(', ') }}</span><br>{% endif %}
+                          <span class="bubble-gray"><b>Product ID:</b> {{ item['productID'] }}</span><br>
+                          <span class="bubble-gray">{{ item['productName'] }}</span><br>
+                          <span class="bubble"><b>Quantity:</b> {{ item['quantity'] }}g</span> <span class="bubble"><b>Total:</b> {{ item['total'] }}</span>{% if not loop.last %}<br><br>{% endif %}
+                        {% endfor %}
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if order['total_discounts'] is not none and order['total_discounts']|float > 0 %}<span class="bubble"><b>Total:</b> ${{ '%.2f' % (order['total_discounts']|float) }}</span>{% endif %}{% if order['total_discounts'] is not none and order['total_discounts']|float > 0 %}<br>{% endif %}
+                      {% if order['volume_discounts'] is not none and order['volume_discounts']|float > 0 %}<span class="bubble-light"><b>Flower:</b> ${{ '%.2f' % (order['volume_discounts']|float) }}</span>{% endif %}{% if order['volume_discounts'] is not none and order['volume_discounts']|float > 0 %}<br>{% endif %}
+                      {% if order['BXGO_discounts'] is not none and order['BXGO_discounts']|float > 0 %}<span class="bubble-light"><b>BXGO:</b> ${{ '%.2f' % (order['BXGO_discounts']|float) }}</span>{% endif %}{% if order['BXGO_discounts'] is not none and order['BXGO_discounts']|float > 0 %}<br>{% endif %}
+                      {% if order['promo_discounts'] is not none and order['promo_discounts']|float > 0 %}<span class="bubble-light"><b>Promo:</b> ${{ '%.2f' % (order['promo_discounts']|float) }}</span>{% endif %}
+                    </td>
+                    <td>
+                      {% if order['order_profit'] is not none and order['order_profit']|float > 0 %}<span class="bubble"><b>Profit:</b> ${{ '%.2f' % (order['order_profit']|float) }}</span>{% endif %}
+                      {% if order['profit_margin'] is not none and order['profit_margin']|float > 0 %}<span class="bubble-light"><b>Margin:</b> {{ (order['profit_margin']|float * 100) | round(0) | int }}%</span>{% endif %}
+                    </td>
+                    <td>{% if order['payment_method'] %}<span class="bubble-gray">{{ order['payment_method'] }}</span>{% endif %}</td>
                   </tr>
                 {% endfor %}
-                {% if filtered_orders|length == 0 %}
-                  <tr><td colspan="11">No orders in the last 14 days.</td></tr>
+                {% if orders|length == 0 %}
+                  <tr><td colspan="13"><span class="bubble-gray">No orders found.</span></td></tr>
                 {% endif %}
               </tbody>
             </table>
