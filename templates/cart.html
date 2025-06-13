@@ -655,6 +655,20 @@
 
         // Example usage
         const { flowerItems, productItems } = getCartItemsByType();
+
+        // Listen for addToCart messages from iframes
+        window.addEventListener('message', function(event) {
+            // Optionally, check event.origin for security
+            if (event.data && event.data.type === 'addToCart' && event.data.item) {
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                cart.push(event.data.item);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                // Optionally reload or update the cart UI
+                document.getElementById('cart-items').innerHTML = '';
+                loadCart();
+                calculateTierTotals();
+            }
+        });
     </script>
 </head>
 <body>
