@@ -763,13 +763,19 @@
     <div class="main-content">
       <button onclick="openNewOrderPopup()" style="position: absolute; top: 32px; right: 60px; z-index: 1100; background: #000; color: #fff; border: none; border-radius: 7px; padding: 12px 28px; font-size: 16px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.10); cursor: pointer;">Create New Order</button>
       <div id="product-dropdown-container" style="display:none; margin-bottom:24px;">
+        <!-- Product Add Row -->
         <label for='product-dropdown' style='font-size:18px;font-weight:600;margin-bottom:12px;display:block;'>Select Product:</label>
-        <div style="display: flex; gap: 18px; align-items: center;">
-          <select id='product-dropdown' style='font-size:16px;padding:10px 18px;border-radius:7px;border:1.5px solid #b3c6e0;max-width:320px;'>
-            {% for product in products %}
-              <option value='{{ product.id }}' data-options='{{ product.options|tojson|safe if product.options is defined else "[]" }}'>{{ product.id }}: {{ product.product_name }}</option>
-            {% endfor %}
-          </select>
+        <div style="display: flex; gap: 18px; align-items: center; margin-bottom: 18px;">
+          <div style="position:relative;max-width:320px;width:320px;">
+            <div style="display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,0,0,0.07);border-radius:10px;overflow:hidden;border:1.5px solid #b3c6e0;background:#fff;">
+              <input id="product-search-input" type="text" placeholder="Search product..." autocomplete="off" style="font-size:16px;padding:10px 18px;border:none;border-bottom:1px solid #e5e7eb;width:100%;box-sizing:border-box;outline:none;border-radius:10px 10px 0 0;">
+              <select id='product-dropdown' style='font-size:16px;padding:10px 18px;border:none;width:100%;box-sizing:border-box;outline:none;border-radius:0 0 10px 10px;background:#fff;'>
+                {% for product in products|sort(attribute='id') %}
+                  <option value='{{ product.id }}' data-options='{{ product.options|tojson|safe if product.options is defined else "[]" }}'>{{ product.id }}: {{ product.product_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
           <label for='quantity-dropdown' style='font-size:16px;font-weight:500;margin-left:8px;'>Qty:</label>
           <select id='quantity-dropdown' style='font-size:16px;padding:10px 18px;border-radius:7px;border:1.5px solid #b3c6e0;width:90px;'>
             {% for i in range(1, 21) %}
@@ -986,6 +992,80 @@ document.addEventListener('DOMContentLoaded', function() {
     updateTypeDropdown(); // initialize on load
   }
 
+  // --- Product Searchable Dropdown ---
+  const products = JSON.parse(document.getElementById('products-data').textContent);
+  const productSearchInput = document.getElementById('product-search-input');
+  const productSearchDropdown = document.getElementById('product-search-dropdown');
+  let selectedProductIdx = 0;
+  function renderProductDropdown(filterText = '') {
+    let filtered = products.filter(p =>
+      p.id.toLowerCase().includes(filterText.toLowerCase()) ||
+      p.product_name.toLowerCase().includes(filterText.toLowerCase())
+    );
+    productSearchDropdown.innerHTML = '';
+    if (filtered.length === 0) {
+      productSearchDropdown.innerHTML = '<div style="padding:10px;color:#888;">No products found</div>';
+    } else {
+      filtered.forEach((p, idx) => {
+        const div = document.createElement('div');
+        div.textContent = `${p.id}: ${p.product_name}`;
+        div.style.padding = '10px 18px';
+        div.style.cursor = 'pointer';
+        div.style.background = idx === selectedProductIdx ? '#e5e7eb' : '#fff';
+        div.onmouseenter = () => { selectedProductIdx = idx; highlightDropdown(); };
+        div.onclick = () => selectProduct(filtered[idx]);
+        productSearchDropdown.appendChild(div);
+      });
+    }
+    productSearchDropdown.style.display = 'block';
+  }
+  function highlightDropdown() {
+    Array.from(productSearchDropdown.children).forEach((div, idx) => {
+      div.style.background = idx === selectedProductIdx ? '#e5e7eb' : '#fff';
+    });
+  }
+  function selectProduct(product) {
+    productSearchInput.value = `${product.id}: ${product.product_name}`;
+    productSearchInput.dataset.selectedId = product.id;
+    productSearchDropdown.style.display = 'none';
+    productSearchInput.dispatchEvent(new Event('change'));
+  }
+  productSearchInput.addEventListener('input', function(e) {
+    selectedProductIdx = 0;
+    renderProductDropdown(this.value);
+  });
+  productSearchInput.addEventListener('focus', function() {
+    renderProductDropdown(this.value);
+  });
+  productSearchInput.addEventListener('blur', function() {
+    setTimeout(() => { productSearchDropdown.style.display = 'none'; }, 150);
+  });
+  productSearchInput.addEventListener('keydown', function(e) {
+    const visible = productSearchDropdown.style.display === 'block';
+    if (!visible) return;
+    const items = Array.from(productSearchDropdown.children);
+    if (e.key === 'ArrowDown') {
+      selectedProductIdx = Math.min(selectedProductIdx + 1, items.length - 1);
+      highlightDropdown();
+      e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      selectedProductIdx = Math.max(selectedProductIdx - 1, 0);
+      highlightDropdown();
+      e.preventDefault();
+    } else if (e.key === 'Enter') {
+      if (items[selectedProductIdx]) {
+        items[selectedProductIdx].click();
+        e.preventDefault();
+      }
+    }
+  });
+  function getSelectedProductId() {
+    if (productSearchInput.dataset.selectedId) return productSearchInput.dataset.selectedId;
+    const val = productSearchInput.value.trim();
+    const found = products.find(p => `${p.id}: ${p.product_name}` === val);
+    return found ? found.id : '';
+  }
+
   // Manual Cart Add to Cart logic
   var addToCartBtn = document.getElementById('add-to-cart-btn');
   var quantityDropdown = document.getElementById('quantity-dropdown');
@@ -997,8 +1077,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   if (addToCartBtn) {
     addToCartBtn.addEventListener('click', async function() {
-      var selectedProductId = productDropdown.value;
-      var selectedProductName = productDropdown.options[productDropdown.selectedIndex].text;
+      var selectedProductId = getSelectedProductId();
+      var selectedProductName = productSearchInput.value;
       var selectedQuantity = parseInt(quantityDropdown.value);
       var selectedType = typeDropdown.value;
       // Fetch price and group from backend
@@ -1043,5 +1123,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+{% if flower_options %}
+<script id="flower-options-data" type="application/json">{{ flower_options|tojson|safe }}</script>
+{% endif %}
 </body>
 </html>
