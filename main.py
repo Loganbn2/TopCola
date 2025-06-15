@@ -108,6 +108,20 @@ def render_cart():
         logging.error(f"Error rendering cart: {e}")
         return render_template('cart.html', cart=[], groups=[], volume_discounts=[], promo_codes=[], error=f"An error occurred: {str(e)}")
 
+# manual-cart.html
+@app.route('/manual-cart', methods=['GET'])
+def render_manual_cart():
+    try:
+        cart_data = []
+        volume_discounts, error = get_volume_discounts(supabase)
+        groups, error = get_groups(supabase)
+        promo_codes, error = get_promo_codes(supabase)
+        return render_template('manual_cart.html', cart=cart_data, volume_discounts=volume_discounts, groups=groups, promo_codes=promo_codes, error=error)
+    except Exception as e:
+        logging.error(f"Error rendering cart: {e}")
+        return render_template('manual_cart.html', cart=[], groups=[], volume_discounts=[], promo_codes=[], error=f"An error occurred: {str(e)}")
+
+
 # place order
 @app.route('/api/place-order', methods=['POST'])
 def place_order():
@@ -574,10 +588,13 @@ def delete_weighted_product():
 def render_orders():
     try:
         orders, error = get_order_data(supabase)
-        return render_template('orders.html', orders=orders, error=error)
+        # Fetch all products for the dropdown
+        response = supabase.table('products').select('id, product_name').execute()
+        products = response.data if response.data else []
+        return render_template('orders.html', orders=orders, error=error, products=products)
     except Exception as e:
         logging.error(f"Error rendering orders: {e}")
-        return render_template('orders.html', orders=[], error=f"An error occurred: {str(e)}")
+        return render_template('orders.html', orders=[], error=f"An error occurred: {str(e)}", products=[])
 
 # update fulfillment status
 @app.route('/update-fulfillment', methods=['POST'])
@@ -609,6 +626,28 @@ def update_fulfillment():
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+# API endpoint to get product options as JSON
+@app.route('/api/product-options/<int:product_id>', methods=['GET'])
+def get_product_options(product_id):
+    try:
+        product_info, error = get_product_info(supabase, product_id)
+        if error or not product_info:
+            return jsonify({'options': [], 'price': None, 'group': None})
+        options = product_info.get('options') or []
+        price = None
+        option = request.args.get('option')
+        # If option is provided and option_prices exists, use it
+        if option and 'option_prices' in product_info and product_info['option_prices']:
+            # option_prices is expected to be a dict: {option: price, ...}
+            price = product_info['option_prices'].get(option)
+        elif 'price' in product_info:
+            price = product_info['price']
+        group = product_info.get('group') or product_info.get('productGroup')
+        return jsonify({'options': options, 'price': price, 'group': group})
+    except Exception as e:
+        logging.error(f"Error fetching product options for ID {product_id}: {e}")
+        return jsonify({'options': [], 'price': None, 'group': None})
 
 # run
 if __name__ == "__main__":

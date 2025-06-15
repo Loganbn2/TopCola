@@ -675,175 +675,373 @@
             }
           });
         });
+        function openNewOrderPopup() {
+          let overlay = document.getElementById('new-order-overlay');
+          let popup = document.getElementById('new-order-popup');
+          if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'new-order-overlay';
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100vw';
+            overlay.style.height = '100vh';
+            overlay.style.background = 'rgba(0,0,0,0.35)';
+            overlay.style.zIndex = '3000';
+            overlay.onclick = function(e) {
+              if (e.target === overlay) closeNewOrderPopup();
+            };
+            document.body.appendChild(overlay);
+          } else {
+            overlay.style.display = 'block';
+          }
+          if (!popup) {
+            popup = document.createElement('div');
+            popup.id = 'new-order-popup';
+            popup.style.position = 'fixed';
+            popup.style.top = '50%';
+            popup.style.left = '50%';
+            popup.style.transform = 'translate(-50%, -50%)';
+            popup.style.background = '#fff';
+            popup.style.padding = '48px 60px';
+            popup.style.borderRadius = '18px';
+            popup.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18), 0 1.5px 8px rgba(0,0,0,0.10)';
+            popup.style.zIndex = '4000';
+            popup.style.minWidth = '480px';
+            popup.style.minHeight = '340px';
+            popup.style.width = '60vw';
+            popup.style.height = '60vh';
+            popup.style.maxWidth = '900px';
+            popup.style.maxHeight = '90vh';
+            popup.style.display = 'flex';
+            popup.style.flexDirection = 'column';
+            popup.innerHTML = `<button onclick='closeNewOrderPopup()' style='position:absolute;top:18px;right:24px;font-size:22px;background:none;border:none;cursor:pointer;color:#222;' aria-label='Close'>&times;</button>`;
+            // Move the dropdown into the popup
+            var dropdownContainer = document.getElementById('product-dropdown-container');
+            if (dropdownContainer) {
+              popup.appendChild(dropdownContainer);
+              dropdownContainer.style.display = 'block';
+            }
+            overlay.appendChild(popup);
+          } else {
+            popup.style.display = 'flex';
+            overlay.appendChild(popup);
+            var dropdownContainer = document.getElementById('product-dropdown-container');
+            if (dropdownContainer) {
+              popup.appendChild(dropdownContainer);
+              dropdownContainer.style.display = 'block';
+            }
+          }
+        }
+        function closeNewOrderPopup() {
+          let overlay = document.getElementById('new-order-overlay');
+          if (overlay) overlay.style.display = 'none';
+          var dropdownContainer = document.getElementById('product-dropdown-container');
+          if (dropdownContainer) dropdownContainer.style.display = 'none';
+        }
     </script>
 </head>
 <body>
-    <div style="display: flex; min-height: 100vh;">
-        <nav>
-            <div class="nav-btns">
-                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.location.href='https://topcola.onrender.com/orders'; return false;">Orders</button>
-                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" id="profit-reports-btn" type="button">Profit Reports</button>
-                <div class="nav-submenu" id="profit-reports-submenu">
-                    <button onclick="window.location.href='/profits-reports/7'">7 Days</button>
-                    <button onclick="window.location.href='/profits-reports/14'">14 Days</button>
-                    <button onclick="window.location.href='/profits-reports/30'">30 Days</button>
-                    <button onclick="window.location.href='/profits-reports/60'">60 Days</button>
-                    <button onclick="window.location.href='/profits-reports/90'">90 Days</button>
-                    <button onclick="window.location.href='/profits-reports/365'">1 Year</button>
-                </div>
-                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.location.href='https://topcola.onrender.com/admin'; return false;">Admin</button>
-                <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.open('https://supabase.com/dashboard/project/otnrvaybkwsvzxgwfhfc/editor', '_blank'); return false;">Database</button>
+<div style="display: flex; min-height: 100vh;">
+    <nav>
+        <div class="nav-btns">
+            <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.location.href='https://topcola.onrender.com/orders'; return false;">Orders</button>
+            <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" id="profit-reports-btn" type="button">Profit Reports</button>
+            <div class="nav-submenu" id="profit-reports-submenu">
+                <button onclick="window.location.href='/profits-reports/7'">7 Days</button>
+                <button onclick="window.location.href='/profits-reports/14'">14 Days</button>
+                <button onclick="window.location.href='/profits-reports/30'">30 Days</button>
+                <button onclick="window.location.href='/profits-reports/60'">60 Days</button>
+                <button onclick="window.location.href='/profits-reports/90'">90 Days</button>
+                <button onclick="window.location.href='/profits-reports/365'">1 Year</button>
             </div>
-            <img src="/static/ndc.png" alt="Nicholson Digital Co." class="nav-logo" />
-        </nav>
-        <div class="main-content">
-          <h1>All Orders</h1>
-          {% if error %}
-            <div class="error">{{ error }}</div>
-          {% endif %}
+            <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.location.href='https://topcola.onrender.com/admin'; return false;">Admin</button>
+            <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.open('https://supabase.com/dashboard/project/otnrvaybkwsvzxgwfhfc/editor', '_blank'); return false;">Database</button>
+        </div>
+        <img src="/static/ndc.png" alt="Nicholson Digital Co." class="nav-logo" />
+    </nav>
+    <div class="main-content">
+      <button onclick="openNewOrderPopup()" style="position: absolute; top: 32px; right: 60px; z-index: 1100; background: #000; color: #fff; border: none; border-radius: 7px; padding: 12px 28px; font-size: 16px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.10); cursor: pointer;">Create New Order</button>
+      <div id="product-dropdown-container" style="display:none; margin-bottom:24px;">
+        <label for='product-dropdown' style='font-size:18px;font-weight:600;margin-bottom:12px;display:block;'>Select Product:</label>
+        <div style="display: flex; gap: 18px; align-items: center;">
+          <select id='product-dropdown' style='font-size:16px;padding:10px 18px;border-radius:7px;border:1.5px solid #b3c6e0;max-width:320px;'>
+            {% for product in products %}
+              <option value='{{ product.id }}' data-options='{{ product.options|tojson|safe if product.options is defined else "[]" }}'>{{ product.id }}: {{ product.product_name }}</option>
+            {% endfor %}
+          </select>
+          <label for='quantity-dropdown' style='font-size:16px;font-weight:500;margin-left:8px;'>Qty:</label>
+          <select id='quantity-dropdown' style='font-size:16px;padding:10px 18px;border-radius:7px;border:1.5px solid #b3c6e0;width:90px;'>
+            {% for i in range(1, 21) %}
+              <option value='{{ i }}'>{{ i }}</option>
+            {% endfor %}
+          </select>
+          <label for='type-dropdown' style='font-size:16px;font-weight:500;margin-left:8px;'>Type:</label>
+          <select id='type-dropdown' style='font-size:16px;padding:10px 18px;border-radius:7px;border:1.5px solid #b3c6e0;width:120px;'>
+            <option value="" disabled selected>Select type</option>
+          </select>
+          <button id="add-to-cart-btn" style="margin-left:12px;padding:10px 24px;font-size:16px;border-radius:7px;background:#007bff;color:#fff;border:none;cursor:pointer;">Add to Cart</button>
+        </div>
+      </div>
+      <h1>All Orders</h1>
+      {% if error %}
+        <div class="error">{{ error }}</div>
+      {% endif %}
 
-          {% if orders and orders|length > 0 %}
-            {% set sorted_orders = orders|sort(attribute='created_at', reverse=true) %}
-            <div class="table-wrapper">
-              <table border="1" cellpadding="5" cellspacing="0">
-                <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Order Date</th>
-                    <th>Delivery Time</th>
-                    <th>Fulfillment Status</th>
-                    <th>Customer</th>
-                    <th>Final Order Total <span class="info-badge" tabindex="0">&#9432;
+      {% if orders and orders|length > 0 %}
+        {% set sorted_orders = orders|sort(attribute='created_at', reverse=true) %}
+        <div class="table-wrapper">
+          <table border="1" cellpadding="5" cellspacing="0">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Order Date</th>
+                <th>Delivery Time</th>
+                <th>Fulfillment Status</th>
+                <th>Customer</th>
+                <th>Final Order Total <span class="info-badge" tabindex="0">&#9432;
   <span class="info-tooltip">Click this value to manually edit. Profit &amp; Profit Margin will be updated as well.</span>
 </span></th>
-                    <th>Items</th>
-                    <th>Flower</th>
-                    <th>Discounts</th>
-                    <th>Profit</th>
-                    <th>Payment Method</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for order in sorted_orders %}
-                  <tr>
-                    <td><span class="bubble-gray">{{ order['id'] }}</span></td>
-                    <td>
-                      {% if order['created_at'] %}
-                        {% set dt = order['created_at'] %}
-                        {% set year = dt[0:4]|int %}
-                        {% set month = dt[5:7]|int %}
-                        {% set day = dt[8:10]|int %}
-                        {% set hour = dt[11:13]|int %}
-                        {% set minute = dt[14:16]|int %}
-                        {% set ampm = 'AM' %}
-                        {# Convert UTC to Pacific Time (UTC-7 for DST, UTC-8 for Standard) #}
-                        {% set month_for_dst = month %}
-                        {% set day_for_dst = day %}
-                        {% set dst_start = 8 %} {# Second Sunday in March is always between 8-14 #}
-                        {% set dst_end = 1 %} {# First Sunday in November is always between 1-7 #}
-                        {% set is_dst = (month_for_dst > 3 and month_for_dst < 11) or (month_for_dst == 3 and day_for_dst >= dst_start) or (month_for_dst == 11 and day_for_dst < dst_end) %}
-                        {% set offset = -7 if is_dst else -8 %}
-                        {% set hour_pacific = hour + offset %}
-                        {% if hour_pacific < 0 %}
-                          {% set hour_pacific = hour_pacific + 24 %}
-                          {% set day = day - 1 %}
-                          {# Not handling month/year underflow for simplicity #}
-                        {% elif hour_pacific >= 24 %}
-                          {% set hour_pacific = hour_pacific - 24 %}
-                          {% set day = day + 1 %}
-                          {# Not handling month/year overflow for simplicity #}
-                        {% endif %}
-                        {% set hour12 = hour_pacific if hour_pacific == 0 or hour_pacific == 12 else hour_pacific % 12 %}
-                        {% set hour12 = 12 if hour12 == 0 else hour12 %}
-                        {% set ampm = 'AM' if hour_pacific < 12 else 'PM' %}
-                        {% set month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
-                        <span class="bubble-gray">{{ month_names[month-1] }} {{ day }}, {{ year }}<br>{{ '%d' % hour12 }}:{{ '%02d' % minute }} {{ ampm }}</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      {% if order['delivery_time'] %}
-                        {% set dt = order['delivery_time'] %}
-                        {% set year = dt[0:4]|int %}
-                        {% set month = dt[5:7]|int %}
-                        {% set day = dt[8:10]|int %}
-                        {% set hour = dt[11:13]|int %}
-                        {% set minute = dt[14:16]|int %}
-                        {% set hour12 = hour if hour == 0 or hour == 12 else hour % 12 %}
-                        {% set hour12 = 12 if hour12 == 0 else hour12 %}
-                        {% set ampm = 'AM' if hour < 12 else 'PM' %}
-                        {% set month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
-                        <span class="bubble-gray">{{ month_names[month-1] }} {{ day }}, {{ year }}<br>{{ '%d' % hour12 }}:{{ '%02d' % minute }} {{ ampm }}</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      <div class="fulfillment-dropdown" style="position: relative; display: inline-block;">
-                        <span class="bubble-gray fulfillment-bubble" tabindex="0" onclick="toggleDropdown(this)" data-order-id="{{ order['id'] }}"
+                <th>Items</th>
+                <th>Flower</th>
+                <th>Discounts</th>
+                <th>Profit</th>
+                <th>Payment Method</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in sorted_orders %}
+              <tr>
+                <td><span class="bubble-gray">{{ order['id'] }}</span></td>
+                <td>
+                  {% if order['created_at'] %}
+                    {% set dt = order['created_at'] %}
+                    {% set year = dt[0:4]|int %}
+                    {% set month = dt[5:7]|int %}
+                    {% set day = dt[8:10]|int %}
+                    {% set hour = dt[11:13]|int %}
+                    {% set minute = dt[14:16]|int %}
+                    {% set ampm = 'AM' %}
+                    {# Convert UTC to Pacific Time (UTC-7 for DST, UTC-8 for Standard) #}
+                    {% set month_for_dst = month %}
+                    {% set day_for_dst = day %}
+                    {% set dst_start = 8 %} {# Second Sunday in March is always between 8-14 #}
+                    {% set dst_end = 1 %} {# First Sunday in November is always between 1-7 #}
+                    {% set is_dst = (month_for_dst > 3 and month_for_dst < 11) or (month_for_dst == 3 and day_for_dst >= dst_start) or (month_for_dst == 11 and day_for_dst < dst_end) %}
+                    {% set offset = -7 if is_dst else -8 %}
+                    {% set hour_pacific = hour + offset %}
+                    {% if hour_pacific < 0 %}
+                      {% set hour_pacific = hour_pacific + 24 %}
+                      {% set day = day - 1 %}
+                      {# Not handling month/year underflow for simplicity #}
+                    {% elif hour_pacific >= 24 %}
+                      {% set hour_pacific = hour_pacific - 24 %}
+                      {% set day = day + 1 %}
+                      {# Not handling month/year overflow for simplicity #}
+                    {% endif %}
+                    {% set hour12 = hour_pacific if hour_pacific == 0 or hour_pacific == 12 else hour_pacific % 12 %}
+                    {% set hour12 = 12 if hour12 == 0 else hour12 %}
+                    {% set ampm = 'AM' if hour_pacific < 12 else 'PM' %}
+                    {% set month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+                    <span class="bubble-gray">{{ month_names[month-1] }} {{ day }}, {{ year }}<br>{{ '%d' % hour12 }}:{{ '%02d' % minute }} {{ ampm }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if order['delivery_time'] %}
+                    {% set dt = order['delivery_time'] %}
+                    {% set year = dt[0:4]|int %}
+                    {% set month = dt[5:7]|int %}
+                    {% set day = dt[8:10]|int %}
+                    {% set hour = dt[11:13]|int %}
+                    {% set minute = dt[14:16]|int %}
+                    {% set hour12 = hour if hour == 0 or hour == 12 else hour % 12 %}
+                    {% set hour12 = 12 if hour12 == 0 else hour12 %}
+                    {% set ampm = 'AM' if hour < 12 else 'PM' %}
+                    {% set month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+                    <span class="bubble-gray">{{ month_names[month-1] }} {{ day }}, {{ year }}<br>{{ '%d' % hour12 }}:{{ '%02d' % minute }} {{ ampm }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="fulfillment-dropdown" style="position: relative; display: inline-block;">
+                    <span class="bubble-gray fulfillment-bubble" tabindex="0" onclick="toggleDropdown(this)" data-order-id="{{ order['id'] }}"
   {% if order['fulfillment_status'] == 'Completed' %}class="bubble-gray fulfillment-bubble bubble-fulfillment-completed"{% elif order['fulfillment_status'] == 'Processing' %}class="bubble-gray fulfillment-bubble bubble-fulfillment-processing"{% elif order['fulfillment_status'] == 'Received' %}class="bubble-gray fulfillment-bubble bubble-fulfillment-received"{% elif order['fulfillment_status'] == 'Canceled' %}class="bubble-gray fulfillment-bubble bubble-fulfillment-canceled"{% endif %}>
   {{ order['fulfillment_status'] }}
 </span>
-                        <div class="dropdown-menu" style="display: none; position: absolute; left: 0; top: 110%; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 140px; z-index: 10;">
-                          <div class="dropdown-option" onclick="selectFulfillment(this, 'Received')">Received</div>
-                          <div class="dropdown-option" onclick="selectFulfillment(this, 'Processing')">Processing</div>
-                          <div class="dropdown-option" onclick="selectFulfillment(this, 'Canceled')">Canceled</div>
-                          <div class="dropdown-option" onclick="selectFulfillment(this, 'Completed')">Completed</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span class="bubble-gray">&#128100; {{ order['full_name'] }}</span><br>
-                      {% if order['phone'] %}<span class="bubble-gray">&#128222; {{ order['phone'] }}</span>{% endif %}
-                      {% if order['email'] %}<br><span class="bubble-gray">&#9993; {{ order['email'] }}</span>{% endif %}
-                      {% if order['address'] or order['city'] or order['state'] or order['zip'] %}<br><br><span class="bubble-gray">&#128205; {{ order['address'] }}</span><br><span class="bubble-gray">{{ order['city'] }}, {{ order['state'] }} {{ order['zip'] }}</span>{% endif %}
-                    </td>
-                    <td>{% if order['total'] is not none %}<span class="bubble">${{ '%.2f' % (order['total']|float) }}</span>{% endif %}</td>
-                    <td>
-                      {% if order['items'] %}
-                        {% set non_empty_items = order['items'] | selectattr('productID') | list %}
-                        {% set items_json = non_empty_items | tojson %}
-                        {% for item in non_empty_items %}
-                          <span class="bubble-gray"><b>Product ID:</b> {{ item['productID'] }}</span>
-                          {% if item['option'] %}<span class="bubble-gray">{{ item['option'] }}</span>{% endif %}
-                          <br>
-                          <span class="bubble-gray">{{ item['productName'] }}</span><br>
-                          <span class="bubble" style="cursor:pointer;" data-items='{{ items_json|safe }}' data-index='{{ loop.index0 }}'><b>Quantity:</b> {{ item['quantity'] }}</span> <span class="bubble"><b>Total:</b> {{ item['total'] }}</span>{% if not loop.last %}<br><br>{% endif %}
-                        {% endfor %}
-                      {% endif %}
-                    </td>
-                    <td>
-                      {% if order['flower'] %}
-                        {% set non_empty_flower = order['flower'] | selectattr('productID') | list %}
-                        {% set flower_json = non_empty_flower | tojson %}
-                        {% for item in non_empty_flower %}
-                          <span class="bubble-gray"><b>Product ID:</b> {{ item['productID'] }}</span>
-                          {% if item['option'] %}<span class="bubble-gray">{{ item['option'] }}</span>{% endif %}
-                          <br>
-                          <span class="bubble-gray">{{ item['productName'] }}</span><br>
-                          <span class="bubble" style="cursor:pointer;" data-items='{{ flower_json|safe }}' data-index='{{ loop.index0 }}'><b>Quantity:</b> {{ item['quantity'] }}g</span> <span class="bubble"><b>Total:</b> {{ item['total'] }}</span>{% if not loop.last %}<br><br>{% endif %}
-                        {% endfor %}
-                      {% endif %}
-                    </td>
-                    <td>
-                      {% if order['total_discounts'] is not none and order['total_discounts']|float > 0 %}<span class="bubble"><b>Total:</b> ${{ '%.2f' % (order['total_discounts']|float) }}</span>{% endif %}{% if order['total_discounts'] is not none and order['total_discounts']|float > 0 %}<br>{% endif %}
-                      {% if order['volume_discounts'] is not none and order['volume_discounts']|float > 0 %}<span class="bubble-light"><b>Flower:</b> ${{ '%.2f' % (order['volume_discounts']|float) }}</span>{% endif %}{% if order['volume_discounts'] is not none and order['volume_discounts']|float > 0 %}<br>{% endif %}
-                      {% if order['BXGO_discounts'] is not none and order['BXGO_discounts']|float > 0 %}<span class="bubble-light"><b>BXGO:</b> ${{ '%.2f' % (order['BXGO_discounts']|float) }}</span>{% endif %}{% if order['BXGO_discounts'] is not none and order['BXGO_discounts']|float > 0 %}<br>{% endif %}
-                      {% if order['promo_discounts'] is not none and order['promo_discounts']|float > 0 %}<span class="bubble-light"><b>Promo:</b> ${{ '%.2f' % (order['promo_discounts']|float) }}</span>{% endif %}
-                    </td>
-                    <td>
-                      {% if order['order_profit'] is not none and order['order_profit']|float > 0 %}<span class="bubble"><b>Profit:</b> ${{ '%.2f' % (order['order_profit']|float) }}</span>{% endif %}
-                      {% if order['profit_margin'] is not none and order['profit_margin']|float > 0 %}<span class="bubble-light"><b>Margin:</b> {{ (order['profit_margin']|float * 100) | round(0) | int }}%</span>{% endif %}
-                    </td>
-                    <td>{% if order['payment_method'] %}<span class="bubble-gray">{{ order['payment_method'] }}</span>{% endif %}</td>
-                  </tr>
-                {% endfor %}
-                {% if orders|length == 0 %}
-                  <tr><td colspan="13"><span class="bubble-gray">No orders found.</span></td></tr>
-                {% endif %}
-              </tbody>
-            </table>
-          {% else %}
-            <p>No orders found.</p>
-          {% endif %}
-        </div>
+                    <div class="dropdown-menu" style="display: none; position: absolute; left: 0; top: 110%; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 140px; z-index: 10;">
+                      <div class="dropdown-option" onclick="selectFulfillment(this, 'Received')">Received</div>
+                      <div class="dropdown-option" onclick="selectFulfillment(this, 'Processing')">Processing</div>
+                      <div class="dropdown-option" onclick="selectFulfillment(this, 'Canceled')">Canceled</div>
+                      <div class="dropdown-option" onclick="selectFulfillment(this, 'Completed')">Completed</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="bubble-gray">&#128100; {{ order['full_name'] }}</span><br>
+                  {% if order['phone'] %}<span class="bubble-gray">&#128222; {{ order['phone'] }}</span>{% endif %}
+                  {% if order['email'] %}<br><span class="bubble-gray">&#9993; {{ order['email'] }}</span>{% endif %}
+                  {% if order['address'] or order['city'] or order['state'] or order['zip'] %}<br><br><span class="bubble-gray">&#128205; {{ order['address'] }}</span><br><span class="bubble-gray">{{ order['city'] }}, {{ order['state'] }} {{ order['zip'] }}</span>{% endif %}
+                </td>
+                <td>{% if order['total'] is not none %}<span class="bubble">${{ '%.2f' % (order['total']|float) }}</span>{% endif %}</td>
+                <td>
+                  {% if order['items'] %}
+                    {% set non_empty_items = order['items'] | selectattr('productID') | list %}
+                    {% set items_json = non_empty_items | tojson %}
+                    {% for item in non_empty_items %}
+                      <span class="bubble-gray"><b>Product ID:</b> {{ item['productID'] }}</span>
+                      {% if item['option'] %}<span class="bubble-gray">{{ item['option'] }}</span>{% endif %}
+                      <br>
+                      <span class="bubble-gray">{{ item['productName'] }}</span><br>
+                      <span class="bubble" style="cursor:pointer;" data-items='{{ items_json|safe }}' data-index='{{ loop.index0 }}'><b>Quantity:</b> {{ item['quantity'] }}</span> <span class="bubble"><b>Total:</b> {{ item['total'] }}</span>{% if not loop.last %}<br><br>{% endif %}
+                    {% endfor %}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if order['flower'] %}
+                    {% set non_empty_flower = order['flower'] | selectattr('productID') | list %}
+                    {% set flower_json = non_empty_flower | tojson %}
+                    {% for item in non_empty_flower %}
+                      <span class="bubble-gray"><b>Product ID:</b> {{ item['productID'] }}</span>
+                      {% if item['option'] %}<span class="bubble-gray">{{ item['option'] }}</span>{% endif %}
+                      <br>
+                      <span class="bubble-gray">{{ item['productName'] }}</span><br>
+                      <span class="bubble" style="cursor:pointer;" data-items='{{ flower_json|safe }}' data-index='{{ loop.index0 }}'><b>Quantity:</b> {{ item['quantity'] }}g</span> <span class="bubble"><b>Total:</b> {{ item['total'] }}</span>{% if not loop.last %}<br><br>{% endif %}
+                    {% endfor %}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if order['total_discounts'] is not none and order['total_discounts']|float > 0 %}<span class="bubble"><b>Total:</b> ${{ '%.2f' % (order['total_discounts']|float) }}</span>{% endif %}{% if order['total_discounts'] is not none and order['total_discounts']|float > 0 %}<br>{% endif %}
+                  {% if order['volume_discounts'] is not none and order['volume_discounts']|float > 0 %}<span class="bubble-light"><b>Flower:</b> ${{ '%.2f' % (order['volume_discounts']|float) }}</span>{% endif %}{% if order['volume_discounts'] is not none and order['volume_discounts']|float > 0 %}<br>{% endif %}
+                  {% if order['BXGO_discounts'] is not none and order['BXGO_discounts']|float > 0 %}<span class="bubble-light"><b>BXGO:</b> ${{ '%.2f' % (order['BXGO_discounts']|float) }}</span>{% endif %}{% if order['BXGO_discounts'] is not none and order['BXGO_discounts']|float > 0 %}<br>{% endif %}
+                  {% if order['promo_discounts'] is not none and order['promo_discounts']|float > 0 %}<span class="bubble-light"><b>Promo:</b> ${{ '%.2f' % (order['promo_discounts']|float) }}</span>{% endif %}
+                </td>
+                <td>
+                  {% if order['order_profit'] is not none and order['order_profit']|float > 0 %}<span class="bubble"><b>Profit:</b> ${{ '%.2f' % (order['order_profit']|float) }}</span>{% endif %}
+                  {% if order['profit_margin'] is not none and order['profit_margin']|float > 0 %}<span class="bubble-light"><b>Margin:</b> {{ (order['profit_margin']|float * 100) | round(0) | int }}%</span>{% endif %}
+                </td>
+                <td>{% if order['payment_method'] %}<span class="bubble-gray">{{ order['payment_method'] }}</span>{% endif %}</td>
+              </tr>
+            {% endfor %}
+            {% if orders|length == 0 %}
+              <tr><td colspan="13"><span class="bubble-gray">No orders found.</span></td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No orders found.</p>
+      {% endif %}
     </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Product dropdown change event to update type options
+  var productDropdown = document.getElementById('product-dropdown');
+  var typeDropdown = document.getElementById('type-dropdown');
+
+  async function updateTypeDropdown() {
+    var selectedProductId = productDropdown.value;
+    typeDropdown.innerHTML = '';
+    typeDropdown.disabled = true;
+    // Show loading
+    var loadingOption = document.createElement('option');
+    loadingOption.textContent = 'Loading...';
+    loadingOption.disabled = true;
+    loadingOption.selected = true;
+    typeDropdown.appendChild(loadingOption);
+    try {
+      const resp = await fetch(`/api/product-options/${selectedProductId}`);
+      if (!resp.ok) throw new Error('Failed to fetch product options');
+      const data = await resp.json();
+      let options = data.options || [];
+      typeDropdown.innerHTML = '';
+      if (options.length > 0) {
+        options.forEach(function(opt) {
+          var optionEl = document.createElement('option');
+          optionEl.value = opt;
+          optionEl.textContent = opt;
+          typeDropdown.appendChild(optionEl);
+        });
+        typeDropdown.disabled = false;
+      } else {
+        var placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = 'No options';
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        typeDropdown.appendChild(placeholder);
+        typeDropdown.disabled = true;
+      }
+    } catch (e) {
+      typeDropdown.innerHTML = '';
+      var errorOption = document.createElement('option');
+      errorOption.value = '';
+      errorOption.textContent = 'Error loading options';
+      errorOption.disabled = true;
+      errorOption.selected = true;
+      typeDropdown.appendChild(errorOption);
+      typeDropdown.disabled = true;
+    }
+  }
+  if (productDropdown && typeDropdown) {
+    productDropdown.addEventListener('change', updateTypeDropdown);
+    updateTypeDropdown(); // initialize on load
+  }
+
+  // Manual Cart Add to Cart logic
+  var addToCartBtn = document.getElementById('add-to-cart-btn');
+  var quantityDropdown = document.getElementById('quantity-dropdown');
+  function getManualCart() {
+    return JSON.parse(localStorage.getItem('manual_cart')) || [];
+  }
+  function setManualCart(cart) {
+    localStorage.setItem('manual_cart', JSON.stringify(cart));
+  }
+  if (addToCartBtn) {
+    addToCartBtn.addEventListener('click', async function() {
+      var selectedProductId = productDropdown.value;
+      var selectedProductName = productDropdown.options[productDropdown.selectedIndex].text;
+      var selectedQuantity = parseInt(quantityDropdown.value);
+      var selectedType = typeDropdown.value;
+      // Fetch price and group from backend
+      try {
+        let url = `/api/product-options/${selectedProductId}`;
+        if (selectedType) {
+          url += `?option=${encodeURIComponent(selectedType)}`;
+        }
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('Failed to fetch product info');
+        const data = await resp.json();
+        let price = data.price;
+        let group = data.group || data.productGroup || '';
+        if (typeof price === 'undefined') {
+          alert('Price not available for this product/option.');
+          return;
+        }
+        let total = (price * selectedQuantity).toFixed(2);
+        // Use the same structure as product_page.html addToCart
+        var item = {
+          productName: selectedProductName,
+          productID: selectedProductId,
+          quantity: selectedQuantity,
+          total: `$${total}`,
+          productGroup: group,
+          option: selectedType || ''
+        };
+        var cart = getManualCart();
+        cart.push(item);
+        setManualCart(cart);
+        // Debug: log backend data and cart item
+        console.log('Backend data:', data);
+        console.log('Cart item being added:', item);
+        cart.forEach(function(it, idx) {
+          console.log(`#${idx + 1}:`, it.productName, '| productGroup:', it.productGroup, '| group:', it.group, '| full:', it);
+        });
+        alert('Added to Manual Cart!');
+      } catch (e) {
+        alert('Error adding to cart: ' + e.message);
+      }
+    });
+  }
+});
+</script>
 </body>
 </html>

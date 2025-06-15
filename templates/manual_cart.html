@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <style>
+        .cart-container {
+            color: #333;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%;
+            margin: 20px auto;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: space-between; /* Create space between cart and form */
+        }
+        .cart-column {
+            width: 60%; /* Adjust width to fit side by side */
+            padding-left: 30px;
+        }
+        
+        .form-column {
+            width: 36%; /* Adjust width to fit side by side */
+            padding-left: 30px;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between; /* Distribute space evenly between elements */
+            align-items: center; /* Align items vertically */
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .cart-item > * {
+            flex: 1; /* Ensure all elements take up equal space */
+            text-align: center; /* Center align text within each container */
+        }
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        .cart-total {
+            text-align: left; /* Align the total for the whole cart to the left */
+            font-weight: bold;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .subtotal {
+            text-align: left; /* Align the total for the whole cart to the left */
+            font-weight: 400;
+            font-size: 18px;
+            margin-top: 20px;
+            padding-left: 30px;;
+        }
+        .discounts-total {
+            text-align: left; /* Align the total for the whole cart to the left */
+            font-weight: 400;
+            margin-top: 20px;
+            font-size: 18px;
+            color: darkgreen;
+            padding-left: 30px;
+        }
+        .place-order-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            width: fit-content;
+            cursor: pointer;
+        }
+        .place-order-button:hover {
+            background-color: #0056b3;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .delete-button {
+            background-color: transparent; /* Make background transparent */
+            color: black; /* Set icon color to black */
+            border: none; /* Remove border */
+            font-size: 18px; /* Adjust font size for the icon */
+            cursor: pointer; /* Change cursor to pointer */
+            width: 100%; /* Ensure the button fills the container */
+        }
+        .delete-button:hover {
+            color: red; /* Change icon color to red on hover */
+        }
+        .quantity-button {
+            color: black;
+            background-color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        .quantity-button:hover {
+            background-color: #dadada;
+        }
+        .quantity-display {
+            font-size: 16px;
+            margin: 0 10px;
+            width: 50px; /* Fixed width for quantity container */
+            text-align: center; /* Center align the text */
+            display: inline-block; /* Ensure the width is applied */
+        }
+        .flower-line-item {
+            color: black; /* Change flower line item text color to black */
+        }
+        .product-line-item {
+            color: black; /* Product line item text color */
+        }
+        .cart-item span {
+            width: auto; /* Remove fixed width */
+            display: inline; /* Allow to fill available width */
+            overflow: visible; /* Show all text */
+            text-overflow: unset; /* Remove ellipsis */
+            white-space: normal; /* Allow wrapping */
+            word-break: break-word; /* Break long words if needed */
+        }
+        .product-name-container {
+            width: 300px; /* Fixed width for product name container */
+            display: inline-block; /* Ensure the width is applied */
+            text-overflow: wrap;
+        }
+
+        .quantity-container {
+            width: 50px; /* Fixed width for quantity container */
+            text-align: center; /* Center align the text */
+            display: inline-block; /* Ensure the width is applied */
+            overflow: hidden; /* Prevent overflow */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        .cart-item .product-name-container {
+            text-align: left; /* Align product name to the left */
+        }
+
+        .cart-item .quantity-container {
+            width: 50px; /* Fixed width for quantity container */
+            text-align: center; /* Center align the text */
+            display: inline-block; /* Ensure the width is applied */
+            overflow: hidden; /* Prevent overflow */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        .cart-item .total-container {
+            width: 70px;
+            min-width: 60px;
+            max-width: 80px;
+            text-align: center; /* Align line item totals to the center */
+            flex: 0 0 70px;
+        }
+        .cart-item .delete-button-container {
+            width: 40px;
+            min-width: 30px;
+            max-width: 50px;
+            text-align: right; /* Align the delete button to the right */
+            flex: 0 0 40px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-radius: 5px;
+            padding-right: 15%;
+        }
+
+        form input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        form input:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        form button {
+            padding: 10px;
+            background-color: #ffffff;
+            color: black;
+            border: solid 1px black;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #000000;
+            color: white;
+        }
+
+        form select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        form select:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        form .city-state-container {
+            display: flex;
+            width: 100%; /* Allow to shrink/grow with parent */
+            padding-right: 0; /* Remove fixed padding for better responsiveness */
+            gap: 10px;
+            min-width: 0; /* Allow flex children to shrink */
+        }
+
+        form .city-state-container input {
+            flex: 1 1 0%; /* Allow both inputs to shrink and grow equally */
+            min-width: 0; /* Prevent overflow */
+        }
+
+        .promo-code {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .promo-code input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 40%; /* Shrink the input field to 40% width */
+        }
+
+        .promo-code label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .cart-item-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 5px;
+            width: 100%;
+        }
+        .cart-item-row > * {
+            align-self: center;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Mobile styles */
+        @media (max-width: 700px) {
+            .cart-container {
+                flex-direction: column;
+                width: 90%;
+                padding: 5px;
+            }
+            .cart-column, .form-column {
+                width: 100%;
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .cart-column {
+                margin-bottom: 30px;
+            }
+            form {
+                padding-right: 0;
+            }
+            .product-name-container {
+                width: 100%;
+                padding-bottom: 10px;
+            }
+            .cart-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+            }
+            .cart-item .product-name-container {
+                width: 100%;
+                margin-bottom: 4px;
+                text-align: left;
+            }
+            .cart-item .cart-item-row {
+                display: flex;
+                flex-direction: row;
+                align-items: center !important;
+                justify-content: flex-start;
+                gap: 5px;
+                width: 100%;
+            }
+            .cart-item .cart-item-row > * {
+                align-self: center !important;
+                display: flex;
+                align-items: center;
+            }
+            .cart-item .cart-item-row .delete-button-container,
+            .cart-item .cart-item-row .total-container,
+            .cart-item .cart-item-row .quantity-container {
+                display: flex;
+                align-items: center !important;
+                justify-content: center;
+            }
+            .cart-total, .subtotal, .discounts-total {
+                padding-left: 0;
+            }
+            .promo-code input {
+                width: 70%;
+            }
+            .city-state-container {
+                flex-direction: column;
+                gap: 0;
+            }
+            form input, form select, form button {
+                width: 80%;
+                max-width: 350px;
+                margin-left: 0;
+                margin-right: 0;
+            }
+            .form-column, .form-column * {
+                text-align: left !important;
+            }
+            .cart-container,
+            .cart-column,
+            .form-column,
+            .cart-item,
+            .cart-item-row,
+            .cart-item span,
+            .product-name-container,
+            .quantity-container,
+            .cart-item .total-container,
+            .cart-item .delete-button-container,
+            .cart-total,
+            .subtotal,
+            .discounts-total,
+            .promo-code,
+            .promo-code input,
+            .promo-code label,
+            form input,
+            form select,
+            form button,
+            h2,
+            label {
+                font-size: 14px !important;
+            }
+            h2 {
+                font-size: 18px !important;
+            }
+            .cart-total, .subtotal, .discounts-total {
+                font-size: 14px !important;
+            }
+            .quantity-button, .delete-button {
+                font-size: 14px !important;
+            }
+        }
+    </style>
+    <script>
+        // Use a unique key for manual cart local storage
+        const MANUAL_CART_KEY = 'manual_cart';
+
+        function getManualCart() {
+            return JSON.parse(localStorage.getItem(MANUAL_CART_KEY)) || [];
+        }
+        function setManualCart(cart) {
+            localStorage.setItem(MANUAL_CART_KEY, JSON.stringify(cart));
+        }
+
+        function togglePopup() {
+            const popup = document.getElementById('popup-form');
+            const overlay = document.getElementById('overlay');
+            const isVisible = popup.style.display === 'block';
+            popup.style.display = isVisible ? 'none' : 'block';
+            overlay.style.display = isVisible ? 'none' : 'block';
+        }
+
+        function calculateBOGODiscounts() {
+            const cart = getManualCart();
+            const groups = JSON.parse('{{ groups|tojson|safe }}');
+            let totalBOGODiscount = 0;
+
+            // Group items by their product group (fallback to empty string if missing)
+            const groupedItems = cart.reduce((acc, item) => {
+                const groupKey = item.productGroup || item.group || '';
+                if (!groupKey) return acc; // skip items with no group
+                if (!acc[groupKey]) {
+                    acc[groupKey] = [];
+                }
+                // Create individual entries based on quantity
+                for (let i = 0; i < item.quantity; i++) {
+                    let unitTotal = item.total;
+                    if (typeof unitTotal === 'string') unitTotal = parseFloat(unitTotal.replace('$', ''));
+                    else unitTotal = Number(unitTotal);
+                    acc[groupKey].push({
+                        ...item,
+                        quantity: 1,
+                        total: `$${(unitTotal / item.quantity).toFixed(2)}`
+                    });
+                }
+                return acc;
+            }, {});
+
+            Object.entries(groupedItems).forEach(([group, items]) => {
+                const groupConfig = groups.find(g => g.group === group);
+                if (!groupConfig) return;
+                // Sort items by price (lowest to highest)
+                const sortedItems = items.sort((a, b) => {
+                    const priceA = parseFloat(a.total.replace('$', ''));
+                    const priceB = parseFloat(b.total.replace('$', ''));
+                    return priceA - priceB;
+                });
+                let groupDiscount = 0;
+                if (groupConfig.BOGO) {
+                    const freeItems = Math.floor(sortedItems.length / 2);
+                    for (let i = 0; i < freeItems; i++) {
+                        groupDiscount += parseFloat(sortedItems[i].total.replace('$', ''));
+                    }
+                } else if (groupConfig.B2GO) {
+                    const freeItems = Math.floor(sortedItems.length / 3);
+                    for (let i = 0; i < freeItems; i++) {
+                        groupDiscount += parseFloat(sortedItems[i].total.replace('$', ''));
+                    }
+                } else if (groupConfig.B3GO) {
+                    const freeItems = Math.floor(sortedItems.length / 4);
+                    for (let i = 0; i < freeItems; i++) {
+                        groupDiscount += parseFloat(sortedItems[i].total.replace('$', ''));
+                    }
+                }
+                if (groupDiscount > 0) {
+                    totalBOGODiscount += groupDiscount;
+                }
+            });
+            return totalBOGODiscount;
+        }
+
+        function loadCart() {
+            const cart = getManualCart();
+            const cartContainer = document.getElementById('cart-items');
+            let total = 0;
+            let subtotal = 0;
+            let discounts = 0;
+
+            // Combine quantities of the same product, but keep separate if 'option' differs
+            const condensedCart = cart.reduce((acc, item) => {
+                // Find an existing item with the same productName, type, AND option (or both undefined)
+                const existingItem = acc.find(i => 
+                    i.productName === item.productName && 
+                    i.type === item.type && 
+                    ((i.option === undefined && item.option === undefined) || i.option === item.option)
+                );
+                const itemQuantity = parseInt(item.quantity, 10) || 0;
+                const itemTotal = parseFloat(item.total.replace('$', '')) || 0;
+                if (existingItem) {
+                    existingItem.quantity += itemQuantity;
+                    existingItem.total = `$${(parseFloat(existingItem.total.replace('$', '')) + itemTotal).toFixed(2)}`;
+                } else {
+                    item.quantity = itemQuantity;
+                    item.total = `$${itemTotal.toFixed(2)}`;
+                    acc.push({ ...item });
+                }
+                return acc;
+            }, []);
+
+            condensedCart.forEach((item, index) => {
+                const lineItem = document.createElement('div');
+                lineItem.className = `cart-item ${item.type === 'flower_line_item' ? 'flower-line-item' : 'product-line-item'}`;
+                lineItem.id = `cart-item-${index}`;
+                const optionText = item.option ? ` <span style='font-style:italic;'>${item.option}</span>` : '';
+                // Product name row
+                const productNameRow = `<span class="product-name-container" style="display:inline; white-space:normal;">${item.productName}${optionText}</span>`;
+                // Row for quantity, total, and remove button
+                const controlsRow = `
+                    <div class="cart-item-row">
+                        <div>
+                            <button onclick="updateQuantity(${index}, -1)" class="quantity-button">-</button>
+                            <span id="quantity-${index}" class="quantity-container">${item.quantity}${item.type === 'flower_line_item' ? 'g' : ''}</span>
+                            <button onclick="updateQuantity(${index}, 1)" class="quantity-button">+</button>
+                        </div>
+                        <span id="total-${index}" class="total-container">${item.total}</span>
+                        <div class="delete-button-container">
+                            <button onclick="deleteItem(${index})" class="delete-button">&times;</button>
+                        </div>
+                    </div>`;
+                lineItem.innerHTML = productNameRow + controlsRow;
+                cartContainer.appendChild(lineItem);
+                subtotal += parseFloat(item.total.replace('$', '')) || 0;
+            });
+
+            // Calculate BOGO/B2GO discounts
+            const bogoDiscounts = calculateBOGODiscounts();
+
+            document.getElementById('cart-subtotal').textContent = `Subtotal: $${subtotal.toFixed(2)}`;
+            document.getElementById('cart-discounts').textContent = `Volume Discounts: -$${discounts.toFixed(2)}`;
+            document.getElementById('cart-bogo-discounts').textContent = `Buy X Get 1 Discounts: -$${bogoDiscounts.toFixed(2)}`;
+            document.getElementById('cart-total').textContent = `Total: $${(subtotal - discounts - bogoDiscounts).toFixed(2)}`;
+        }
+
+        function updateQuantity(index, change) {
+            const cart = getManualCart();
+            const item = cart[index];
+            const unitPrice = parseFloat(item.total.replace('$', '')) / parseInt(item.quantity, 10);
+
+            if (item.type === 'flower_line_item') {
+                const allowedQuantities = [1, 4, 7, 14, 28];
+                let currentIndex = allowedQuantities.indexOf(parseInt(item.quantity, 10));
+
+                if (change > 0 && currentIndex < allowedQuantities.length - 1) {
+                    currentIndex++;
+                } else if (change < 0 && currentIndex > 0) {
+                    currentIndex--;
+                }
+
+                item.quantity = allowedQuantities[currentIndex];
+            } else {
+                item.quantity = Math.max(1, parseInt(item.quantity, 10) + change);
+            }
+
+            item.total = `$${(unitPrice * item.quantity).toFixed(2)}`;
+
+            // Update the specific line item in the DOM
+            const quantityDisplay = document.getElementById(`quantity-${index}`);
+            quantityDisplay.textContent = `${item.quantity}${item.type === 'flower_line_item' ? 'g' : ''}`;
+            document.getElementById(`total-${index}`).textContent = item.total;
+
+            // Update the cart in local storage
+            setManualCart(cart);
+
+            // Recalculate all discounts and totals
+            let subtotal = cart.reduce((sum, cartItem) => sum + parseFloat(cartItem.total.replace('$', '')), 0);
+            let volumeDiscounts = 0;
+            const bogoDiscounts = calculateBOGODiscounts();
+
+            // Update all totals in the DOM
+            document.getElementById('cart-subtotal').textContent = `Subtotal: $${subtotal.toFixed(2)}`;
+            document.getElementById('cart-discounts').textContent = `Volume Discounts: -$${volumeDiscounts.toFixed(2)}`;
+            document.getElementById('cart-bogo-discounts').textContent = `Buy X Get 1 Discounts: -$${bogoDiscounts.toFixed(2)}`;
+            document.getElementById('cart-total').textContent = `Total: $${(subtotal - volumeDiscounts - bogoDiscounts).toFixed(2)}`;
+
+            // Recalculate and render tier totals and discounts
+            calculateTierTotals();
+        }
+
+        function deleteItem(index) {
+            const cart = getManualCart();
+            cart.splice(index, 1); // Remove the item at the specified index
+            setManualCart(cart); // Update local storage
+
+            // Reload the cart to reflect changes
+            document.getElementById('cart-items').innerHTML = ''; // Clear current items
+            loadCart(); // Reload cart with updated items
+        }
+
+        function getHighestDiscount(tier, quantity) {
+            const volumeDiscounts = {
+                "4g discount": 4,
+                "7g discount": 7,
+                "14g discount": 14,
+                "28g discount": 28
+            };
+
+            // Simulated discount values for each tier (replace with actual data if available)
+            const discountValues = {
+                {% for discount in volume_discounts %}
+                "{{ discount.tier }}": {
+                    "4g discount": {{ discount['4g_discount'] }},
+                    "7g discount": {{ discount['7g_discount'] }},
+                    "14g discount": {{ discount['14g_discount'] }},
+                    "28g discount": {{ discount['28g_discount'] }}
+                },
+                {% endfor %}
+                
+            };
+
+            let highestDiscount = 0;
+            Object.keys(volumeDiscounts).forEach(discountKey => {
+                if (quantity >= volumeDiscounts[discountKey] && discountValues[tier] && discountValues[tier][discountKey]) {
+                    highestDiscount = Math.max(highestDiscount, discountValues[tier][discountKey]);
+                }
+            });
+
+            return highestDiscount;
+        }
+
+        function calculateTierTotals() {
+            const cart = getManualCart();
+            const tierTotals = {};
+            const tierDiscounts = {};
+
+            // Calculate total quantities for each tier independently
+            cart.forEach(item => {
+                if (item.type === 'flower_line_item') {
+                    const tier = item.productTier;
+                    const quantity = parseInt(item.quantity, 10) || 0;
+
+                    if (!tier) {
+                        console.error(`Missing tier for item: ${item.productName}`);
+                        return;
+                    }
+
+                    if (!tierTotals[tier]) {
+                        tierTotals[tier] = 0;
+                    }
+                    tierTotals[tier] += quantity; // Add quantity to the tier total
+                }
+            });
+
+            // Calculate discounts for each tier
+            Object.keys(tierTotals).forEach(tier => {
+                const quantity = tierTotals[tier];
+                tierDiscounts[tier] = getHighestDiscount(tier, quantity);
+            });
+
+            // Calculate and update the final "Volume Discounts" value
+            const totalDiscounts = Object.values(tierDiscounts).reduce((sum, discount) => sum + discount, 0);
+            document.getElementById('cart-discounts').textContent = `Volume Discounts: -$${totalDiscounts.toFixed(2)}`;
+
+            // Update the total value
+            const subtotal = parseFloat(document.getElementById('cart-subtotal').textContent.replace('Subtotal: $', '')) || 0;
+            const bogoDiscounts = parseFloat(document.getElementById('cart-bogo-discounts').textContent.replace('Buy X Get 1 Discounts: -$', '')) || 0;
+            document.getElementById('cart-total').textContent = `Total: $${(subtotal - totalDiscounts - bogoDiscounts).toFixed(2)}`;
+        }
+
+        function getAllCartItems() {
+            const cart = getManualCart();
+
+            cart.forEach(item => {
+                console.log(`Product Name: ${item.productName}, Product ID: ${item.productID}, Quantity: ${item.quantity}, Type: ${item.type}`);
+            });
+
+            console.log('All Cart Items:', cart); // Log all cart items
+
+            return cart; // Returns all cart items
+        }
+
+        // Example usage
+        const allCartItems = getAllCartItems();
+
+        function applyPromoCode() {
+            const promoCodeInput = document.getElementById('promo-code').value.trim();
+            const promoCodes = JSON.parse('{{ promo_codes|tojson|safe }}');
+            const cartTotalElement = document.getElementById('cart-total');
+            const subtotal = parseFloat(document.getElementById('cart-subtotal').textContent.replace('Subtotal: $', '')) || 0;
+
+            const promoCode = promoCodes.find(code => code.code === promoCodeInput);
+
+            if (promoCode) {
+                const dollarsOff = promoCode.dollars_off || 0;
+                const percentOff = promoCode.percent_off || 0;
+
+                const existingDiscounts = parseFloat(document.getElementById('cart-discounts').textContent.replace('Volume Discounts: -$', '')) || 0;
+                const bogoDiscounts = parseFloat(document.getElementById('cart-bogo-discounts').textContent.replace('Buy X Get 1 Discounts: -$', '')) || 0;
+
+                const adjustedSubtotal = subtotal - existingDiscounts - bogoDiscounts;
+                const percentDiscount = (adjustedSubtotal * percentOff) / 100;
+                const totalDiscount = dollarsOff + percentDiscount;
+
+                const promoDiscountElement = document.getElementById('cart-promo-discounts');
+                promoDiscountElement.textContent = `Promo Code (${promoCode.code}): -$${totalDiscount.toFixed(2)}`;
+                promoDiscountElement.style.display = totalDiscount > 0 ? 'block' : 'none';
+
+                cartTotalElement.textContent = `Total: $${(adjustedSubtotal - totalDiscount).toFixed(2)}`;
+            } else {
+                alert('Invalid promo code. Please try again.');
+            }
+        }
+
+        function submitOrder() {
+            const fullName = document.getElementById('name-input').value.trim();
+            const email = document.getElementById('email-input').value.trim();
+            const phone = document.getElementById('phone-input').value.trim();
+            const address = document.getElementById('address-input').value.trim();
+            const city = document.getElementById('city-input').value.trim();
+            const state = document.getElementById('state-input').value.trim();
+            const zip = document.getElementById('zip-input').value.trim();
+            const total = parseFloat(document.getElementById('cart-total').textContent.replace('Total: $', ''));
+            const volumeDiscounts = parseFloat(document.getElementById('cart-discounts').textContent.replace('Volume Discounts: -$', '')) || 0;
+            const bxgoDiscounts = parseFloat(document.getElementById('cart-bogo-discounts').textContent.replace('Buy X Get 1 Discounts: -$', '')) || 0;
+            const promoDiscounts = parseFloat(document.getElementById('cart-promo-discounts').textContent.replace(/Promo Code.*: -\$/, '')) || 0;
+            const deliveryTime = document.getElementById('delivery-time').value;
+
+            // Reject orders with total less than $45.00
+            if (total < 45) {
+                alert('Order total must be at least $45.00. Please add more items to your cart.');
+                return;
+            }
+
+            // Get flowerItems and productItems arrays
+            const { flowerItems, productItems } = getCartItemsByType();
+
+            if (!fullName || !email || !phone || !address || !city || !state || !zip || !deliveryTime) {
+                alert('Please fill out all required fields.');
+                return;
+            }
+
+            fetch('/api/place-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    fullName, 
+                    email, 
+                    phone, 
+                    address, 
+                    city, 
+                    state, 
+                    zip, 
+                    total, 
+                    volumeDiscounts, 
+                    bxgoDiscounts, 
+                    promoDiscounts, 
+                    deliveryTime,
+                    flowerItems, // Pass flowerItems array
+                    productItems // Pass productItems array
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    // Show a popup instead of alert
+                    showOrderPopup(data.message);
+                    // Clear the cart after successful order
+                    setManualCart([]);
+                    document.getElementById('cart-items').innerHTML = '';
+                    loadCart();
+                    calculateTierTotals();
+                } else if (data.error) {
+                    // Show error as popup too
+                    showOrderPopup(data.error);
+                } else {
+                    showOrderPopup('Failed to place order. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while placing the order.');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCart();
+            calculateTierTotals(); // Call the function after loading the cart
+
+            const promoCodeInput = document.getElementById('promo-code');
+            if (promoCodeInput) {
+                promoCodeInput.addEventListener('change', applyPromoCode);
+            }
+        });
+
+        function getCartItemsByType() {
+            const cart = getManualCart();
+
+            const flowerItems = [];
+            const productItems = [];
+
+            cart.forEach(item => {
+                if (item.type === 'flower_line_item') {
+                    flowerItems.push({
+                        productID: item.productID,
+                        productName: item.productName,
+                        total: item.total,
+                        quantity: item.quantity
+                    });
+                } else {
+                    productItems.push({
+                        productID: item.productID,
+                        productName: item.productName,
+                        total: item.total,
+                        quantity: item.quantity,
+                        option: item.option // Add option to productItems
+                    });
+                }
+            });
+
+            console.log('Flower Items:', flowerItems);
+            console.log('Product Items:', productItems);
+
+            return { flowerItems, productItems }; // Returns both arrays
+        }
+
+        // Example usage
+        const { flowerItems, productItems } = getCartItemsByType();
+
+        // Listen for addToCart messages from iframes
+        window.addEventListener('message', function(event) {
+            // Optionally, check event.origin for security
+            if (event.data && event.data.type === 'addToCart' && event.data.item) {
+                const cart = getManualCart();
+                cart.push(event.data.item);
+                setManualCart(cart);
+                document.getElementById('cart-items').innerHTML = '';
+                loadCart();
+                calculateTierTotals();
+            }
+        });
+
+        function showOrderPopup(message) {
+            let popup = document.getElementById('order-popup');
+            if (!popup) {
+                popup = document.createElement('div');
+                popup.id = 'order-popup';
+                popup.style.position = 'fixed';
+                popup.style.top = '50%';
+                popup.style.left = '50%';
+                popup.style.transform = 'translate(-50%, -50%)';
+                popup.style.background = '#fff'; // Solid white background
+                popup.style.padding = '36px 48px';
+                popup.style.borderRadius = '16px';
+                popup.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18), 0 1.5px 8px rgba(0,0,0,0.10)';
+                popup.style.zIndex = '2000';
+                popup.style.textAlign = 'center';
+                popup.style.fontSize = '20px';
+                popup.style.minWidth = '280px';
+                popup.style.fontFamily = 'Arial, Helvetica, sans-serif';
+                popup.style.border = '1.5px solid #b3c6e0';
+                popup.innerHTML = `
+                    <span id='order-popup-message' style='color: #222;'></span><br><br>
+                    <button onclick='document.getElementById("order-popup").remove()' style='padding:12px 32px;border-radius:6px;background:#000;color:#fff;border:none;cursor:pointer;font-size:16px;font-family:Arial,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.10);transition:background 0.2s;'>OK</button>
+                `;
+                document.body.appendChild(popup);
+            }
+            document.getElementById('order-popup-message').textContent = message;
+        }
+    </script>
+</head>
+<body>
+    <div class="cart-container">
+        <div class="cart-column">
+            <h2>Shopping Cart</h2>
+            <div id="cart-items">
+                <!-- Line items will be dynamically inserted here -->
+            </div>
+            <hr> <!-- Divider line -->
+            <div id="cart-subtotal" class="subtotal">
+                Subtotal: $0.00
+            </div>
+            <div id="cart-discounts" class="discounts-total">
+                Volume Discounts: $0.00
+            </div>
+            <div id="cart-bogo-discounts" class="discounts-total">
+                Buy X Get 1 Discounts: $0.00
+            </div>
+            <div id="cart-promo-code" class="promo-code">
+                <label for="promo-code">Promo Code:</label>
+                <input type="text" id="promo-code" placeholder="Enter promo code">
+            </div>
+            <div id="cart-promo-discounts" class="discounts-total" style="display:none;">
+                Promo Code Discount: -$0.00
+            </div>
+            <hr style="margin-top: 30px;"> <!-- Divider line between discounts and total -->
+            <div id="cart-total" class="cart-total">
+                Total: $0.00
+            </div>
+        </div>
+        <div class="form-column">
+            <h2>Place Your Order</h2>
+            <form id="order-form">
+                <input type="text" id="name-input" placeholder="Name" required>
+                <input type="email" id="email-input" placeholder="Email" required>
+                <input type="tel" id="phone-input" placeholder="Phone" required>
+                <input type="text" id="address-input" placeholder="Address" required>
+                <div class="city-state-container">
+                    <input type="text" id="city-input" placeholder="City" required>
+                    <input type="text" id="state-input" placeholder="State" required>
+                </div>
+                <input type="text" id="zip-input" placeholder="ZIP" required>
+                <label style="font-weight: bold; padding-top: 20px;" for="payment-method">Payment Method:</label>
+                <select id="payment-method" name="payment-method" required>
+                    <option value="cash">Cash</option>
+                    <option value="zelle">Zelle</option>
+                </select>
+                <label style="font-weight: bold; padding-top: 20px;" for="delivery-time">Desired Delivery Time:</label>
+                <label for="delivery-time">(We try our best to be within 30 minutes of selected time)</label>
+                <input type="datetime-local" id="delivery-time" name="delivery-time" required>
+                <button type="button" onclick="submitOrder()">Place Order</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="overlay" class="overlay" onclick="togglePopup()"></div>
+</body>
+</html>
