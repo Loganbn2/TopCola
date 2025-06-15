@@ -199,6 +199,39 @@
                 font-size: 15px;
             }
         }
+
+        /* Popup Styles */
+        #order-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 36px 48px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 1.5px 8px rgba(0,0,0,0.10);
+            z-index: 2000;
+            text-align: center;
+            font-size: 20px;
+            min-width: 280px;
+            font-family: Arial, Helvetica, sans-serif;
+            border: 1.5px solid #b3c6e0;
+        }
+        #order-popup button {
+            padding: 12px 32px;
+            border-radius: 6px;
+            background: #000;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            transition: background 0.2s;
+        }
+        #order-popup button:hover {
+            background: #333;
+        }
     </style>
     <script>
         function updatePrimaryImage(src) {
@@ -214,6 +247,33 @@
             document.getElementById('subtotal').textContent = `$${subtotal}`;
             document.getElementById('discount').textContent = `-$${discount}`;
             document.getElementById('total').textContent = `$${total}`; // Update total
+        }
+        function showAddToCartPopup(message) {
+            let popup = document.getElementById('order-popup');
+            if (!popup) {
+                popup = document.createElement('div');
+                popup.id = 'order-popup';
+                popup.style.position = 'fixed';
+                popup.style.top = '50%';
+                popup.style.left = '50%';
+                popup.style.transform = 'translate(-50%, -50%)';
+                popup.style.background = '#fff';
+                popup.style.padding = '36px 48px';
+                popup.style.borderRadius = '16px';
+                popup.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18), 0 1.5px 8px rgba(0,0,0,0.10)';
+                popup.style.zIndex = '2000';
+                popup.style.textAlign = 'center';
+                popup.style.fontSize = '20px';
+                popup.style.minWidth = '280px';
+                popup.style.fontFamily = 'Arial, Helvetica, sans-serif';
+                popup.style.border = '1.5px solid #b3c6e0';
+                popup.innerHTML = `
+                    <span id='order-popup-message' style='color: #222;'></span><br><br>
+                    <button onclick='document.getElementById("order-popup").remove()' style='padding:12px 32px;border-radius:6px;background:#000;color:#fff;border:none;cursor:pointer;font-size:16px;font-family:Arial,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.10);transition:background 0.2s;'>OK</button>
+                `;
+                document.body.appendChild(popup);
+            }
+            document.getElementById('order-popup-message').textContent = message;
         }
         function addToCart() {
             const productName = "{{ product.product_name }}";
@@ -238,7 +298,7 @@
 
             console.log('Updated Cart:', cart); // Log the updated cart for debugging
 
-            alert('Item added to cart: ' + productName + ' (ID: ' + productID + ', Group: ' + productGroup + ', Quantity: ' + quantity + ', Total: ' + total + (selectedOption ? ', Option: ' + selectedOption : '') + ')');
+            showAddToCartPopup('Item added to cart: ' + productName);
         }
     </script>
 </head>

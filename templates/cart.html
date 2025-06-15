@@ -727,11 +727,18 @@
             .then(response => response.json())
             .then(data => {
                 if (data.message) {
-                    alert(data.message);
+                    // Show a popup instead of alert
+                    showOrderPopup(data.message);
+                    // Clear the cart after successful order
+                    localStorage.removeItem('cart');
+                    document.getElementById('cart-items').innerHTML = '';
+                    loadCart();
+                    calculateTierTotals();
                 } else if (data.error) {
-                    alert(data.error);
+                    // Show error as popup too
+                    showOrderPopup(data.error);
                 } else {
-                    alert('Failed to place order. Please try again.');
+                    showOrderPopup('Failed to place order. Please try again.');
                 }
             })
             .catch(error => {
@@ -797,6 +804,34 @@
                 calculateTierTotals();
             }
         });
+
+        function showOrderPopup(message) {
+            let popup = document.getElementById('order-popup');
+            if (!popup) {
+                popup = document.createElement('div');
+                popup.id = 'order-popup';
+                popup.style.position = 'fixed';
+                popup.style.top = '50%';
+                popup.style.left = '50%';
+                popup.style.transform = 'translate(-50%, -50%)';
+                popup.style.background = '#fff'; // Solid white background
+                popup.style.padding = '36px 48px';
+                popup.style.borderRadius = '16px';
+                popup.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18), 0 1.5px 8px rgba(0,0,0,0.10)';
+                popup.style.zIndex = '2000';
+                popup.style.textAlign = 'center';
+                popup.style.fontSize = '20px';
+                popup.style.minWidth = '280px';
+                popup.style.fontFamily = 'Arial, Helvetica, sans-serif';
+                popup.style.border = '1.5px solid #b3c6e0';
+                popup.innerHTML = `
+                    <span id='order-popup-message' style='color: #222;'></span><br><br>
+                    <button onclick='document.getElementById("order-popup").remove()' style='padding:12px 32px;border-radius:6px;background:#000;color:#fff;border:none;cursor:pointer;font-size:16px;font-family:Arial,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.10);transition:background 0.2s;'>OK</button>
+                `;
+                document.body.appendChild(popup);
+            }
+            document.getElementById('order-popup-message').textContent = message;
+        }
     </script>
 </head>
 <body>
