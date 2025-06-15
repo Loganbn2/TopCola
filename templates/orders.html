@@ -148,7 +148,7 @@
         th:nth-child(3), td:nth-child(3) { min-width: 120px; }
         th:nth-child(4), td:nth-child(4) { min-width: 130px; }
         th:nth-child(5), td:nth-child(5) { min-width: 250px; }
-        th:nth-child(6), td:nth-child(6) { min-width: 120px; }
+        th:nth-child(6), td:nth-child(6) { min-width: 160px; }
         th:nth-child(7), td:nth-child(7) { min-width: 300px; }
         th:nth-child(8), td:nth-child(8) { min-width: 300px; }
         th:nth-child(9), td:nth-child(9) { min-width: 130px; }
@@ -267,6 +267,45 @@
           background: #ffcdd2 !important;
           color: #b71c1c !important;
         }
+        .info-badge {
+          display: inline-block;
+          background: #e0e7ff;
+          color: #374151;
+          border-radius: 50%;
+          width: 18px;
+          height: 18px;
+          font-size: 14px;
+          text-align: center;
+          line-height: 18px;
+          cursor: pointer;
+          position: relative;
+          margin-left: 6px;
+          border: 1px solid #b6b6b6;
+          font-weight: bold;
+        }
+        .info-badge:focus {
+          outline: 2px solid #17633a;
+        }
+        .info-tooltip {
+          display: none;
+          position: absolute;
+          left: 50%;
+          top: 120%;
+          transform: translateX(-50%);
+          background: #222;
+          color: #fff;
+          padding: 8px 14px;
+          border-radius: 7px;
+          font-size: 13px;
+          white-space: nowrap;
+          z-index: 100;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.13);
+          pointer-events: none;
+        }
+        .info-badge:hover .info-tooltip,
+        .info-badge:focus .info-tooltip {
+          display: block;
+        }
     </style>
     <script>
         function setFulfillmentBubbleColor(bubble, status) {
@@ -307,6 +346,54 @@
             });
             document.querySelectorAll('.fulfillment-bubble').forEach(function(bubble) {
               setFulfillmentBubbleColor(bubble, bubble.textContent.trim());
+            });
+            // Restore: Make order total editable (only bubbles with $ and not Quantity:)
+            document.querySelectorAll('td span.bubble').forEach(function(bubble) {
+              if (
+                bubble.textContent.trim().startsWith('$') &&
+                !bubble.textContent.trim().startsWith('Quantity:') &&
+                !bubble.dataset.hasOwnProperty('items') // not a quantity bubble
+              ) {
+                var tr = bubble.closest('tr');
+                var orderIdSpan = tr ? tr.querySelector('span[data-order-id]') : null;
+                var orderId = orderIdSpan ? orderIdSpan.getAttribute('data-order-id') : null;
+                if (orderId) {
+                  bubble.style.cursor = 'pointer';
+                  bubble.addEventListener('click', function(e) {
+                    if (!bubble.dataset.editing) {
+                      makeOrderTotalEditable(bubble, orderId, bubble.textContent.trim());
+                    }
+                  });
+                }
+              }
+            });
+            // Make item and flower quantities editable (only bubbles with Quantity:)
+            document.querySelectorAll('span.bubble').forEach(function(bubble) {
+              if (bubble.textContent.trim().startsWith('Quantity:')) {
+                let td = bubble.closest('td');
+                let isFlower = false;
+                // Check if this is in the flower column by looking for 'g' after the quantity
+                if (bubble.textContent.trim().endsWith('g')) {
+                  isFlower = true;
+                } else if (td && td.previousElementSibling && td.previousElementSibling.textContent.includes('Flower')) {
+                  isFlower = true;
+                }
+                let orderTr = bubble.closest('tr');
+                let orderIdSpan = orderTr ? orderTr.querySelector('span[data-order-id]') : null;
+                let orderId = orderIdSpan ? orderIdSpan.getAttribute('data-order-id') : null;
+                if (!orderId) return;
+                // Use data-items and data-index for correct array and index
+                let itemsArray = bubble.dataset.items ? JSON.parse(bubble.dataset.items) : null;
+                let itemIndex = bubble.dataset.index ? parseInt(bubble.dataset.index) : null;
+                if (!itemsArray || itemIndex === null || isNaN(itemIndex)) return;
+                bubble.style.cursor = 'pointer';
+                bubble.addEventListener('click', function(e) {
+                  if (!bubble.dataset.editing) {
+                    let val = bubble.textContent.replace(/[^\d.]/g, '');
+                    makeQuantityEditable(bubble, orderId, itemIndex, isFlower, val, itemsArray);
+                  }
+                });
+              }
             });
         });
         function toggleDropdown(el) {
@@ -436,9 +523,116 @@
           });
           input.addEventListener('blur', function() { finishEdit(true); });
         }
+        function makeQuantityEditable(bubble, orderId, itemIndex, isFlower, originalValue, itemsArray) {
+          if (bubble.dataset.editing === 'true') return;
+          bubble.dataset.editing = 'true';
+          // Save the label (e.g., 'Quantity:' or 'Quantity: 3g')
+          let label = bubble.innerHTML.match(/<b>Quantity:<\/b>/) ? '<b>Quantity:</b> ' : '';
+          // Remove label and units from value
+          let valueOnly = originalValue;
+          if (label) {
+            valueOnly = bubble.textContent.replace(/[^\d.]/g, '');
+          }
+          const input = document.createElement('input');
+          input.type = 'number';
+          input.step = '1';
+          input.min = '1';
+          input.value = valueOnly;
+          input.style.width = '60px';
+          input.style.fontSize = '13px';
+          input.style.borderRadius = '8px';
+          input.style.border = '1px solid #ccc';
+          input.style.padding = '2px 6px';
+          input.style.margin = '0';
+          input.style.boxSizing = 'border-box';
+          bubble.innerHTML = label;
+          bubble.appendChild(input);
+          input.focus();
+          input.select();
+          function finishEdit(save) {
+            if (!bubble.dataset.editing) return;
+            bubble.dataset.editing = '';
+            let newValue = input.value;
+            if (save && newValue && newValue !== originalValue) {
+              let updatedArray = JSON.parse(JSON.stringify(itemsArray));
+              updatedArray[itemIndex]['quantity'] = isFlower ? parseFloat(newValue) : parseInt(newValue);
+              bubble.innerHTML = label + '<span class="spinner" style="display:inline-block;width:16px;height:16px;border:2px solid #ccc;border-top:2px solid #17633a;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;"></span>';
+              const start = Date.now();
+              let body = { order_id: orderId };
+              if (isFlower) {
+                body['flower'] = updatedArray;
+              } else {
+                body['items'] = updatedArray;
+              }
+              fetch('/update-fulfillment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+              })
+              .then(response => response.json())
+              .then(data => {
+                const elapsed = Date.now() - start;
+                const minDelay = 500;
+                const finish = () => {
+                  if (!data.success) {
+                    bubble.innerHTML = label + originalValue + (isFlower ? 'g' : '');
+                    alert('Failed to update quantity.');
+                  } else {
+                    bubble.innerHTML = label + newValue + (isFlower ? 'g' : '');
+                  }
+                };
+                if (elapsed < minDelay) {
+                  setTimeout(finish, minDelay - elapsed);
+                } else {
+                  finish();
+                }
+              })
+              .catch(() => {
+                bubble.innerHTML = label + originalValue + (isFlower ? 'g' : '');
+                alert('Error updating quantity.');
+              });
+            } else {
+              bubble.innerHTML = label + originalValue + (isFlower ? 'g' : '');
+            }
+          }
+          input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+              finishEdit(true);
+            } else if (e.key === 'Escape') {
+              finishEdit(false);
+            }
+          });
+          input.addEventListener('blur', function() { finishEdit(true); });
+        }
         document.addEventListener('DOMContentLoaded', function() {
+          // Profit Reports submenu logic
+          const profitBtn = document.getElementById('profit-reports-btn');
+          const submenu = document.getElementById('profit-reports-submenu');
+          let submenuTimeout;
+          profitBtn.addEventListener('mouseenter', function() {
+              clearTimeout(submenuTimeout);
+              submenu.style.display = 'flex';
+          });
+          profitBtn.addEventListener('mouseleave', function() {
+              submenuTimeout = setTimeout(() => submenu.style.display = 'none', 200);
+          });
+          submenu.addEventListener('mouseenter', function() {
+              clearTimeout(submenuTimeout);
+              submenu.style.display = 'flex';
+          });
+          submenu.addEventListener('mouseleave', function() {
+              submenuTimeout = setTimeout(() => submenu.style.display = 'none', 200);
+          });
+          document.querySelectorAll('.fulfillment-bubble').forEach(function(bubble) {
+            setFulfillmentBubbleColor(bubble, bubble.textContent.trim());
+          });
+          // Restore: Make order total editable (only bubbles with $ and not Quantity:)
           document.querySelectorAll('td span.bubble').forEach(function(bubble) {
-            if (bubble.textContent.trim().startsWith('$')) {
+            if (
+              bubble.textContent.trim().startsWith('$') &&
+              !bubble.textContent.trim().startsWith('Quantity:') &&
+              !bubble.dataset.hasOwnProperty('items') // not a quantity bubble
+            ) {
               var tr = bubble.closest('tr');
               var orderIdSpan = tr ? tr.querySelector('span[data-order-id]') : null;
               var orderId = orderIdSpan ? orderIdSpan.getAttribute('data-order-id') : null;
@@ -450,6 +644,34 @@
                   }
                 });
               }
+            }
+          });
+          // Make item and flower quantities editable (only bubbles with Quantity:)
+          document.querySelectorAll('span.bubble').forEach(function(bubble) {
+            if (bubble.textContent.trim().startsWith('Quantity:')) {
+              let td = bubble.closest('td');
+              let isFlower = false;
+              // Check if this is in the flower column by looking for 'g' after the quantity
+              if (bubble.textContent.trim().endsWith('g')) {
+                isFlower = true;
+              } else if (td && td.previousElementSibling && td.previousElementSibling.textContent.includes('Flower')) {
+                isFlower = true;
+              }
+              let orderTr = bubble.closest('tr');
+              let orderIdSpan = orderTr ? orderTr.querySelector('span[data-order-id]') : null;
+              let orderId = orderIdSpan ? orderIdSpan.getAttribute('data-order-id') : null;
+              if (!orderId) return;
+              // Use data-items and data-index for correct array and index
+              let itemsArray = bubble.dataset.items ? JSON.parse(bubble.dataset.items) : null;
+              let itemIndex = bubble.dataset.index ? parseInt(bubble.dataset.index) : null;
+              if (!itemsArray || itemIndex === null || isNaN(itemIndex)) return;
+              bubble.style.cursor = 'pointer';
+              bubble.addEventListener('click', function(e) {
+                if (!bubble.dataset.editing) {
+                  let val = bubble.textContent.replace(/[^\d.]/g, '');
+                  makeQuantityEditable(bubble, orderId, itemIndex, isFlower, val, itemsArray);
+                }
+              });
             }
           });
         });
@@ -491,7 +713,9 @@
                     <th>Delivery Time</th>
                     <th>Fulfillment Status</th>
                     <th>Customer</th>
-                    <th>Final Order Total</th>
+                    <th>Final Order Total <span class="info-badge" tabindex="0">&#9432;
+  <span class="info-tooltip">Click this value to manually edit. Profit &amp; Profit Margin will be updated as well.</span>
+</span></th>
                     <th>Items</th>
                     <th>Flower</th>
                     <th>Discounts</th>
@@ -575,26 +799,26 @@
                     <td>
                       {% if order['items'] %}
                         {% set non_empty_items = order['items'] | selectattr('productID') | list %}
+                        {% set items_json = non_empty_items | tojson %}
                         {% for item in non_empty_items %}
-                          {%- set parts = [] -%}
-                          {%- if item['option'] %}{% set _ = parts.append(item['option']) %}{% endif -%}
-                          {% if parts|length > 0 %}<span class="bubble-gray">{{ parts | join(', ') }}</span><br>{% endif %}
-                          <span class="bubble-gray"><b>Product ID:</b> {{ item['productID'] }}</span><br>
+                          <span class="bubble-gray"><b>Product ID:</b> {{ item['productID'] }}</span>
+                          {% if item['option'] %}<span class="bubble-gray">{{ item['option'] }}</span>{% endif %}
+                          <br>
                           <span class="bubble-gray">{{ item['productName'] }}</span><br>
-                          <span class="bubble"><b>Quantity:</b> {{ item['quantity'] }}</span> <span class="bubble"><b>Total:</b> {{ item['total'] }}</span>{% if not loop.last %}<br><br>{% endif %}
+                          <span class="bubble" style="cursor:pointer;" data-items='{{ items_json|safe }}' data-index='{{ loop.index0 }}'><b>Quantity:</b> {{ item['quantity'] }}</span> <span class="bubble"><b>Total:</b> {{ item['total'] }}</span>{% if not loop.last %}<br><br>{% endif %}
                         {% endfor %}
                       {% endif %}
                     </td>
                     <td>
                       {% if order['flower'] %}
                         {% set non_empty_flower = order['flower'] | selectattr('productID') | list %}
+                        {% set flower_json = non_empty_flower | tojson %}
                         {% for item in non_empty_flower %}
-                          {%- set parts = [] -%}
-                          {%- if item['option'] %}{% set _ = parts.append(item['option']) %}{% endif -%}
-                          {% if parts|length > 0 %}<span class="bubble-gray">{{ parts | join(', ') }}</span><br>{% endif %}
-                          <span class="bubble-gray"><b>Product ID:</b> {{ item['productID'] }}</span><br>
+                          <span class="bubble-gray"><b>Product ID:</b> {{ item['productID'] }}</span>
+                          {% if item['option'] %}<span class="bubble-gray">{{ item['option'] }}</span>{% endif %}
+                          <br>
                           <span class="bubble-gray">{{ item['productName'] }}</span><br>
-                          <span class="bubble"><b>Quantity:</b> {{ item['quantity'] }}g</span> <span class="bubble"><b>Total:</b> {{ item['total'] }}</span>{% if not loop.last %}<br><br>{% endif %}
+                          <span class="bubble" style="cursor:pointer;" data-items='{{ flower_json|safe }}' data-index='{{ loop.index0 }}'><b>Quantity:</b> {{ item['quantity'] }}g</span> <span class="bubble"><b>Total:</b> {{ item['total'] }}</span>{% if not loop.last %}<br><br>{% endif %}
                         {% endfor %}
                       {% endif %}
                     </td>

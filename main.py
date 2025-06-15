@@ -587,6 +587,8 @@ def update_fulfillment():
         order_id = data.get('order_id')
         status = data.get('status')
         total = data.get('total')
+        items = data.get('items')  # New: allow updating items
+        flower = data.get('flower')  # New: allow updating flower items
         update_data = {}
         if status is not None:
             update_data['fulfillment_status'] = status
@@ -595,6 +597,10 @@ def update_fulfillment():
                 update_data['total'] = float(total)
             except Exception:
                 return jsonify({'success': False, 'error': 'Invalid total value'}), 400
+        if items is not None:
+            update_data['items'] = items
+        if flower is not None:
+            update_data['flower'] = flower
         if not order_id or not update_data:
             return jsonify({'success': False, 'error': 'Missing order_id or update data'}), 400
         response = supabase.table('orders').update(update_data).eq('id', order_id).execute()
