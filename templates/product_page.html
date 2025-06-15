@@ -294,6 +294,9 @@
                 <div class="discount-line">
                     Discounts: <span id="discount">-${{ "%.2f"|format(product.standard_discount) }}</span>
                 </div>
+                <div style="font-size: 14px; color: #555; margin-top: 2px; margin-bottom: 2px;">
+                    *BOGO discounts calculated in cart.
+                </div>
                 <hr style="margin: 20px 0; border: 1px solid #ccc;">
                 <div class="total-line">
                     Total: <span id="total">${{ "%.2f"|format(product.original_price - product.standard_discount) }}</span>
