@@ -674,6 +674,55 @@
               });
             }
           });
+          // --- Flower Dropdown for Duplicate Row ---
+          const flowerDropdown = document.getElementById('flower-dropdown-duplicate');
+          const flowerSearchInput = document.getElementById('flower-search-input');
+          let allFlowers = [];
+          if (flowerDropdown) {
+            flowerDropdown.innerHTML = '<option value="" disabled selected>Loading flowers...</option>';
+            fetch('/api/all-flower-options')
+              .then(resp => resp.json())
+              .then(data => {
+                allFlowers = data.flowers || [];
+                renderFlowerDropdown('');
+              })
+              .catch(() => {
+                flowerDropdown.innerHTML = '';
+                var opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Error loading flowers';
+                opt.disabled = true;
+                opt.selected = true;
+                flowerDropdown.appendChild(opt);
+              });
+          }
+          function renderFlowerDropdown(filterText) {
+            flowerDropdown.innerHTML = '';
+            let filtered = allFlowers.filter(f =>
+              f.id.toString().toLowerCase().includes(filterText.toLowerCase()) ||
+              (f.product_name && f.product_name.toLowerCase().includes(filterText.toLowerCase()))
+            );
+            if (filtered.length === 0) {
+              var opt = document.createElement('option');
+              opt.value = '';
+              opt.textContent = 'No flower products found';
+              opt.disabled = true;
+              opt.selected = true;
+              flowerDropdown.appendChild(opt);
+              return;
+            }
+            filtered.forEach(function(flower) {
+              var option = document.createElement('option');
+              option.value = flower.id;
+              option.textContent = flower.id + ': ' + flower.product_name;
+              flowerDropdown.appendChild(option);
+            });
+          }
+          if (flowerSearchInput) {
+            flowerSearchInput.addEventListener('input', function() {
+              renderFlowerDropdown(this.value);
+            });
+          }
         });
         function openNewOrderPopup() {
           let overlay = document.getElementById('new-order-overlay');
@@ -787,6 +836,24 @@
             <option value="" disabled selected>Select type</option>
           </select>
           <button id="add-to-cart-btn" style="margin-left:12px;padding:10px 24px;font-size:16px;border-radius:7px;background:#007bff;color:#fff;border:none;cursor:pointer;">Add to Cart</button>
+        </div>
+        <!-- Duplicate row below, now functional -->
+        <div style="display: flex; gap: 18px; align-items: center; margin-bottom: 18px;">
+          <div style="position:relative;max-width:320px;width:320px;">
+            <div style="display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,0,0,0.07);border-radius:10px;overflow:hidden;border:1.5px solid #b3c6e0;background:#fff;">
+              <input id="flower-search-input" type="text" placeholder="Search flower..." autocomplete="off" style="font-size:16px;padding:10px 18px;border:none;border-bottom:1px solid #e5e7eb;width:100%;box-sizing:border-box;outline:none;border-radius:10px 10px 0 0;">
+              <select id='flower-dropdown-duplicate' style='font-size:16px;padding:10px 18px;border:none;width:100%;box-sizing:border-box;outline:none;border-radius:0 0 10px 10px;background:#fff;'>
+                <option value="" disabled selected>Loading flowers...</option>
+              </select>
+            </div>
+          </div>
+          <label for='quantity-dropdown-duplicate' style='font-size:16px;font-weight:500;margin-left:8px;'>Qty:</label>
+          <select id='quantity-dropdown-duplicate' style='font-size:16px;padding:10px 18px;border-radius:7px;border:1.5px solid #b3c6e0;width:90px;'>
+            {% for i in range(1, 21) %}
+              <option value='{{ i }}'>{{ i }}</option>
+            {% endfor %}
+          </select>
+          <button id="add-to-cart-btn-duplicate" style="margin-left:12px;padding:10px 24px;font-size:16px;border-radius:7px;background:#007bff;color:#fff;border:none;cursor:pointer;">Add to Cart</button>
         </div>
       </div>
       <h1>All Orders</h1>
@@ -1121,6 +1188,66 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
+  // --- Flower Dropdown for Duplicate Row ---
+  const flowerDropdown = document.getElementById('flower-dropdown-duplicate');
+  const flowerSearchInput = document.getElementById('flower-search-input');
+  let allFlowers = [];
+  if (flowerDropdown) {
+    flowerDropdown.innerHTML = '<option value="" disabled selected>Loading flowers...</option>';
+    fetch('/api/all-flower-options')
+      .then(resp => resp.json())
+      .then(data => {
+        allFlowers = data.flowers || [];
+        renderFlowerDropdown('');
+      })
+      .catch(() => {
+        flowerDropdown.innerHTML = '';
+        var opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Error loading flowers';
+        opt.disabled = true;
+        opt.selected = true;
+        flowerDropdown.appendChild(opt);
+      });
+  }
+  function renderFlowerDropdown(filterText) {
+    flowerDropdown.innerHTML = '';
+    let filtered = allFlowers.filter(f =>
+      f.id.toString().toLowerCase().includes(filterText.toLowerCase()) ||
+      (f.product_name && f.product_name.toLowerCase().includes(filterText.toLowerCase()))
+    );
+    if (filtered.length === 0) {
+      var opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'No flower products found';
+      opt.disabled = true;
+      opt.selected = true;
+      flowerDropdown.appendChild(opt);
+      return;
+    }
+    filtered.forEach(function(flower) {
+      var option = document.createElement('option');
+      option.value = flower.id;
+      option.textContent = flower.id + ': ' + flower.product_name;
+      flowerDropdown.appendChild(option);
+    });
+  }
+  if (flowerSearchInput) {
+    flowerSearchInput.addEventListener('input', function() {
+      renderFlowerDropdown(this.value);
+    });
+  }
+  // Add to Cart button for duplicate row (implement your logic here)
+  document.getElementById('add-to-cart-btn-duplicate').addEventListener('click', function() {
+    const flowerId = flowerDropdown.value;
+    const qty = document.getElementById('quantity-dropdown-duplicate').value;
+    if (!flowerId) {
+      alert('Please select a flower product.');
+      return;
+    }
+    // TODO: Add your logic to add the selected flower and quantity to the cart
+    alert('Added flower ID ' + flowerId + ' with quantity ' + qty + ' to cart!');
+  });
 });
 </script>
 {% if flower_options %}

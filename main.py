@@ -627,7 +627,7 @@ def update_fulfillment():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-# API endpoint to get product options as JSON
+# API endpoint to get product details as JSON
 @app.route('/api/product-options/<int:product_id>', methods=['GET'])
 def get_product_options(product_id):
     try:
@@ -648,6 +648,34 @@ def get_product_options(product_id):
     except Exception as e:
         logging.error(f"Error fetching product options for ID {product_id}: {e}")
         return jsonify({'options': [], 'price': None, 'group': None})
+    
+# API endpoint to get flower details as JSON
+@app.route('/api/flower-options/<int:flower_id>', methods=['GET'])
+def get_flower_options(flower_id):
+    try:
+        flower_info, error = get_flower_info(supabase, flower_id)
+        if error or not flower_info:
+            return jsonify({'price': None, 'price_tier': None})
+        price_per_g = None
+        # If option is provided and option_prices exists, use it
+        if 'price/g' in flower_info:
+            price_per_g = flower_info['price/g']
+        price_tier = flower_info.get('price_tier') or flower_info.get('price_tier')
+        return jsonify({ 'price/g': price_per_g, 'price_tier': price_tier})
+    except Exception as e:
+        logging.error(f"Error fetching flower options for ID {flower_id}: {e}")
+        return jsonify({'price/g': None, 'price_tier': None})
+
+# API endpoint to get all flower/weighted products for dropdowns
+@app.route('/api/all-flower-options', methods=['GET'])
+def get_all_flower_options():
+    try:
+        response = supabase.table('weighted_products').select('id, product_name').execute()
+        flowers = response.data if response.data else []
+        return jsonify({'flowers': flowers})
+    except Exception as e:
+        logging.error(f"Error fetching all flower options: {e}")
+        return jsonify({'flowers': []}), 500
 
 # run
 if __name__ == "__main__":
