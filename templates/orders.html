@@ -866,6 +866,7 @@
 
       {% if orders and orders|length > 0 %}
         {% set sorted_orders = orders|sort(attribute='created_at', reverse=true) %}
+        {% set sorted_orders = sorted_orders[:100] %}
         <div class="table-wrapper">
           <table border="1" cellpadding="5" cellspacing="0">
             <thead>
