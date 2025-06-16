@@ -1127,6 +1127,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   function getSelectedProductId() {
+    // Use the product-search-input's data-selected-id if set
     if (productSearchInput.dataset.selectedId) return productSearchInput.dataset.selectedId;
     const val = productSearchInput.value.trim();
     const found = products.find(p => `${p.id}: ${p.product_name}` === val);
@@ -1142,10 +1143,22 @@ document.addEventListener('DOMContentLoaded', function() {
   function setManualCart(cart) {
     localStorage.setItem('manual_cart', JSON.stringify(cart));
   }
+  function getSelectedProductId() {
+    // Use the product-search-input's data-selected-id if set
+    if (productSearchInput.dataset.selectedId) return productSearchInput.dataset.selectedId;
+    const val = productSearchInput.value.trim();
+    const found = products.find(p => `${p.id}: ${p.product_name}` === val);
+    return found ? found.id : '';
+  }
   if (addToCartBtn) {
     addToCartBtn.addEventListener('click', async function() {
-      var selectedProductId = getSelectedProductId();
-      var selectedProductName = productSearchInput.value;
+      var selectedProductId = productDropdown.value;
+      if (!selectedProductId) {
+        alert('Please select a product from the dropdown.');
+        return;
+      }
+      var selectedProductOption = productDropdown.options[productDropdown.selectedIndex];
+      var selectedProductName = selectedProductOption ? selectedProductOption.textContent : '';
       var selectedQuantity = parseInt(quantityDropdown.value);
       var selectedType = typeDropdown.value;
       // Fetch price and group from backend
@@ -1252,6 +1265,9 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 {% if flower_options %}
 <script id="flower-options-data" type="application/json">{{ flower_options|tojson|safe }}</script>
+{% endif %}
+{% if products %}
+<script id="products-data" type="application/json">{{ products|tojson|safe }}</script>
 {% endif %}
 </body>
 </html>
