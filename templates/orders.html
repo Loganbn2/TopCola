@@ -1251,15 +1251,49 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   // Add to Cart button for duplicate row (implement your logic here)
-  document.getElementById('add-to-cart-btn-duplicate').addEventListener('click', function() {
+  document.getElementById('add-to-cart-btn-duplicate').addEventListener('click', async function() {
     const flowerId = flowerDropdown.value;
-    const qty = document.getElementById('quantity-dropdown-duplicate').value;
+    const qty = parseInt(document.getElementById('quantity-dropdown-duplicate').value);
     if (!flowerId) {
       alert('Please select a flower product.');
       return;
     }
-    // TODO: Add your logic to add the selected flower and quantity to the cart
-    alert('Added flower ID ' + flowerId + ' with quantity ' + qty + ' to cart!');
+    // Find the selected flower's name
+    let selectedFlowerOption = flowerDropdown.options[flowerDropdown.selectedIndex];
+    let selectedFlowerName = selectedFlowerOption ? selectedFlowerOption.textContent : '';
+    // Fetch price and group from backend
+    try {
+      let url = `/api/flower-options/${flowerId}`;
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('Failed to fetch flower info');
+      const data = await resp.json();
+      // Try to get price per gram from various possible keys
+      let price = data['price/g'] || data['price_per_g'] || data['price_g'] || data.price;
+      let group = data.group || data.productGroup || 'Flower';
+      let tier = data.price_tier || data.productTier || data.tier || '';
+      if (typeof price === 'undefined') {
+        alert('Price per gram not available for this flower.');
+        return;
+      }
+      let total = (price * qty).toFixed(2);
+      var item = {
+        productName: selectedFlowerName,
+        productID: flowerId,
+        quantity: qty,
+        total: `$${total}`,
+        productGroup: group,
+        option: '',
+        flower_line_item: true,
+        type: 'flower_line_item',
+        productTier: tier
+      };
+      var cart = getManualCart();
+      cart.push(item);
+      setManualCart(cart);
+      alert('Added flower to Manual Cart!');
+    } catch (e) {
+      alert('Error adding flower to cart: ' + e.message);
+    }
   });
 });
 </script>
