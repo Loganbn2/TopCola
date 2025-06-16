@@ -839,7 +839,7 @@
 <body>
     <div class="cart-container">
         <div class="cart-column">
-            <h2>Shopping Cart</h2>
+            <h2>Manually Created Cart</h2>
             <div id="cart-items">
                 <!-- Line items will be dynamically inserted here -->
             </div>
@@ -866,7 +866,7 @@
             </div>
         </div>
         <div class="form-column">
-            <h2>Place Your Order</h2>
+            <h2>Place Order</h2>
             <form id="order-form">
                 <input type="text" id="name-input" placeholder="Name" required>
                 <input type="email" id="email-input" placeholder="Email" required>
@@ -883,7 +883,6 @@
                     <option value="zelle">Zelle</option>
                 </select>
                 <label style="font-weight: bold; padding-top: 20px;" for="delivery-time">Desired Delivery Time:</label>
-                <label for="delivery-time">(We try our best to be within 30 minutes of selected time)</label>
                 <input type="datetime-local" id="delivery-time" name="delivery-time" required>
                 <button type="button" onclick="submitOrder()">Place Order</button>
             </form>

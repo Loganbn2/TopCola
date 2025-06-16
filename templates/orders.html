@@ -812,8 +812,9 @@
     <div class="main-content">
       <button onclick="openNewOrderPopup()" style="position: absolute; top: 32px; right: 60px; z-index: 1100; background: #000; color: #fff; border: none; border-radius: 7px; padding: 12px 28px; font-size: 16px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.10); cursor: pointer;">Create New Order</button>
       <div id="product-dropdown-container" style="display:none; margin-bottom:24px;">
+        <h2 style="font-size:22px;font-weight:700;margin:0 0 18px 0;">Manually Create New Order</h2>
         <!-- Product Add Row -->
-        <label for='product-dropdown' style='font-size:18px;font-weight:600;margin-bottom:12px;display:block;'>Select Product:</label>
+        <label for='product-dropdown' style='font-size:18px;font-weight:600;margin-bottom:12px;display:block;'>Select Product/Item:</label>
         <div style="display: flex; gap: 18px; align-items: center; margin-bottom: 18px;">
           <div style="position:relative;max-width:320px;width:320px;">
             <div style="display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,0,0,0.07);border-radius:10px;overflow:hidden;border:1.5px solid #b3c6e0;background:#fff;">
@@ -837,7 +838,8 @@
           </select>
           <button id="add-to-cart-btn" style="margin-left:12px;padding:10px 24px;font-size:16px;border-radius:7px;background:#007bff;color:#fff;border:none;cursor:pointer;">Add to Cart</button>
         </div>
-        <!-- Duplicate row below, now functional -->
+        <!-- Flower Add Row -->
+        <label for='flower-dropdown-duplicate' style='font-size:18px;font-weight:600;margin:16px 0 12px 0;display:block;'>Select Flower:</label>
         <div style="display: flex; gap: 18px; align-items: center; margin-bottom: 18px;">
           <div style="position:relative;max-width:320px;width:320px;">
             <div style="display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,0,0,0.07);border-radius:10px;overflow:hidden;border:1.5px solid #b3c6e0;background:#fff;">
@@ -855,6 +857,7 @@
           </select>
           <button id="add-to-cart-btn-duplicate" style="margin-left:12px;padding:10px 24px;font-size:16px;border-radius:7px;background:#007bff;color:#fff;border:none;cursor:pointer;">Add to Cart</button>
         </div>
+        <button onclick="window.open('/manual-cart', '_blank');" style="margin-top:18px;padding:12px 32px;font-size:17px;font-weight:600;border-radius:8px;background:#17633a;color:#fff;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.10);cursor:pointer;">View Manually Created Cart</button>
       </div>
       <h1>All Orders</h1>
       {% if error %}
