@@ -475,6 +475,11 @@
           bubble.appendChild(input);
           input.focus();
           input.select();
+          function formatCurrency(val, fallback) {
+            var num = parseFloat(val);
+            if (isNaN(num)) return fallback;
+            return `$${num.toFixed(2)}`;
+          }
           function finishEdit(save) {
             if (!bubble.dataset.editing) return;
             bubble.dataset.editing = '';
@@ -495,9 +500,9 @@
                 const finish = () => {
                   if (!data.success) {
                     alert('Failed to update order total.');
-                    bubble.innerHTML = `$${parseFloat(originalValue).toFixed(2)}`;
+                    bubble.innerHTML = formatCurrency(originalValue.replace(/[^\d.\-]/g, ''), originalValue);
                   } else {
-                    bubble.innerHTML = `$${parseFloat(newValue).toFixed(2)}`;
+                    bubble.innerHTML = formatCurrency(newValue, originalValue);
                   }
                 };
                 if (elapsed < minDelay) {
@@ -507,11 +512,11 @@
                 }
               })
               .catch(() => {
-                bubble.innerHTML = `$${parseFloat(originalValue).toFixed(2)}`;
+                bubble.innerHTML = formatCurrency(originalValue.replace(/[^\d.\-]/g, ''), originalValue);
                 alert('Error updating order total.');
               });
             } else {
-              bubble.innerHTML = `$${parseFloat(originalValue).toFixed(2)}`;
+              bubble.innerHTML = formatCurrency(originalValue.replace(/[^\d.\-]/g, ''), originalValue);
             }
           }
           input.addEventListener('keydown', function(e) {
