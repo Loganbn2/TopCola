@@ -723,6 +723,49 @@
               renderFlowerDropdown(this.value);
             });
           }
+
+          // --- Product Dropdown for Add Row ---
+          const productDropdown = document.getElementById('product-dropdown');
+          const productSearchInput = document.getElementById('product-search-input');
+          let allProducts = [];
+          if (productDropdown) {
+            // Gather all products from the select options
+            allProducts = Array.from(productDropdown.options).map(opt => ({
+              id: opt.value,
+              product_name: opt.textContent.split(': ').slice(1).join(': ') || opt.textContent,
+              fullText: opt.textContent,
+              dataOptions: opt.getAttribute('data-options')
+            }));
+            renderProductDropdownSelect('');
+          }
+          function renderProductDropdownSelect(filterText) {
+            productDropdown.innerHTML = '';
+            let filtered = allProducts.filter(p =>
+              p.id.toLowerCase().includes(filterText.toLowerCase()) ||
+              p.product_name.toLowerCase().includes(filterText.toLowerCase())
+            );
+            if (filtered.length === 0) {
+              var opt = document.createElement('option');
+              opt.value = '';
+              opt.textContent = 'No products found';
+              opt.disabled = true;
+              opt.selected = true;
+              productDropdown.appendChild(opt);
+              return;
+            }
+            filtered.forEach(function(product) {
+              var option = document.createElement('option');
+              option.value = product.id;
+              option.textContent = product.fullText;
+              if (product.dataOptions) option.setAttribute('data-options', product.dataOptions);
+              productDropdown.appendChild(option);
+            });
+          }
+          if (productSearchInput) {
+            productSearchInput.addEventListener('input', function() {
+              renderProductDropdownSelect(this.value);
+            });
+          }
         });
         function openNewOrderPopup() {
           let overlay = document.getElementById('new-order-overlay');
