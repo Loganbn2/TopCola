@@ -677,6 +677,18 @@ def get_all_flower_options():
         logging.error(f"Error fetching all flower options: {e}")
         return jsonify({'flowers': []}), 500
 
+# Endpoint for Zapier Retrieve Poll: returns the 10 most recent orders
+@app.route('/new-orders', methods=['GET'])
+def new_orders():
+    try:
+        # Fetch the 10 most recent orders, sorted by created_at descending
+        response = supabase.table('orders').select('*').order('created_at', desc=True).limit(10).execute()
+        orders = response.data if response.data else []
+        return jsonify(orders)
+    except Exception as e:
+        logging.error(f"Error fetching new orders for Zapier: {e}")
+        return jsonify({'error': f"An error occurred: {str(e)}"}), 500
+
 # run
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5001)
