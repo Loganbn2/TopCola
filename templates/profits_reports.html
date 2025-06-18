@@ -159,6 +159,7 @@
           text-align: left;
           font-size: 14px;
         }
+        #hide-body-style { display: none !important; }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -182,6 +183,42 @@
             });
         });
     </script>
+    <script>
+// Password protection for profit reports page using Supabase
+(async function() {
+    if (!sessionStorage.getItem('admin_authed')) {
+        let tries = 0;
+        let passwords = [];
+        try {
+            const res = await fetch('/api/passwords');
+            if (!res.ok) throw new Error('Could not fetch passwords');
+            const data = await res.json();
+            passwords = (data.passwords || data || []).map(row => row.password);
+        } catch (e) {
+            document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:80px;">Could not verify password. Try again later.</h2>';
+            throw new Error('Password fetch failed');
+        }
+        while (tries < 3) {
+            const input = prompt('Enter admin password:');
+            if (input === null) {
+                document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:80px;">Access denied.</h2>';
+                throw new Error('Access denied');
+            }
+            if (passwords.includes(input)) {
+                sessionStorage.setItem('admin_authed', '1');
+                break;
+            } else {
+                tries++;
+                if (tries >= 3) {
+                    document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:80px;">Access denied.</h2>';
+                    throw new Error('Access denied');
+                }
+                alert('Incorrect password. Try again.');
+            }
+        }
+    }
+})();
+</script>
 </head>
 <body>
     <div style="display: flex; min-height: 100vh;">

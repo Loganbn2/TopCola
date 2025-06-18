@@ -689,6 +689,19 @@ def new_orders():
         logging.error(f"Error fetching new orders for Zapier: {e}")
         return jsonify({'error': f"An error occurred: {str(e)}"}), 500
 
+# API endpoint to get all admin passwords from the 'passwords' table
+@app.route('/api/passwords', methods=['GET'])
+def get_passwords():
+    try:
+        response = supabase.table('passwords').select('password').execute()
+        if response.data:
+            return jsonify({'passwords': response.data})
+        else:
+            return jsonify({'passwords': []}), 200
+    except Exception as e:
+        logging.error(f"Error fetching passwords: {e}")
+        return jsonify({'error': f"An error occurred: {str(e)}"}), 500
+
 # run
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5001)
