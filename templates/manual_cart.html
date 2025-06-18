@@ -690,6 +690,7 @@
             const bxgoDiscounts = parseFloat(document.getElementById('cart-bogo-discounts').textContent.replace('Buy X Get 1 Discounts: -$', '')) || 0;
             const promoDiscounts = parseFloat(document.getElementById('cart-promo-discounts').textContent.replace(/Promo Code.*: -\$/, '')) || 0;
             const deliveryTime = document.getElementById('delivery-time').value;
+            const paymentMethod = document.getElementById('payment-method').value;
 
             // Reject orders with total less than $45.00
             if (total < 45) {
@@ -723,6 +724,7 @@
                     bxgoDiscounts, 
                     promoDiscounts, 
                     deliveryTime,
+                    paymentMethod, // Pass payment method
                     flowerItems, // Pass flowerItems array
                     productItems // Pass productItems array
                 })
