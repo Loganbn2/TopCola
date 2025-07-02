@@ -356,6 +356,17 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             initTabs();
+            // Prevent Enter key from submitting Add Product and Add Flower forms
+            document.getElementById('admin-form').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                }
+            });
+            document.getElementById('weighted-admin-form').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                }
+            });
             // Profit Reports submenu logic
             const profitBtn = document.getElementById('profit-reports-btn');
             const submenu = document.getElementById('profit-reports-submenu');
