@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/static/styles.css">
     <style>
         body { font-family: Arial, sans-serif; background: #f9f9f9; }
-        .admin-container { display: flex; flex-direction: row; min-height: 600px; max-width: 1200px; width: 1000px; margin: 12px auto; padding: 0px 16px; border-radius: 8px; background: #f9f9f9; }
+        .admin-container { display: flex; flex-direction: row; min-height: 600px; max-width: 1200px; width: 733px; margin: 12px auto; padding: 0px 16px; border-radius: 8px; background: #f9f9f9; }
         h1 { text-align: center; }
         form { display: flex; flex-direction: column; gap: 10px; }
         label { font-weight: bold; }
@@ -18,17 +18,16 @@
         .success { color: green; }
         .error { color: red; }
         .tab-btn {
-            padding: 14px 0 14px 18px;
+            padding: 10px 0 10px 12px;
             border-radius: 0 18px 18px 0;
             border: none;
             background: none;
-            font-size: 17px;
+            font-size: 14px;
             color: #333;
             text-align: left;
             opacity: 0.7;
             font-weight: normal;
             margin: 0;
-            width: 100%;
             transition: background 0.15s, color 0.15s, opacity 0.15s;
         }
         .tab-btn.active {
@@ -41,12 +40,15 @@
         #admin-tabs {
             background: #f9f9f9;
             border-right: 1px solid #ddd;
-            min-width: 210px;
-            padding: 24px 0 0 0;
+            min-width: 140px;
+            max-width: 150px;
+            width: 140px;
+            padding: 16px 0 0 0;
             gap: 0;
             display: flex;
             flex-direction: column;
             align-items: stretch;
+            transition: min-width 0.2s, width 0.2s, max-width 0.2s, padding 0.2s;
         }
         .tab-btn:hover {
             background: #f7f7f7;
@@ -56,6 +58,7 @@
         #tags-input-container, #options-input-container, #weighted-tags-input-container {
             min-height: 32px !important;
             padding: 3px 5px !important;
+            
         }
         #images-upload-container, #weighted-images-upload-container {
             padding: 12px !important;
@@ -91,6 +94,44 @@
             gap: 8px;
             z-index: 1000;
             justify-content: space-between;
+        }
+        nav.collapsed {
+            width: 48px;
+            min-width: 48px;
+            transition: width 0.2s;
+        }
+        nav.collapsed .nav-btns,
+        nav.collapsed .nav-logo,
+        nav.collapsed .nav-submenu {
+            display: none !important;
+        }
+        .collapse-arrow {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1101;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+            transition: background 0.15s;
+        }
+        .collapse-arrow:hover {
+            background: #d1d5db;
+        }
+        .collapse-arrow svg {
+            width: 14px;
+            height: 14px;
+            transition: transform 0.2s;
+        }
+        nav.collapsed + .main-content {
+            margin-left: 48px !important;
+            transition: margin-left 0.2s;
         }
         .nav-logo {
             width: 120px;
@@ -138,8 +179,9 @@
         .main-content {
             flex: 1;
             display: flex;
-            flex-direction: column;
-            margin-left: 210px;
+            flex-direction: row;
+            margin-left: 10px;
+            align-items: flex-start;
         }
     </style>
     <script>
@@ -434,6 +476,34 @@
                     if (e.target === deleteWeightedProductModal) deleteWeightedProductModal.style.display = 'none';
                 });
             }
+
+            // Collapse navigation logic
+            const nav = document.getElementById('admin-nav');
+            const arrow = document.getElementById('collapse-arrow');
+            let collapsed = false;
+            function setArrowDirection() {
+                const svg = arrow.querySelector('svg');
+                if (collapsed) {
+                    svg.style.transform = 'rotate(180deg)';
+                    arrow.title = 'Expand navigation';
+                } else {
+                    svg.style.transform = '';
+                    arrow.title = 'Collapse navigation';
+                }
+            }
+            function toggleNav() {
+                collapsed = !collapsed;
+                nav.classList.toggle('collapsed', collapsed);
+                setArrowDirection();
+            }
+            arrow.addEventListener('click', toggleNav);
+            arrow.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleNav();
+                }
+            });
+            setArrowDirection();
         });
 
         // Tag modal logic
@@ -693,7 +763,12 @@
 </head>
 <body>
     <div style="display: flex; min-height: 100vh;">
-        <nav>
+        <nav id="admin-nav">
+            <div class="collapse-arrow" id="collapse-arrow" title="Collapse navigation" tabindex="0">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13 5l-5 5 5 5" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
             <div class="nav-btns">
                 <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" onclick="window.location.href='https://topcola.onrender.com/orders'; return false;">Orders</button>
                 <button style="background: none; border: none; color: #333; font-size: 17px; padding: 14px 0; margin: 0 18px; border-radius: 5px; text-align: left; opacity: 0.7;" id="profit-reports-btn" type="button">Profit Reports</button>
@@ -713,7 +788,7 @@
         <div class="main-content">
             <div class="admin-container" style="display: flex; flex-direction: row; min-height: 600px;">
                 <!-- Tabs on the left -->
-                <div id="admin-tabs" style="display: flex; flex-direction: column; align-items: flex-start; gap: 0; min-width: 210px; border-right: 1px solid #ddd; padding: 24px 0 0 0; background: #f9f9f9;">
+                <div id="admin-tabs" style="display: flex; flex-direction: column; align-items: flex-start; gap: 0; min-width: 140px; max-width: 150px; width: 140px; border-right: 1px solid #ddd; padding: 16px 0 0 0; background: #f9f9f9;">
                     <button id="tab-add-product" type="button" class="tab-btn active" style="border-radius: 6px 0 0 6px; border-bottom: 1px solid #ccc; border-right: none; width: 100%; text-align: left;">Product</button>
                     <button id="tab-add-flower" type="button" class="tab-btn" style="border-radius: 6px 0 0 6px; border-bottom: 1px solid #ccc; border-right: none; width: 100%; text-align: left;">Flower</button>
                     <button id="tab-add-bxgo-group" type="button" class="tab-btn" style="border-radius: 6px 0 0 6px; border-bottom: 1px solid #ccc; border-right: none; width: 100%; text-align: left;">BXGO Group</button>
