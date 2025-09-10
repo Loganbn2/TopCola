@@ -88,17 +88,17 @@ def get_product_ids_by_tag(supabase, tag):
 def get_volume_discounts(supabase):
     try:
         logging.info("Fetching all data from the 'volume_discounts' table...")
-        response = supabase.table('volume_discounts').select('tier, 4g_discount, 7g_discount, 14g_discount, 28g_discount').execute()
+        response = supabase.table('volume_discounts').select('tier, 4g_discount, 8g_discount, 16g_discount, 32g_discount').execute()
         logging.info(f"Supabase response: {response}")
-        
+
         if response.data:
             volume_discounts = [
                 {
                     "tier": item.get("tier"),
                     "4g_discount": item.get("4g_discount"),
-                    "7g_discount": item.get("7g_discount"),
-                    "14g_discount": item.get("14g_discount"),
-                    "28g_discount": item.get("28g_discount")
+                    "8g_discount": item.get("8g_discount"),
+                    "16g_discount": item.get("16g_discount"),
+                    "32g_discount": item.get("32g_discount")
                 }
                 for item in response.data
             ]

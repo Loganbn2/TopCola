@@ -634,9 +634,9 @@
         function submitFlowerPriceTier() {
             const tier = document.getElementById('tier').value;
             const discount4g = document.getElementById('discount-4g').value;
-            const discount7g = document.getElementById('discount-7g').value;
-            const discount14g = document.getElementById('discount-14g').value;
-            const discount28g = document.getElementById('discount-28g').value;
+            const discount8g = document.getElementById('discount-8g').value;
+            const discount16g = document.getElementById('discount-16g').value;
+            const discount32g = document.getElementById('discount-32g').value;
             const msgDiv = document.getElementById('add-flower-price-tier-message');
             if (!tier) {
                 msgDiv.textContent = 'Tier is required.';
@@ -645,9 +645,9 @@
             }
             const payload = { tier: parseInt(tier) };
             if (discount4g !== "") payload['4g_discount'] = parseFloat(discount4g);
-            if (discount7g !== "") payload['7g_discount'] = parseFloat(discount7g);
-            if (discount14g !== "") payload['14g_discount'] = parseFloat(discount14g);
-            if (discount28g !== "") payload['28g_discount'] = parseFloat(discount28g);
+            if (discount8g !== "") payload['8g_discount'] = parseFloat(discount8g);
+            if (discount16g !== "") payload['16g_discount'] = parseFloat(discount16g);
+            if (discount32g !== "") payload['32g_discount'] = parseFloat(discount32g);
             fetch('/api/add-flower-price-tier', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1184,12 +1184,12 @@
                             <input type="number" id="tier" name="tier" required min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
                             <label for="discount-4g">4g Discount ($)</label>
                             <input type="number" id="discount-4g" name="discount-4g" step="0.01" min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
-                            <label for="discount-7g">7g Discount ($)</label>
-                            <input type="number" id="discount-7g" name="discount-7g" step="0.01" min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
-                            <label for="discount-14g">14g Discount ($)</label>
-                            <input type="number" id="discount-14g" name="discount-14g" step="0.01" min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
-                            <label for="discount-28g">28g Discount ($)</label>
-                            <input type="number" id="discount-28g" name="discount-28g" step="0.01" min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
+                            <label for="discount-8g">8g Discount ($)</label>
+                            <input type="number" id="discount-8g" name="discount-8g" step="0.01" min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
+                            <label for="discount-16g">16g Discount ($)</label>
+                            <input type="number" id="discount-16g" name="discount-16g" step="0.01" min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
+                            <label for="discount-32g">32g Discount ($)</label>
+                            <input type="number" id="discount-32g" name="discount-32g" step="0.01" min="0" autocomplete="off" style="padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px;">
                             <button type="submit">Add Flower Price Tier</button>
                             <div id="add-flower-price-tier-message" style="margin-top:8px; text-align:center;"></div>
                         </form>

@@ -256,12 +256,12 @@
             let discount = 0;
             if (quantity === 4) {
                 discount = parseFloat("{{ product.volume_discounts['4g_discount'] }}");
-            } else if (quantity === 7) {
-                discount = parseFloat("{{ product.volume_discounts['7g_discount'] }}");
-            } else if (quantity === 14) {
-                discount = parseFloat("{{ product.volume_discounts['14g_discount'] }}");
-            } else if (quantity === 28) {
-                discount = parseFloat("{{ product.volume_discounts['28g_discount'] }}");
+            } else if (quantity === 8) {
+                discount = parseFloat("{{ product.volume_discounts['8g_discount'] }}");
+            } else if (quantity === 16) {
+                discount = parseFloat("{{ product.volume_discounts['16g_discount'] }}");
+            } else if (quantity === 32) {
+                discount = parseFloat("{{ product.volume_discounts['32g_discount'] }}");
             }
 
             const total = subtotal - discount;
@@ -392,9 +392,9 @@
                     <select class="quantity-dropdown" onchange="updateSubtotal()">
                         <option value="1">1</option>
                         <option value="4">4</option>
-                        <option value="7">7</option>
-                        <option value="14">14</option>
-                        <option value="28">28</option>
+                        <option value="8">8</option>
+                        <option value="16">16</option>
+                        <option value="32">32</option>
                     </select>
                     <span>g</span>
                     <button class="add-to-cart-button" onclick="addToCart()">Add to Cart</button>
