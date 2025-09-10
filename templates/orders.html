@@ -883,12 +883,17 @@
             popup.innerHTML = `
               <button onclick='closeNewOrderPopup()' style='position:absolute;top:18px;right:24px;font-size:22px;background:none;border:none;cursor:pointer;color:#222;' aria-label='Close'>&times;</button>
               <div id="manual-cart-preview" style="width: 45%; padding-left: 40px; padding-top: 8px; overflow-y: auto;">
-                <h3 style="font-size:18px;font-weight:700;margin:0 0 16px 0;color:#333;">Cart Preview</h3>
+                <h2 style="font-size:18px;font-weight:700;margin:0 0 20px 0;color:#333;">Manually Create New Order</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                  <button onclick="updateCartPreview()" style="background:none;border:none;font-size:24px;color:#666;cursor:pointer;transition:color 0.2s;padding:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;" title="Refresh cart preview">⟳</button>
+                  <h3 style="font-size:18px;font-weight:700;margin:0;color:#333;">Cart Preview</h3>
+                  <div style="width:24px;"></div>
+                </div>
                 <div id="cart-preview-content" style="background: #ffffff; border: none; border-radius: 8px; padding: 16px; min-height: 180px; margin-bottom: 16px;">
                   <p style="color: #6c757d; margin: 0; text-align: center;">Manual cart preview will appear here</p>
                 </div>
                 <div style="text-align: center;">
-                  <button onclick="window.open('/manual-cart', '_blank');" style="padding:10px 20px;font-size:14px;font-weight:600;border-radius:6px;background:#17633a;color:#fff;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.10);cursor:pointer;transition:background 0.2s;">View Full Cart</button>
+                  <button onclick="window.open('/manual-cart', '_blank');" style="padding:10px 20px;font-size:14px;font-weight:600;border-radius:6px;background:#17633a;color:#fff;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.10);cursor:pointer;transition:background 0.2s;">View Full Cart to See Discounts</button>
                 </div>
               </div>
             `;
@@ -899,6 +904,8 @@
               dropdownContainer.style.display = 'block';
             }
             overlay.appendChild(popup);
+            // Refresh cart preview when popup opens for the first time
+            updateCartPreview();
           } else {
             popup.style.display = 'flex';
             overlay.appendChild(popup);
@@ -996,8 +1003,6 @@
     <div class="main-content">
       <button onclick="openNewOrderPopup()" style="position: absolute; top: 32px; right: 60px; z-index: 1100; background: #000; color: #fff; border: none; border-radius: 7px; padding: 12px 28px; font-size: 16px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.10); cursor: pointer;">Create New Order</button>
       <div id="product-dropdown-container" style="display:none; width: 45%; padding-right: 30px; padding-top: 8px; overflow-y: auto; margin-right: 40px;">
-        <h2 style="font-size:18px;font-weight:700;margin:0 0 16px 0;color:#333;">Manually Create New Order</h2>
-        
         <!-- Product Add Section -->
         <div style="margin-bottom: 20px; padding: 16px; background: #ffffff; border-radius: 8px; border: none;">
           <h3 style="font-size:16px;font-weight:600;margin:0 0 12px 0;color:#495057;">Add Product/Item</h3>
