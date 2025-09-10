@@ -371,8 +371,18 @@
     <script>
         // Use a unique key for manual cart local storage
         const MANUAL_CART_KEY = 'manual_cart';
-        // Safely serialize discount data from Jinja to JS
-        const discountValues = {{ volume_discounts|tojson|safe }};
+        
+        // Convert volume_discounts array to object format expected by discount logic
+        const rawVolumeDiscounts = {{ volume_discounts|tojson|safe }};
+        const discountValues = {};
+        rawVolumeDiscounts.forEach(discount => {
+            discountValues[discount.tier] = {
+                "4g discount": discount["4g_discount"],
+                "8g discount": discount["8g_discount"], 
+                "16g discount": discount["16g_discount"],
+                "32g discount": discount["32g_discount"]
+            };
+        });
 
         function getManualCart() {
             return JSON.parse(localStorage.getItem(MANUAL_CART_KEY)) || [];
@@ -516,7 +526,7 @@
             const unitPrice = parseFloat(item.total.replace('$', '')) / parseInt(item.quantity, 10);
 
             if (item.type === 'flower_line_item') {
-                const allowedQuantities = [1, 4, 7, 14, 28];
+                const allowedQuantities = [1, 4, 8, 16, 32];
                 let currentIndex = allowedQuantities.indexOf(parseInt(item.quantity, 10));
 
                 if (change > 0 && currentIndex < allowedQuantities.length - 1) {
@@ -568,9 +578,9 @@
         function getHighestDiscount(tier, quantity) {
             const volumeDiscounts = {
                 "4g discount": 4,
-                "7g discount": 7,
-                "14g discount": 14,
-                "28g discount": 28
+                "8g discount": 8,
+                "16g discount": 16,
+                "32g discount": 32
             };
 
             let highestDiscount = 0;

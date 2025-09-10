@@ -869,19 +869,29 @@
             popup.style.left = '50%';
             popup.style.transform = 'translate(-50%, -50%)';
             popup.style.background = '#fff';
-            popup.style.padding = '48px 60px';
-            popup.style.borderRadius = '18px';
+            popup.style.padding = '32px 40px';
+            popup.style.borderRadius = '12px';
             popup.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18), 0 1.5px 8px rgba(0,0,0,0.10)';
             popup.style.zIndex = '4000';
-            popup.style.minWidth = '480px';
-            popup.style.minHeight = '340px';
-            popup.style.width = '60vw';
-            popup.style.height = '60vh';
-            popup.style.maxWidth = '900px';
-            popup.style.maxHeight = '90vh';
+            popup.style.width = '90vw';
+            popup.style.height = '85vh';
+            popup.style.maxWidth = '1200px';
+            popup.style.maxHeight = '900px';
             popup.style.display = 'flex';
-            popup.style.flexDirection = 'column';
-            popup.innerHTML = `<button onclick='closeNewOrderPopup()' style='position:absolute;top:18px;right:24px;font-size:22px;background:none;border:none;cursor:pointer;color:#222;' aria-label='Close'>&times;</button>`;
+            popup.style.flexDirection = 'row';
+            popup.style.overflow = 'hidden';
+            popup.innerHTML = `
+              <button onclick='closeNewOrderPopup()' style='position:absolute;top:18px;right:24px;font-size:22px;background:none;border:none;cursor:pointer;color:#222;' aria-label='Close'>&times;</button>
+              <div id="manual-cart-preview" style="width: 45%; padding-left: 40px; padding-top: 8px; overflow-y: auto;">
+                <h3 style="font-size:18px;font-weight:700;margin:0 0 16px 0;color:#333;">Cart Preview</h3>
+                <div id="cart-preview-content" style="background: #ffffff; border: none; border-radius: 8px; padding: 16px; min-height: 180px; margin-bottom: 16px;">
+                  <p style="color: #6c757d; margin: 0; text-align: center;">Manual cart preview will appear here</p>
+                </div>
+                <div style="text-align: center;">
+                  <button onclick="window.open('/manual-cart', '_blank');" style="padding:10px 20px;font-size:14px;font-weight:600;border-radius:6px;background:#17633a;color:#fff;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.10);cursor:pointer;transition:background 0.2s;">View Full Cart</button>
+                </div>
+              </div>
+            `;
             // Move the dropdown into the popup
             var dropdownContainer = document.getElementById('product-dropdown-container');
             if (dropdownContainer) {
@@ -897,6 +907,8 @@
               popup.appendChild(dropdownContainer);
               dropdownContainer.style.display = 'block';
             }
+            // Refresh cart preview when popup reopens
+            updateCartPreview();
           }
         }
         function closeNewOrderPopup() {
@@ -905,6 +917,56 @@
           var dropdownContainer = document.getElementById('product-dropdown-container');
           if (dropdownContainer) dropdownContainer.style.display = 'none';
         }
+        
+        function updateCartPreview() {
+          const cartPreviewContent = document.getElementById('cart-preview-content');
+          if (!cartPreviewContent) return;
+          
+          const cart = getManualCart();
+          if (cart.length === 0) {
+            cartPreviewContent.innerHTML = '<p style="color: #6c757d; margin: 0; text-align: center;">Cart is empty</p>';
+            return;
+          }
+          
+          let cartHTML = '';
+          let total = 0;
+          
+          cart.forEach((item, index) => {
+            const itemTotal = parseFloat(item.total.replace('$', '')) || 0;
+            total += itemTotal;
+            const optionText = item.option ? ` (${item.option})` : '';
+            const quantityUnit = item.type === 'flower_line_item' ? 'g' : '';
+            
+            cartHTML += `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                <div style="flex: 1;">
+                  <div style="font-size: 14px; font-weight: 500; color: #495057;">${item.productName}${optionText}</div>
+                  <div style="font-size: 12px; color: #6c757d;">Qty: ${item.quantity}${quantityUnit}</div>
+                </div>
+                <div style="font-size: 14px; font-weight: 600; color: #28a745;">${item.total}</div>
+              </div>
+            `;
+          });
+          
+          cartHTML += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; margin-top: 8px; border-top: 2px solid #28a745;">
+              <div style="font-size: 16px; font-weight: 700; color: #495057;">Total:</div>
+              <div style="font-size: 16px; font-weight: 700; color: #28a745;">$${total.toFixed(2)}</div>
+            </div>
+          `;
+          
+          cartPreviewContent.innerHTML = cartHTML;
+        }
+    </script>
+    
+    <script>
+    // Global Manual Cart Helper Functions
+    function getManualCart() {
+      return JSON.parse(localStorage.getItem('manual_cart')) || [];
+    }
+    function setManualCart(cart) {
+      localStorage.setItem('manual_cart', JSON.stringify(cart));
+    }
     </script>
 </head>
 <body>
@@ -933,53 +995,75 @@
     </nav>
     <div class="main-content">
       <button onclick="openNewOrderPopup()" style="position: absolute; top: 32px; right: 60px; z-index: 1100; background: #000; color: #fff; border: none; border-radius: 7px; padding: 12px 28px; font-size: 16px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.10); cursor: pointer;">Create New Order</button>
-      <div id="product-dropdown-container" style="display:none; margin-bottom:24px;">
-        <h2 style="font-size:22px;font-weight:700;margin:0 0 18px 0;">Manually Create New Order</h2>
-        <!-- Product Add Row -->
-        <label for='product-dropdown' style='font-size:18px;font-weight:600;margin-bottom:12px;display:block;'>Select Product/Item:</label>
-        <div style="display: flex; gap: 18px; align-items: center; margin-bottom: 18px;">
-          <div style="position:relative;max-width:320px;width:320px;">
-            <div style="display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,0,0,0.07);border-radius:10px;overflow:hidden;border:1.5px solid #b3c6e0;background:#fff;">
-              <input id="product-search-input" type="text" placeholder="Search product..." autocomplete="off" style="font-size:16px;padding:10px 18px;border:none;border-bottom:1px solid #e5e7eb;width:100%;box-sizing:border-box;outline:none;border-radius:10px 10px 0 0;">
-              <select id='product-dropdown' style='font-size:16px;padding:10px 18px;border:none;width:100%;box-sizing:border-box;outline:none;border-radius:0 0 10px 10px;background:#fff;'>
-                {% for product in products|sort(attribute='id') %}
-                  <option value='{{ product.id }}' data-options='{{ product.options|tojson|safe if product.options is defined else "[]" }}'>{{ product.id }}: {{ product.product_name }}</option>
+      <div id="product-dropdown-container" style="display:none; width: 45%; padding-right: 30px; padding-top: 8px; overflow-y: auto; margin-right: 40px;">
+        <h2 style="font-size:18px;font-weight:700;margin:0 0 16px 0;color:#333;">Manually Create New Order</h2>
+        
+        <!-- Product Add Section -->
+        <div style="margin-bottom: 20px; padding: 16px; background: #ffffff; border-radius: 8px; border: none;">
+          <h3 style="font-size:16px;font-weight:600;margin:0 0 12px 0;color:#495057;">Add Product/Item</h3>
+          
+          <div style="margin-bottom: 12px;">
+            <label for='product-dropdown' style='font-size:14px;font-weight:500;margin-bottom:6px;display:block;color:#6c757d;'>Select Product:</label>
+            <div style="position:relative;width:100%;">
+              <div style="display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(0,0,0,0.1);border-radius:6px;overflow:hidden;border:1px solid #ced4da;background:#fff;">
+                <input id="product-search-input" type="text" placeholder="Search product..." autocomplete="off" style="font-size:14px;padding:10px 12px;border:none;border-bottom:1px solid #e9ecef;width:100%;box-sizing:border-box;outline:none;">
+                <select id='product-dropdown' style='font-size:14px;padding:10px 12px;border:none;width:100%;box-sizing:border-box;outline:none;background:#fff;'>
+                  {% for product in products|sort(attribute='id') %}
+                    <option value='{{ product.id }}' data-options='{{ product.options|tojson|safe if product.options is defined else "[]" }}'>{{ product.id }}: {{ product.product_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div style="display:flex;gap:12px;margin-bottom:12px;">
+            <div style="flex:1;">
+              <label for='quantity-dropdown' style='font-size:14px;font-weight:500;display:block;margin-bottom:6px;color:#6c757d;'>Quantity:</label>
+              <select id='quantity-dropdown' style='font-size:14px;padding:10px 12px;border-radius:6px;border:1px solid #ced4da;width:100%;background:#fff;'>
+                {% for i in range(1, 21) %}
+                  <option value='{{ i }}'>{{ i }}</option>
                 {% endfor %}
               </select>
             </div>
-          </div>
-          <label for='quantity-dropdown' style='font-size:16px;font-weight:500;margin-left:8px;'>Qty:</label>
-          <select id='quantity-dropdown' style='font-size:16px;padding:10px 18px;border-radius:7px;border:1.5px solid #b3c6e0;width:90px;'>
-            {% for i in range(1, 21) %}
-              <option value='{{ i }}'>{{ i }}</option>
-            {% endfor %}
-          </select>
-          <label for='type-dropdown' style='font-size:16px;font-weight:500;margin-left:8px;'>Type:</label>
-          <select id='type-dropdown' style='font-size:16px;padding:10px 18px;border-radius:7px;border:1.5px solid #b3c6e0;width:120px;'>
-            <option value="" disabled selected>Select type</option>
-          </select>
-          <button id="add-to-cart-btn" style="margin-left:12px;padding:10px 24px;font-size:16px;border-radius:7px;background:#007bff;color:#fff;border:none;cursor:pointer;">Add to Cart</button>
-        </div>
-        <!-- Flower Add Row -->
-        <label for='flower-dropdown-duplicate' style='font-size:18px;font-weight:600;margin:16px 0 12px 0;display:block;'>Select Flower:</label>
-        <div style="display: flex; gap: 18px; align-items: center; margin-bottom: 18px;">
-          <div style="position:relative;max-width:320px;width:320px;">
-            <div style="display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,0,0,0.07);border-radius:10px;overflow:hidden;border:1.5px solid #b3c6e0;background:#fff;">
-              <input id="flower-search-input" type="text" placeholder="Search flower..." autocomplete="off" style="font-size:16px;padding:10px 18px;border:none;border-bottom:1px solid #e5e7eb;width:100%;box-sizing:border-box;outline:none;border-radius:10px 10px 0 0;">
-              <select id='flower-dropdown-duplicate' style='font-size:16px;padding:10px 18px;border:none;width:100%;box-sizing:border-box;outline:none;border-radius:0 0 10px 10px;background:#fff;'>
-                <option value="" disabled selected>Loading flowers...</option>
+            <div style="flex:1;">
+              <label for='type-dropdown' style='font-size:14px;font-weight:500;display:block;margin-bottom:6px;color:#6c757d;'>Type:</label>
+              <select id='type-dropdown' style='font-size:14px;padding:10px 12px;border-radius:6px;border:1px solid #ced4da;width:100%;background:#fff;'>
+                <option value="" disabled selected>Select type</option>
               </select>
             </div>
           </div>
-          <label for='quantity-dropdown-duplicate' style='font-size:16px;font-weight:500;margin-left:8px;'>Qty:</label>
-          <select id='quantity-dropdown-duplicate' style='font-size:16px;padding:10px 18px;border-radius:7px;border:1.5px solid #b3c6e0;width:90px;'>
-            {% for i in range(1, 21) %}
-              <option value='{{ i }}'>{{ i }}</option>
-            {% endfor %}
-          </select>
-          <button id="add-to-cart-btn-duplicate" style="margin-left:12px;padding:10px 24px;font-size:16px;border-radius:7px;background:#007bff;color:#fff;border:none;cursor:pointer;">Add to Cart</button>
+          
+          <button id="add-to-cart-btn" style="width:100%;padding:10px;font-size:14px;font-weight:600;border-radius:6px;background:#007bff;color:#fff;border:none;cursor:pointer;transition:background 0.2s;">Add Product to Cart</button>
         </div>
-        <button onclick="window.open('/manual-cart', '_blank');" style="margin-top:18px;padding:12px 32px;font-size:17px;font-weight:600;border-radius:8px;background:#17633a;color:#fff;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.10);cursor:pointer;">View Manually Created Cart</button>
+        <!-- Flower Add Section -->
+        <div style="margin-bottom: 20px; padding: 16px; background: #ffffff; border-radius: 8px; border: none;">
+          <h3 style="font-size:16px;font-weight:600;margin:0 0 12px 0;color:#495057;">Add Flower</h3>
+          
+          <div style="margin-bottom: 12px;">
+            <label for='flower-dropdown-duplicate' style='font-size:14px;font-weight:500;margin-bottom:6px;display:block;color:#6c757d;'>Select Flower:</label>
+            <div style="position:relative;width:100%;">
+              <div style="display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(0,0,0,0.1);border-radius:6px;overflow:hidden;border:1px solid #ced4da;background:#fff;">
+                <input id="flower-search-input" type="text" placeholder="Search flower..." autocomplete="off" style="font-size:14px;padding:10px 12px;border:none;border-bottom:1px solid #e9ecef;width:100%;box-sizing:border-box;outline:none;">
+                <select id='flower-dropdown-duplicate' style='font-size:14px;padding:10px 12px;border:none;width:100%;box-sizing:border-box;outline:none;background:#fff;'>
+                  <option value="" disabled selected>Loading flowers...</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 12px;">
+            <label for='quantity-dropdown-duplicate' style='font-size:14px;font-weight:500;display:block;margin-bottom:6px;color:#6c757d;'>Quantity (grams):</label>
+            <select id='quantity-dropdown-duplicate' style='font-size:14px;padding:10px 12px;border-radius:6px;border:1px solid #ced4da;width:100%;background:#fff;'>
+              {% for i in range(1, 21) %}
+                <option value='{{ i }}'>{{ i }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <button id="add-to-cart-btn-duplicate" style="width:100%;padding:10px;font-size:14px;font-weight:600;border-radius:6px;background:#007bff;color:#fff;border:none;cursor:pointer;transition:background 0.2s;">Add Flower to Cart</button>
+        </div>
+        
+
       </div>
       <h1>All Orders</h1>
       {% if error %}
@@ -1297,12 +1381,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Manual Cart Add to Cart logic
   var addToCartBtn = document.getElementById('add-to-cart-btn');
   var quantityDropdown = document.getElementById('quantity-dropdown');
-  function getManualCart() {
-    return JSON.parse(localStorage.getItem('manual_cart')) || [];
-  }
-  function setManualCart(cart) {
-    localStorage.setItem('manual_cart', JSON.stringify(cart));
-  }
   function getSelectedProductId() {
     // Use the product-search-input's data-selected-id if set
     if (productSearchInput.dataset.selectedId) return productSearchInput.dataset.selectedId;
@@ -1356,6 +1434,7 @@ document.addEventListener('DOMContentLoaded', function() {
           console.log(`#${idx + 1}:`, it.productName, '| productGroup:', it.productGroup, '| group:', it.group, '| full:', it);
         });
         alert('Added to Manual Cart!');
+        updateCartPreview(); // Update the cart preview in the popup
       } catch (e) {
         alert('Error adding to cart: ' + e.message);
       }
@@ -1451,6 +1530,7 @@ document.addEventListener('DOMContentLoaded', function() {
       cart.push(item);
       setManualCart(cart);
       alert('Added flower to Manual Cart!');
+      updateCartPreview(); // Update the cart preview in the popup
     } catch (e) {
       alert('Error adding flower to cart: ' + e.message);
     }
