@@ -371,6 +371,8 @@
     <script>
         // Use a unique key for manual cart local storage
         const MANUAL_CART_KEY = 'manual_cart';
+        // Safely serialize discount data from Jinja to JS
+        const discountValues = {{ volume_discounts|tojson|safe }};
 
         function getManualCart() {
             return JSON.parse(localStorage.getItem(MANUAL_CART_KEY)) || [];
@@ -571,19 +573,6 @@
                 "28g discount": 28
             };
 
-            // Simulated discount values for each tier (replace with actual data if available)
-            const discountValues = {
-                {% for discount in volume_discounts %}
-                "{{ discount.tier }}": {
-                    "4g discount": {{ discount['4g_discount'] }},
-                    "7g discount": {{ discount['7g_discount'] }},
-                    "14g discount": {{ discount['14g_discount'] }},
-                    "28g discount": {{ discount['28g_discount'] }}
-                },
-                {% endfor %}
-                
-            };
-
             let highestDiscount = 0;
             Object.keys(volumeDiscounts).forEach(discountKey => {
                 if (quantity >= volumeDiscounts[discountKey] && discountValues[tier] && discountValues[tier][discountKey]) {
@@ -755,7 +744,16 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadCart();
             calculateTierTotals(); // Call the function after loading the cart
-
+            // Debug: Show raw manual_cart data
+            const rawDataElem = document.getElementById('cart-raw-data');
+            if (rawDataElem) {
+                try {
+                    const rawCart = localStorage.getItem('manual_cart');
+                    rawDataElem.textContent = rawCart ? rawCart : '(manual_cart not set)';
+                } catch (e) {
+                    rawDataElem.textContent = 'Error reading manual_cart: ' + e.message;
+                }
+            }
             const promoCodeInput = document.getElementById('promo-code');
             if (promoCodeInput) {
                 promoCodeInput.addEventListener('change', applyPromoCode);
